@@ -1,47 +1,51 @@
 <?php
 require 'admin_header.php';
 
-// --- NEW: Function to calculate relative time ---
-function time_ago($datetime, $full = false) {
-    $now = new DateTime;
-    $ago = new DateTime($datetime);
-    $diff = $now->diff($ago);
-
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
-
-    $string = array( 'y' => 'tahun', 'm' => 'bulan', 'w' => 'minggu', 'd' => 'hari', 'h' => 'jam', 'i' => 'minit', 's' => 'saat' );
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? '' : '');
-        } else {
-            unset($string[$k]);
-        }
+// --- NEW, SIMPLER, AND BUG-FREE time_ago FUNCTION ---
+function time_ago($datetime) {
+    $timestamp = strtotime($datetime);
+    if ($timestamp === false) {
+        return "tarikh tidak sah";
     }
+    
+    $strTime = array("saat", "minit", "jam", "hari", "bulan", "tahun");
+    $length = array("60", "60", "24", "30", "12", "10");
 
-    if (!$full) $string = array_slice($string, 0, 1);
-    return $string ? implode(', ', $string) . ' yang lalu' : 'sebentar tadi';
+    $currentTime = time();
+    if ($currentTime >= $timestamp) {
+        $diff = $currentTime - $timestamp;
+        for ($i = 0; $diff >= $length[$i] && $i < count($length) - 1; $i++) {
+            $diff = $diff / $length[$i];
+        }
+
+        $diff = round($diff);
+        return $diff . " " . $strTime[$i] . " yang lalu";
+    }
+    return "sebentar tadi";
 }
 
-
 // --- PHP LOGIC FOR DASHBOARD ---
-$jumlahProduk = $conn->query("SELECT COUNT(*) as total FROM produk")->fetch_assoc()['total'] ?? 0;
-$tertunda = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Belum Diproses'")->fetch_assoc()['total'] ?? 0;
-$stokRendah = 8; // Static based on wireframe
-$pesananBulanIni = 24; // Static based on wireframe
+$jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM produk");
+$jumlahProduk = $jumlahProduk_result ? $jumlahProduk_result->fetch_assoc()['total'] : 0;
+
+$tertunda_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Belum Diproses'");
+$tertunda = $tertunda_result ? $tertunda_result->fetch_assoc()['total'] : 0;
+
+$stokRendah = 8;
+$pesananBulanIni = 24;
 
 $sql_requests = "SELECT s.nama, p.jumlah_diminta, pr.nama_produk, p.status, p.tarikh_mohon
-                 FROM permohonan p
-                 JOIN staf s ON p.ID_staf = s.ID_staf
-                 JOIN produk pr ON p.ID_produk = pr.ID_produk
-                 ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC
-                 LIMIT 4";
+                FROM permohonan p
+                JOIN staf s ON p.ID_staf = s.ID_staf
+                JOIN produk pr ON p.ID_produk = pr.ID_produk
+                ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC
+                LIMIT 4";
 $recent_requests = $conn->query($sql_requests);
 ?>
 <title>Dashboard Admin - Sistem Pengurusan Stor</title>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">Dashboard</h3>
+    <h3 class="mb-0">Dashboard Admin</h3>
     <a href="#" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Tambah Pesanan</a>
 </div>
 

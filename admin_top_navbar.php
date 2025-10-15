@@ -1,16 +1,19 @@
-<?php // FILE: admin_top_navbar.php ?>
+<?php
+// FILE: admin_top_navbar.php
+?>
 <header class="top-navbar">
-    <div class="ms-auto dropdown">
-        <a href="#" class="d-flex align-items-center text-decoration-none text-dark" data-bs-toggle="dropdown" aria-expanded="false">
-            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+    <div class="ms-auto d-flex align-items-center">
+        <div class="d-flex align-items-center">
+            <span class="fw-bold me-3"><?php echo htmlspecialchars($userName); ?></span>
+            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
                 <?php echo strtoupper(substr($userName, 0, 2)); ?>
             </div>
-            <span class="fw-bold"><?php echo htmlspecialchars($userName); ?></span>
+        </div>
+        
+        <div class="vr mx-3"></div>
+
+        <a class="btn btn-danger btn-sm" href="logout.php">
+            <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
         </a>
-        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-            <li><a class="dropdown-item" href="#">Profil Saya</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="logout.php">Log Keluar</a></li>
-        </ul>
     </div>
 </header>
