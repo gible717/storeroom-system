@@ -1,78 +1,129 @@
-<?php require 'auth_check.php'; ?>
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Sistem Pengurusan Stor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body { background-color: #f8f9fa; }
-        .welcome-header { background-color: #ffffff; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 2.5rem; }
-        .card-link-wrapper { text-decoration: none; color: inherit; }
-        .dashboard-card { border: 1px solid #e9ecef; border-radius: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-        .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #4f46e5; }
-        /* Style for the success alert */
-        .alert-top { position: fixed; top: 20px; right: 20px; z-index: 1050; min-width: 300px; }
-    </style>
-</head>
-<body>
-    <?php require 'navbar.php'; ?>
+<?php
+require 'admin_header.php';
 
-    <?php if (isset($_GET['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show alert-top" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <?php echo htmlspecialchars($_GET['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+// --- NEW: Function to calculate relative time ---
+function time_ago($datetime, $full = false) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
 
-    <div class="container my-5">
-        <div class="welcome-header">
-            <h3 class="mb-1">Selamat Datang, <?php echo htmlspecialchars($userName); ?>! (Admin)</h3>
-            <p class="text-muted mb-0"><?php echo date('l, j F Y'); ?></p>
-        </div>
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
 
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <a href="manage_requests.php" class="card-link-wrapper">
-                    <div class="card h-100 dashboard-card"><div class="card-body p-4 d-flex align-items-center">
-                        <i class="bi bi-journal-check text-primary me-4" style="font-size: 2.5rem;"></i>
-                        <div>
-                            <h5 class="card-title mb-1">Urus Permohonan</h5>
-                            <p class="card-text text-muted mb-0">Luluskan atau tolak permohonan staf.</p>
-                        </div>
-                    </div></div>
-                </a>
-            </div>
+    $string = array( 'y' => 'tahun', 'm' => 'bulan', 'w' => 'minggu', 'd' => 'hari', 'h' => 'jam', 'i' => 'minit', 's' => 'saat' );
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? '' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
 
-            <div class="col-lg-4 mb-4">
-                <a href="manage_inventory.php" class="card-link-wrapper">
-                    <div class="card h-100 dashboard-card"><div class="card-body p-4 d-flex align-items-center">
-                        <i class="bi bi-box-seam text-success me-4" style="font-size: 2.5rem;"></i>
-                        <div>
-                            <h5 class="card-title mb-1">Urus Inventori</h5>
-                            <p class="card-text text-muted mb-0">Tambah atau kemaskini produk.</p>
-                        </div>
-                    </div></div>
-                </a>
-            </div>
+    if (!$full) $string = array_slice($string, 0, 1);
+    return $string ? implode(', ', $string) . ' yang lalu' : 'sebentar tadi';
+}
 
-            <div class="col-lg-4 mb-4">
-                <a href="admin_profile.php" class="card-link-wrapper">
-                    <div class="card h-100 dashboard-card"><div class="card-body p-4 d-flex align-items-center">
-                        <i class="bi bi-person-circle text-warning me-4" style="font-size: 2.5rem;"></i>
-                        <div>
-                            <h5 class="card-title mb-1">Profil Saya</h5>
-                            <p class="card-text text-muted mb-0">Kemaskini profil dan kata laluan.</p>
-                        </div>
-                    </div></div>
-                </a>
+
+// --- PHP LOGIC FOR DASHBOARD ---
+$jumlahProduk = $conn->query("SELECT COUNT(*) as total FROM produk")->fetch_assoc()['total'] ?? 0;
+$tertunda = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Belum Diproses'")->fetch_assoc()['total'] ?? 0;
+$stokRendah = 8; // Static based on wireframe
+$pesananBulanIni = 24; // Static based on wireframe
+
+$sql_requests = "SELECT s.nama, p.jumlah_diminta, pr.nama_produk, p.status, p.tarikh_mohon
+                 FROM permohonan p
+                 JOIN staf s ON p.ID_staf = s.ID_staf
+                 JOIN produk pr ON p.ID_produk = pr.ID_produk
+                 ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC
+                 LIMIT 4";
+$recent_requests = $conn->query($sql_requests);
+?>
+<title>Dashboard Admin - Sistem Pengurusan Stor</title>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">Dashboard</h3>
+    <a href="#" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Tambah Pesanan</a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-box-seam-fill fs-1 text-primary opacity-50 me-4"></i>
+                <div class="text-center flex-grow-1">
+                    <h5 class="card-title text-muted">Jumlah Produk</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><?php echo $jumlahProduk; ?></p>
+                </div>
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-clock-history fs-1 text-warning opacity-50 me-4"></i>
+                <div class="text-center flex-grow-1">
+                    <h5 class="card-title text-muted">Tertunda</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><?php echo $tertunda; ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-1 text-danger opacity-50 me-4"></i>
+                <div class="text-center flex-grow-1">
+                    <h5 class="card-title text-muted">Stok Rendah</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><?php echo $stokRendah; ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <i class="bi bi-calendar-check-fill fs-1 text-success opacity-50 me-4"></i>
+                <div class="text-center flex-grow-1">
+                    <h5 class="card-title text-muted">Pesanan Bulan Ini</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><?php echo $pesananBulanIni; ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Permohonan Terkini</h5>
+        <a href="manage_requests.php" class="text-decoration-none">Lihat Semua &rarr;</a>
+    </div>
+    <div class="card-body">
+        <div class="list-group list-group-flush">
+            <?php if ($recent_requests && $recent_requests->num_rows > 0): ?>
+                <?php while($req = $recent_requests->fetch_assoc()): ?>
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <div class="flex-grow-1">
+                        <strong><?php echo htmlspecialchars($req['nama_produk']); ?></strong>
+                        <small class="text-muted d-block">
+                            <?php echo htmlspecialchars($req['nama']); ?> - <?php echo time_ago($req['tarikh_mohon']); ?>
+                        </small>
+                    </div>
+                    <span class="fw-bold me-4"><?php echo htmlspecialchars($req['jumlah_diminta']); ?> unit</span>
+                    <?php
+                        $status = htmlspecialchars($req['status']);
+                        $badge_class = 'bg-secondary';
+                        if ($status === 'Diluluskan') $badge_class = 'bg-success';
+                        elseif ($status === 'Belum Diproses') $badge_class = 'bg-warning text-dark';
+                        elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
+                    ?>
+                    <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
+                </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p class="text-muted text-center my-3">Tiada permohonan terkini.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<?php require 'admin_footer.php'; ?>

@@ -1,13 +1,11 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = ""; // default for XAMPP
-$db   = "storeroom_db";
-
-$conn = new mysqli($host, $user, $pass, $db);
-
+// FILE: db.php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "storeroom_db";
+$conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 ?>
-
