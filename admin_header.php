@@ -72,7 +72,47 @@ if ($userRole !== 'Admin') {
         .top-navbar { justify-content: space-between; }
         .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
     </style>
+
+<style>
+        /* Optional: Positions the toast container in the top-right corner */
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1090;
+        }
+    </style>
+</head> <body> <script>
+    // This code finds any toast elements on the page and shows them automatically.
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function(toastEl) {
+            return new bootstrap.Toast(toastEl);
+        });
+        toastList.forEach(toast => toast.show());
+    });
+</script>
 </head>
+
+<style>
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1090;
+        }
+    </style>
+</head> <body> <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function(toastEl) {
+            // Creates a new toast instance and shows it
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    });
+</script>
+
 <body>
 <div class="d-flex">
     <?php require 'admin_sidebar.php'; ?>
