@@ -18,19 +18,33 @@ if ($userRole !== 'Admin') {
         body { background-color: #f8f9fa; font-family: sans-serif; }
         .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background-color: #1f2937; padding-top: 1rem; }
         
-        .sidebar-header {
-            padding: 1.5rem 1.5rem 2rem 1.5rem; /* This now has more bottom padding for the gap */
-            color: white;
-            border-bottom: 1px solid #374151;
-        }
-        .sidebar-header h5 {
-            font-weight: bold;
-            font-size: 1.1rem;
-            text-align: left; /* This aligns the text to the left */
-        }
-
         .sidebar-nav { padding: 1rem; }
         
+        /* ===== Sidebar Header Styles - FINAL, NO WHITE CIRCLE, LEFT ALIGNED TEXT ===== */
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column; /* Stacks logo and text vertically */
+            align-items: flex-start; /* Aligns content to the start (left) */
+            text-align: left;        /* Aligns text to the left */
+            border-bottom: 1px solid #374151;
+        }
+        .sidebar-brand-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain; /* Ensures logo fits if it's not square */
+            /* REMOVED: background-color, border-radius, padding for white circle */
+            margin-bottom: 0.5rem; /* Space between logo and text */
+            margin-left: 0;      /* Ensure no extra left margin */
+        }
+        .sidebar-brand-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: #f9fafb;
+            max-width: 200px;
+            margin-top: 0;
+        }
         .sidebar-link {
             display: flex;
             align-items: center;
@@ -51,20 +65,12 @@ if ($userRole !== 'Admin') {
             font-weight: 600;
         }
 
-        .sidebar-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px auto;
-            border-radius: 50%;
-            background-image: url('assets/img/admin-logo.png');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-
         .main-content-wrapper { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 0; }
         .top-navbar { background: #fff; padding: 1rem 2.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: flex-end; align-items: center; }
         .page-content { padding: 2.5rem; }
+
+        .top-navbar { justify-content: space-between; }
+        .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
     </style>
 </head>
 <body>

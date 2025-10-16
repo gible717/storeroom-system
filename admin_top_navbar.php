@@ -1,19 +1,21 @@
 <?php
-// FILE: admin_top_navbar.php
-?>
-<header class="top-navbar">
-    <div class="ms-auto d-flex align-items-center">
-        <div class="d-flex align-items-center">
-            <span class="fw-bold me-3"><?php echo htmlspecialchars($userName); ?></span>
-            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                <?php echo strtoupper(substr($userName, 0, 2)); ?>
-            </div>
-        </div>
-        
-        <div class="vr mx-3"></div>
+// FILE: admin_top_navbar.php (Updated)
 
-        <a class="btn btn-danger btn-sm" href="logout.php">
+// These variables should be available from auth_check.php if needed
+$userName = $_SESSION['nama'] ?? 'Admin';
+$userInitials = strtoupper(substr($userName, 0, 2));
+
+?>
+<nav class="top-navbar">
+    <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle ?? 'Dashboard'; ?></h1>
+
+    <div class="user-info d-flex align-items-center">
+        <span class="me-3 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
+        <div class="user-initials-badge me-3">
+            <?php echo htmlspecialchars($userInitials); ?>
+        </div>
+        <a href="logout.php" class="btn btn-light btn-sm">
             <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
         </a>
     </div>
-</header>
+</nav>

@@ -1,42 +1,81 @@
 <?php
-// FILE: admin_sidebar.php
-$current_page = basename($_SERVER['PHP_SELF']);
+// FILE: admin_sidebar.php (Final version, matching the vertical design)
+// No need to get $current_page here, it should be in admin_header.php
 ?>
 <nav class="sidebar">
     <div class="sidebar-header">
-        <div class="sidebar-logo"></div>
-        <h5 class="mt-3">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+        <img src="assets/img/admin-logo.png" alt="Logo" class="sidebar-brand-logo">
+        <span class="sidebar-brand-text">Sistem Pengurusan Bilik Stor dan Inventori</span>
     </div>
-    <div class="sidebar-nav">
-        <a href="admin_dashboard.php" class="sidebar-link <?php if($current_page == 'admin_dashboard.php' || $current_page == 'admin_panel.php') echo 'active'; ?>">
-            <i class="bi bi-house-fill me-3"></i> <span>Admin Dashboard</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-box-seam-fill me-3"></i>
-            <span>Produk</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-truck me-3"></i>
-            <span>Pembekal</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-cart-fill me-3"></i> <span>Pesanan</span>
-        </a>
-        <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php') echo 'active'; ?>">
-            <i class="bi bi-clipboard2-check-fill me-3"></i>
-            <span>Permohonan</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
-            <span>Laporan</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-people-fill me-3"></i>
-            <span>Pengguna</span>
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="bi bi-person-circle me-3"></i>
-            <span>Profil Saya</span>
-        </a>
-    </div>
+
+    <ul class="sidebar-nav">
+        <li class="sidebar-item">
+            <a href="admin_dashboard.php" class="sidebar-link <?php if($current_page == 'admin_dashboard.php') echo 'active'; ?>">
+                <i class="bi bi-house-door-fill me-3"></i>
+                <span>Admin Dashboard</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="admin_products.php" class="sidebar-link <?php if($current_page == 'admin_products.php') echo 'active'; ?>">
+    <i class="bi bi-box-seam-fill me-3"></i>
+    <span>Produk</span>
+            </a>          
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-truck me-3"></i>
+                <span>Pembekal</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-cart-fill me-3"></i>
+                <span>Pesanan</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-clipboard2-data-fill me-3"></i>
+                <span>Permohonan</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
+                <span>Laporan</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-people-fill me-3"></i>
+                <span>Pengguna</span>
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-person-circle me-3"></i>
+                <span>Profil Saya</span>
+            </a>
+        </li>
+    </ul>
 </nav>
+
+<style>
+/* ===== Sidebar Header Styles - FINAL VERSION to match design ===== */
+        .sidebar-header {
+            padding: 2rem 1rem;      /* More vertical space */
+            display: flex;
+            flex-direction: column;  /* Stacks logo and text vertically */
+            align-items: center;     /* Centers them horizontally */
+            text-align: left;      /* Centers the text lines */
+            border-bottom: 1px solid #374151;
+        }
+     /* Space between logo and text */
+        .sidebar-brand-text {
+            font-size: 1.1rem;       /* Larger, more prominent font */
+            font-weight: 700;        /* The correct bold weight */
+            line-height: 1.4;        /* Correct spacing between text lines */
+            color: #f9fafb;
+            max-width: 200px;        /* Prevents text from being too wide */
+        }
+</style>
