@@ -34,7 +34,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php') echo 'active'; ?>">
                 <i class="bi bi-clipboard2-data-fill me-3"></i>
                 <span>Permohonan</span>
             </a>

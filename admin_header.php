@@ -1,6 +1,6 @@
 <?php
 // FILE: admin_header.php
-require_once 'auth_check.php';
+require_once 'admin_auth_check.php';
 if ($userRole !== 'Admin') {
     header("Location: staff_dashboard.php");
     exit;

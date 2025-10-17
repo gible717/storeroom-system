@@ -1,64 +1,99 @@
 <?php
-// FILE: update_request_status.php
-require 'auth_check.php';
+// FILE: update_request_status.php (Safer & More Robust Version)
+require 'admin_auth_check.php'; // Ensures only Admins can access
 
-// Security: Only admins can perform this action.
-if ($userRole !== 'Admin') {
-    header("Location: staff_dashboard.php");
-    exit;
-}
-
-// 1. Get the request ID and the action from the URL (e.g., ?id=5&action=approve)
+// 1. Get the Request ID and Action from the URL
 $request_id = $_GET['id'] ?? null;
-$action = $_GET['action'] ?? '';
+$action = $_GET['action'] ?? null;
 
-if (!$request_id || !in_array($action, ['approve', 'reject'])) {
-    // If ID or action is missing/invalid, redirect back.
+// 2. Validate the input
+if (!$request_id || !in_array($action, ['approve', 'reject', 'complete'])) {
     header("Location: manage_requests.php?error=" . urlencode("Tindakan tidak sah."));
     exit;
 }
 
-// 2. Fetch the request details to ensure it's still pending
-$stmt = $conn->prepare("SELECT ID_produk, jumlah_diminta, status FROM permohonan WHERE ID_permohonan = ?");
-$stmt->bind_param('i', $request_id);
-$stmt->execute();
-$request = $stmt->get_result()->fetch_assoc();
+// 3. Get the Admin's ID from the session to log who approved/rejected it.
+$admin_id = $_SESSION['ID_staf'];
+$new_status = ($action === 'approve') ? 'Diluluskan' : 'Ditolak';
 
-// Check if the request exists and hasn't already been processed
-if (!$request || $request['status'] !== 'Belum Diproses') {
-    header("Location: manage_requests.php?error=" . urlencode("Permohonan ini telah diproses atau tidak wujud."));
-    exit;
-}
-
-// 3. Perform the requested action
+// --- THE CRITICAL LOGIC FOR APPROVAL ---
 if ($action === 'approve') {
-    // APPROVE LOGIC
-    $new_status = 'Diluluskan';
+    // Start a transaction. This is our all-or-nothing safety guarantee.
+    $conn->begin_transaction();
 
-    // CRITICAL STEP: Deduct the stock from the 'produk' table
-    $update_stock_sql = "UPDATE produk SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?";
-    $stmt_stock = $conn->prepare($update_stock_sql);
-    $stmt_stock->bind_param('is', $request['jumlah_diminta'], $request['ID_produk']);
-    $stmt_stock->execute();
+    try {
+        // Step A: Get the request details
+        $stmt_get = $conn->prepare("SELECT ID_produk, jumlah_diminta FROM permohonan WHERE ID_permohonan = ? AND status = 'Belum Diproses' FOR UPDATE");
+        $stmt_get->bind_param("i", $request_id);
+        $stmt_get->execute();
+        $request = $stmt_get->get_result()->fetch_assoc();
 
-} elseif ($action === 'reject') {
-    // REJECT LOGIC
-    $new_status = 'Ditolak';
-    // No stock change is needed if the request is rejected.
-}
+        if (!$request) {
+            throw new Exception("Permohonan tidak dijumpai atau telah diproses oleh admin lain.");
+        }
 
-// 4. Update the request status in the 'permohonan' table
-$update_status_sql = "UPDATE permohonan SET status = ?, ID_staf_pelulus = ? WHERE ID_permohonan = ?";
-$stmt_status = $conn->prepare($update_status_sql);
-// $userID is the admin's ID from auth_check.php, recording who took the action
-$stmt_status->bind_param('ssi', $new_status, $userID, $request_id); 
+        $product_id = $request['ID_produk'];
+        $quantity_requested = $request['jumlah_diminta'];
 
-if ($stmt_status->execute()) {
-    // Success! Redirect back with a success message.
-    header("Location: manage_requests.php?success=" . urlencode("Status permohonan telah dikemaskini."));
+        // Step B: Check current stock
+        $stmt_stock = $conn->prepare("SELECT stok_semasa FROM produk WHERE ID_produk = ? FOR UPDATE");
+        $stmt_stock->bind_param("s", $product_id);
+        $stmt_stock->execute();
+        $product = $stmt_stock->get_result()->fetch_assoc();
+
+        if (!$product || $product['stok_semasa'] < $quantity_requested) {
+            throw new Exception("Stok tidak mencukupi untuk meluluskan permohonan ini.");
+        }
+
+        // Step C: Deduct the quantity from stock
+        $stmt_update_stock = $conn->prepare("UPDATE produk SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?");
+        $stmt_update_stock->bind_param("is", $quantity_requested, $product_id);
+        $stmt_update_stock->execute();
+
+        // Step D: Update the status AND AUTOMATICALLY SET THE COMPLETION TIMESTAMP
+        $completed_date = date('Y-m-d H:i:s'); // Get current time for the trace record
+        $stmt_update_status = $conn->prepare("UPDATE permohonan SET status = ?, tarikh_selesai = ? WHERE ID_permohonan = ?");
+        $stmt_update_status->bind_param("ssi", $new_status, $completed_date, $request_id);
+        $stmt_update_status->execute();
+        
+        // Commit the transaction
+        $conn->commit();
+        header("Location: manage_requests.php?success=" . urlencode("Permohonan telah diluluskan dan stok telah dikemaskini."));
+
+    } catch (Exception $e) {
+        // If anything fails, undo all changes
+        $conn->rollback();
+        header("Location: manage_requests.php?error=" . urlencode($e->getMessage()));
+    }
+
+
+} elseif ($action === 'complete') {
+    // --- LOGIC FOR COMPLETION ---
+    $new_status = 'Selesai';
+    $completed_date = date('Y-m-d H:i:s'); // Get the current time for our trace record
+    
+    $stmt = $conn->prepare("UPDATE permohonan SET status = ?, tarikh_selesai = ? WHERE ID_permohonan = ? AND status = 'Diluluskan'");
+    $stmt->bind_param("ssi", $new_status, $completed_date, $request_id);
+
+    if ($stmt->execute()) {
+        header("Location: manage_requests.php?success=" . urlencode("Permohonan telah ditandakan sebagai selesai."));
+    } else {
+        header("Location: manage_requests.php?error=" . urlencode("Gagal mengemaskini status permohonan."));
+    }
+
 } else {
-    // Fail! Redirect back with an error message.
-    header("Location: manage_requests.php?error=" . urlencode("Gagal mengemaskini status."));
+    // --- SIMPLE LOGIC FOR REJECTION ---
+    // For rejections, we only need to update the status. No transaction needed.
+    $stmt = $conn->prepare("UPDATE permohonan SET status = ? WHERE ID_permohonan = ? AND status = 'Belum Diproses'");
+    $stmt->bind_param("si", $new_status, $request_id);
+
+    if ($stmt->execute()) {
+        header("Location: manage_requests.php?success=" . urlencode("Permohonan telah ditolak."));
+    } else {
+        header("Location: manage_requests.php?error=" . urlencode("Gagal mengemaskini status permohonan."));
+    }
 }
+
+$conn->close();
 exit;
 ?>

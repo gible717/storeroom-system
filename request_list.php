@@ -1,6 +1,9 @@
 <?php
 // FILE: request_list.php
-require 'auth_check.php';
+require 'staff_auth_check.php';
+
+// Get the logged-in staff's ID from the session
+$id_staf = $_SESSION['ID_staf'];
 
 $sql = "SELECT p.ID_permohonan, pr.nama_produk, p.tarikh_mohon, p.jumlah_diminta, p.status 
         FROM permohonan p
@@ -9,29 +12,14 @@ $sql = "SELECT p.ID_permohonan, pr.nama_produk, p.tarikh_mohon, p.jumlah_diminta
         ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('s', $userID);
+$stmt->bind_param('s', $id_staf); // Use the correct variable
 $stmt->execute();
 $requests_result = $stmt->get_result();
 ?>
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permohonan Saya - Sistem Pengurusan Stor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body { background-color: #f8f-9fa; }
-        .content-card { background: #ffffff; border: none; border-radius: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
-        .alert-top { position: fixed; top: 80px; right: 20px; z-index: 1050; min-width: 300px; }
-        .form-control, .form-select { border-radius: 0.5rem; background-color: #f8f9fa; border: 1px solid #dee2e6; }
-        .input-group-text { background-color: #f8f9fa; border: 1px solid #dee2e6; }
-    </style>
-</head>
-<body>
-    <?php require 'navbar.php'; ?>
-
+<?php
+$pageTitle = "Permohonan Saya";
+require 'staff_header.php'; // This one line fixes the entire header and navbar.
+?>
     <?php if (isset($_GET['success'])): ?>
         <div class="alert alert-success alert-dismissible fade show alert-top" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i><?php echo htmlspecialchars($_GET['success']); ?>
