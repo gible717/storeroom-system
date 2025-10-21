@@ -80,7 +80,7 @@ if ($userRole === 'Admin') {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
         .welcome-card {
-             padding: 1.5rem;
+            padding: 1.5rem;
         }
         .action-card {
             text-align: center;
@@ -166,7 +166,7 @@ if ($userRole === 'Admin') {
                     </a>
                 </div>
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="profile.php" class="text-decoration-none h-100 d-block">
+                    <a href="staff_profile.php" class="text-decoration-none h-100 d-block">
                         <div class="card action-card">
                             <div class="icon-circle"><i class="bi bi-person-circle"></i></div>
                             <h5>Profil Saya</h5>

@@ -52,7 +52,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="admin_profile.php" class="sidebar-link">
                 <i class="bi bi-person-circle me-3"></i>
                 <span>Profil Saya</span>
             </a>
