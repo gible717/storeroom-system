@@ -102,6 +102,19 @@ if ($userRole !== 'Admin') {
             z-index: 1090;
         }
     </style>
+
+    <style>
+        .floating-alert {
+            position: fixed;
+            top: 80px; /* Adjust as needed */
+            right: 25px;
+            z-index: 1050;
+            min-width: 300px;
+            max-width: 400px;
+        }
+    </style>
+</head>
+
 </head> <body> <script>
     document.addEventListener('DOMContentLoaded', function() {
         var toastElList = [].slice.call(document.querySelectorAll('.toast'));
@@ -119,3 +132,20 @@ if ($userRole !== 'Admin') {
     <div class="main-content-wrapper">
         <?php require 'admin_top_navbar.php'; ?>
         <main class="page-content">
+            <div class="floating-alert">
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <?php echo htmlspecialchars($_GET['success']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <?php echo htmlspecialchars($_GET['error']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+            </div>

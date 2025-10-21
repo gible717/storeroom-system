@@ -46,7 +46,6 @@ $recent_requests = $conn->query($sql_requests);
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0">Dashboard Admin</h3>
-    <a href="#" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Tambah Pesanan</a>
 </div>
 
 <div class="row g-4 mb-4">

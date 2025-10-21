@@ -22,14 +22,14 @@
             </a>          
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="admin_suppliers.php" class="sidebar-link <?php if($current_page == 'admin_suppliers.php' || $current_page == 'supplier_add.php' || $current_page == 'supplier_edit.php') echo 'active'; ?>">
                 <i class="bi bi-truck me-3"></i>
                 <span>Pembekal</span>
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-cart-fill me-3"></i>
+            <a href="admin_orders.php" class="sidebar-link <?php if($current_page == 'admin_orders.php' || $current_page == 'order_add.php') echo 'active'; ?>">
+                <i class="bi bi-cart-check-fill me-3"></i>
                 <span>Pesanan</span>
             </a>
         </li>
@@ -40,7 +40,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="admin_laporan.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_laporan') || str_starts_with($current_page, 'laporan_')) echo 'active'; ?>">
                 <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
                 <span>Laporan</span>
             </a>

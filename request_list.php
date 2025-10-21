@@ -91,15 +91,24 @@ require 'staff_header.php'; // This one line fixes the entire header and navbar.
                                             ?>
                                             <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
                                         </td>
-                                        <td>
-                                            <?php if ($row['status'] === 'Belum Diproses'): ?>
-                                                <a href="edit_request.php?id=<?php echo $row['ID_permohonan']; ?>" class="text-primary me-2" title="Kemaskini"><i class="bi bi-pencil-square"></i></a>
-                                            <?php elseif ($row['status'] === 'Diluluskan'): ?>
-                                                <a href="print_request.php?id=<?php echo $row['ID_permohonan']; ?>" class="text-secondary" title="Cetak"><i class="bi bi-printer-fill"></i></a>
-                                            <?php else: ?>
-                                                <a href="view_request.php?id=<?php echo $row['ID_permohonan']; ?>" class="text-secondary" title="Lihat"><i class="bi bi-eye"></i></a>
-                                            <?php endif; ?>
-                                        </td>
+                                        <td class="text-center">
+                                        <?php if ($row['status'] === 'Belum Diproses'): ?>
+                                        <a href="edit_request.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-warning btn-sm" title="Kemaskini">
+                                        <i class="bi bi-pencil-fill"></i>
+                                        </a>
+    
+                                        <?php elseif ($row['status'] === 'Diluluskan'): ?>
+                                        <a href="print_request.php?id=<?php echo $row['ID_permohonan']; ?>" target="_blank" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">
+                                        <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                        <a href="print_request.php?id=<?php echo $row['ID_permohonan']; ?>" target="_blank" class="btn btn-secondary btn-sm" title="Cetak Dokumen">
+                                        <i class="bi bi-printer-fill"></i>
+                                        </a>
+        
+                                        <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                        </td>                
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>

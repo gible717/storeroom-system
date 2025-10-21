@@ -45,16 +45,30 @@ if ($action === 'approve') {
             throw new Exception("Stok tidak mencukupi untuk meluluskan permohonan ini.");
         }
 
-        // Step C: Deduct the quantity from stock
+        // Step C: If stock is sufficient, deduct the quantity.
         $stmt_update_stock = $conn->prepare("UPDATE produk SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?");
         $stmt_update_stock->bind_param("is", $quantity_requested, $product_id);
         $stmt_update_stock->execute();
 
-        // Step D: Update the status AND AUTOMATICALLY SET THE COMPLETION TIMESTAMP
-        $completed_date = date('Y-m-d H:i:s'); // Get current time for the trace record
+        // Step D: Update the status of the request.
         $stmt_update_status = $conn->prepare("UPDATE permohonan SET status = ?, tarikh_selesai = ? WHERE ID_permohonan = ?");
         $stmt_update_status->bind_param("ssi", $new_status, $completed_date, $request_id);
         $stmt_update_status->execute();
+        
+        // --- STEP E: NEW (Based on your Proposal) ---
+        // Create the audit trail in 'transaksi_inventori'
+        $jenis_transaksi = 'Keluar'; // Stock OUT
+        $kuantiti_berubah = -$quantity_requested; // Store as a negative number
+        $tarikh_transaksi = date('Y-m-d H:i:s');
+        
+        $sql_transaksi = "INSERT INTO transaksi_inventori 
+                            (ID_produk, ID_staf, ID_permohonan, jenis_transaksi, kuantiti_berubah, tarikh_transaksi)
+                        VALUES (?, ?, ?, ?, ?, ?)";
+        
+        $stmt_transaksi = $conn->prepare($sql_transaksi);
+        // We use $admin_id (from the top of the file) as the ID_staf who approved it
+        $stmt_transaksi->bind_param("ssisis", $product_id, $admin_id, $request_id, $jenis_transaksi, $kuantiti_berubah, $tarikh_transaksi);
+        $stmt_transaksi->execute();
         
         // Commit the transaction
         $conn->commit();

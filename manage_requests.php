@@ -90,7 +90,7 @@ $requests_result = $conn->query($sql);
         <a href="update_request_status.php?id=<?php echo $row['ID_permohonan']; ?>&action=reject" class="btn btn-danger btn-sm" title="Tolak"><i class="bi bi-x-lg"></i></a>
     
     <?php elseif ($row['status'] === 'Diluluskan'): ?>
-        <a href="#" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">
+        <a href="print_request.php?id=<?php echo $row['ID_permohonan']; ?>" target="_blank" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">
             <i class="bi bi-eye-fill"></i>
         </a>
         <a href="print_request.php?id=<?php echo $row['ID_permohonan']; ?>" target="_blank" class="btn btn-secondary btn-sm" title="Cetak Dokumen">
