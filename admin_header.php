@@ -71,6 +71,21 @@ if ($userRole !== 'Admin') {
 
         .top-navbar { justify-content: space-between; }
         .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+    
+    /* --- ADD THIS CODE FOR THE LOGOUT BUTTON --- */
+        .btn-logout {
+            background-color: #ffe5e5;
+            color: #dc3545;
+            border: none;
+            font-weight: 600;
+            padding: 0.375rem 0.75rem;
+        }
+        .btn-logout:hover {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        /* --- END OF FIX --- */
+    
     </style>
 
 <style>

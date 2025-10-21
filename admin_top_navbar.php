@@ -14,7 +14,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
         <div class="user-initials-badge me-3">
             <?php echo htmlspecialchars($userInitials); ?>
         </div>
-        <a href="logout.php" class="btn btn-light btn-sm">
+        <a href="logout.php" class="btn btn-logout btn-sm">
             <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
         </a>
     </div>

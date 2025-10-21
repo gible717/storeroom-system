@@ -45,12 +45,16 @@ if ($action === 'approve') {
             throw new Exception("Stok tidak mencukupi untuk meluluskan permohonan ini.");
         }
 
-        // Step C: If stock is sufficient, deduct the quantity.
+       // Step C: If stock is sufficient, deduct the quantity.
         $stmt_update_stock = $conn->prepare("UPDATE produk SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?");
         $stmt_update_stock->bind_param("is", $quantity_requested, $product_id);
         $stmt_update_stock->execute();
 
-        // Step D: Update the status of the request.
+        // --- FIX: Define variables for the status update ---
+        $new_status = 'Diluluskan';
+        $completed_date = date('Y-m-d H:i:s'); // Get the current time
+
+        // Step D: Update the status of the request.
         $stmt_update_status = $conn->prepare("UPDATE permohonan SET status = ?, tarikh_selesai = ? WHERE ID_permohonan = ?");
         $stmt_update_status->bind_param("ssi", $new_status, $completed_date, $request_id);
         $stmt_update_status->execute();
