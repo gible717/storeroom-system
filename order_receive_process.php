@@ -28,26 +28,41 @@ try {
     }
 
     // Prepare statements for the loop
+    // Prepare statements for the loop
     $sql_update_stock = "UPDATE produk SET stok_semasa = stok_semasa + ? WHERE ID_produk = ?";
     $stmt_update_stock = $conn->prepare($sql_update_stock);
 
     $sql_transaksi = "INSERT INTO transaksi_inventori 
-                        (ID_produk, ID_staf, ID_pesanan, jenis_transaksi, kuantiti_berubah, tarikh_transaksi)
-                      VALUES (?, ?, ?, ?, ?, NOW())";
+                        (ID_produk, ID_staf, ID_pesanan, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga)
+                    VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)";
     $stmt_transaksi = $conn->prepare($sql_transaksi);
     $jenis_transaksi = 'Masuk'; // Stock IN
+    
+    // We also need to get the product price in the item query
+    $stmt_items->close(); // Close the old item query
+    $sql_items = "SELECT pi.ID_produk, pi.kuantiti_dipesan, p.harga 
+                FROM pesanan_item pi
+                JOIN produk p ON pi.ID_produk = p.ID_produk
+                WHERE pi.ID_pesanan = ?";
+    $stmt_items = $conn->prepare($sql_items);
+    $stmt_items->bind_param("s", $id_pesanan); // 's' because ID_pesanan is VARCHAR
+    $stmt_items->execute();
+    $items = $stmt_items->get_result();
+
 
     // 3. Loop through each item, update stock, and create transaction log
     while ($item = $items->fetch_assoc()) {
         $product_id = $item['ID_produk'];
         $quantity = $item['kuantiti_dipesan'];
+        $harga_seunit = $item['harga'] ?? 0.00;
+        $jumlah_harga = $harga_seunit * $quantity;
 
         // Step A: Update the 'produk' table
         $stmt_update_stock->bind_param("is", $quantity, $product_id);
         $stmt_update_stock->execute();
 
         // Step B: Create the audit log in 'transaksi_inventori'
-        $stmt_transaksi->bind_param("ssisi", $product_id, $admin_id, $id_pesanan, $jenis_transaksi, $quantity);
+        $stmt_transaksi->bind_param("ssisidd", $product_id, $admin_id, $id_pesanan, $jenis_transaksi, $quantity, $harga_seunit, $jumlah_harga);
         $stmt_transaksi->execute();
     }
 

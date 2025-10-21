@@ -36,7 +36,7 @@ if ($action === 'approve') {
         $quantity_requested = $request['jumlah_diminta'];
 
         // Step B: Check current stock
-        $stmt_stock = $conn->prepare("SELECT stok_semasa FROM produk WHERE ID_produk = ? FOR UPDATE");
+        $stmt_stock = $conn->prepare("SELECT stok_semasa, harga FROM produk WHERE ID_produk = ? FOR UPDATE");
         $stmt_stock->bind_param("s", $product_id);
         $stmt_stock->execute();
         $product = $stmt_stock->get_result()->fetch_assoc();
@@ -62,16 +62,19 @@ if ($action === 'approve') {
         // --- STEP E: NEW (Based on your Proposal) ---
         // Create the audit trail in 'transaksi_inventori'
         $jenis_transaksi = 'Keluar'; // Stock OUT
-        $kuantiti_berubah = -$quantity_requested; // Store as a negative number
+        $jumlah_transaksi = -$quantity_requested; // Store as a negative number
         $tarikh_transaksi = date('Y-m-d H:i:s');
         
+        // Get product price for logging
+        $harga_seunit = $product['harga'] ?? 0.00; // 'harga' from produk table
+        $jumlah_harga = $harga_seunit * $quantity_requested;
+
         $sql_transaksi = "INSERT INTO transaksi_inventori 
-                            (ID_produk, ID_staf, ID_permohonan, jenis_transaksi, kuantiti_berubah, tarikh_transaksi)
-                        VALUES (?, ?, ?, ?, ?, ?)";
-        
+        (ID_produk, ID_staf, ID_permohonan, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
         $stmt_transaksi = $conn->prepare($sql_transaksi);
-        // We use $admin_id (from the top of the file) as the ID_staf who approved it
-        $stmt_transaksi->bind_param("ssisis", $product_id, $admin_id, $request_id, $jenis_transaksi, $kuantiti_berubah, $tarikh_transaksi);
+        $stmt_transaksi->bind_param("ssisidds", $product_id, $admin_id, $request_id, $jenis_transaksi, $jumlah_transaksi, $tarikh_transaksi, $harga_seunit, $jumlah_harga);
         $stmt_transaksi->execute();
         
         // Commit the transaction

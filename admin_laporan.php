@@ -54,7 +54,7 @@ require 'admin_header.php';
                 <p class="card-text text-muted">
                     Laporan transaksi stok masuk dan keluar.
                 </p>
-                <a href="laporan_transaksi.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_transactions.php" class="btn btn-outline-primary">Jana Laporan</a>
             </div>
         </div>
     </div>
