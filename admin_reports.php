@@ -15,7 +15,7 @@ require 'admin_header.php';
                 <p class="card-text text-muted">
                     Laporan stok semasa dan pergerakan inventori.
                 </p>
-                <a href="laporan_inventori.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_inventory.php" class="btn btn-outline-primary">Jana Laporan</a>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@ require 'admin_header.php';
                 <p class="card-text text-muted">
                     Laporan permohonan staf mengikut tempoh.
                 </p>
-                <a href="laporan_permohonan.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_requests.php" class="btn btn-outline-primary">Jana Laporan</a>
             </div>
         </div>
     </div>
@@ -41,7 +41,7 @@ require 'admin_header.php';
                 <p class="card-text text-muted">
                     Laporan pembekal dan pesanan.
                 </p>
-                <a href="laporan_pembekal.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_suppliers.php" class="btn btn-outline-primary">Jana Laporan</a>
             </div>
         </div>
     </div>

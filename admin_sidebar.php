@@ -40,7 +40,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="admin_laporan.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_laporan') || str_starts_with($current_page, 'laporan_')) echo 'active'; ?>">
+            <a href="admin_reports.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_laporan') || str_starts_with($current_page, 'laporan_')) echo 'active'; ?>">
                 <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
                 <span>Laporan</span>
             </a>

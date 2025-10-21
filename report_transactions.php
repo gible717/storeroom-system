@@ -53,10 +53,10 @@ $total_rm = $stmt_rm->get_result()->fetch_assoc()['total'] ?? 0;
 $sql_trend = "SELECT 
                 DATE(tarikh_transaksi) AS 'tarikh', 
                 COUNT(ID_transaksi) AS 'jumlah'
-              FROM transaksi_inventori
-              $where_clause
-              GROUP BY DATE(tarikh_transaksi)
-              ORDER BY tarikh ASC";
+                FROM transaksi_inventori
+                $where_clause
+                GROUP BY DATE(tarikh_transaksi)
+                ORDER BY tarikh ASC";
 $stmt_trend = $conn->prepare($sql_trend);
 $stmt_trend->bind_param($types, ...$params);
 $stmt_trend->execute();
@@ -92,43 +92,46 @@ $bar_chart_data = $trend_data;
     .stat-card-info h4 { margin-bottom: 0; font-weight: 700; }
 </style>
 
-<div class="d-flex align-items-center mb-4">
-    <a href="admin_reports.php" class="btn btn-light me-3">
-        <i class="bi bi-arrow-left"></i>
-    </a>
-    <h3 class="mb-0 fw-bold">Laporan Transaksi</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <a href="admin_reports.php" class="btn btn-light me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h3 class="mb-0 fw-bold">Laporan Transaksi</h3>
+    </div>
+    
+    <button type="submit" class="btn btn-primary" form="filterForm">
+        <i class="bi bi-plus me-2"></i>Jana Laporan
+    </button>
 </div>
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <h5 class="card-title fw-bold mb-3">Tetapan Laporan</h5>
-        
-        <form action="report_transactions_view.php" method="GET" target="_blank">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="mula" class="form-label">Dari Tarikh</label>
-                    <input type="date" class="form-control" id="mula" name="mula" value="<?php echo $tarikh_mula; ?>">
-                </div>
-                <div class="col-md-3">
-                    <label for="akhir" class="form-label">Hingga Tarikh</label>
-                    <input type="date" class="form-control" id="akhir" name="akhir" value="<?php echo $tarikh_akhir; ?>">
-                </div>
-                <div class="col-md-3">
-                    <label for="jenis" class="form-label">Jenis Transaksi</label>
-                    <select id="jenis" name="jenis" class="form-select">
-                        <option value="Semua" <?php if ($jenis == 'Semua') echo 'selected'; ?>>Semua Jenis</option>
-                        <option value="Masuk" <?php if ($jenis == 'Masuk') echo 'selected'; ?>>Stok Masuk</option>
-                        <option value="Keluar" <?php if ($jenis == 'Keluar') echo 'selected'; ?>>Stok Keluar</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Jana Laporan
-                    </button>
-                </div>
+        <h5 class="card-title fw-bold mb-3">Tetapan Laporan</h5> 
+
+            <form action="report_transactions_view.php" method="GET" target="_blank" id="filterForm">
+        <div class="row g-3">
+        <div class="col-md-4">
+        <label for="mula" class="form-label">Dari Tarikh</label>
+        <input type="date" class="form-control" id="mula" name="mula" value="<?php echo $tarikh_mula; ?>">
+        </div>
+
+        <div class="col-md-4">
+        <label for="akhir" class="form-label">Hingga Tarikh</label>
+        <input type="date" class="form-control" id="akhir" name="akhir" value="<?php echo $tarikh_akhir; ?>">
+        </div>
+
+        <div class="col-md-4">
+        <label for="jenis" class="form-label">Jenis Transaksi</label>
+        <select id="jenis" name="jenis" class="form-select">
+        <option value="Semua" <?php if ($jenis == 'Semua') echo 'selected'; ?>>Semua Jenis</option>
+        <option value="Masuk" <?php if ($jenis == 'Masuk') echo 'selected'; ?>>Stok Masuk</option>
+        <option value="Keluar" <?php if ($jenis == 'Keluar') echo 'selected'; ?>>Stok Keluar</option>
+        </select>
             </div>
+        </div>
         </form>
-    </div>
+        </div>
 </div>
 
 <h5 class="fw-bold mt-4 mb-3">Ringkasan Data</h5>
