@@ -1,0 +1,5 @@
+# Tell the server to load login.php as the default page
+DirectoryIndex login.php
+
+# The 404 rule we already added
+ErrorDocument 404 /storeroom/404.php
