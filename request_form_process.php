@@ -46,12 +46,16 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param('ssssisiss', $id_staf, $id_produk, $tarikh_mohon, $status, $jumlah_diminta, $no_bpsi, $jabatan_unit, $baki_sedia_ada, $catatan);
 
 if ($stmt->execute()) {
-    // Success! Redirect to the request list page with a success message.
-    header('Location: request_list.php?success=' . urlencode('Permohonan berjaya dihantar.'));
+        // --- FIX: Add success message ---
+        $message = urlencode("Permohonan anda telah berjaya dihantar.");
+        header("Location: request_list.php?success=" . $message);
+
+    } else {
+        // --- FIX: Add error message ---
+        $message = urlencode("Gagal menghantar permohonan. Sila cuba lagi.");
+        header("Location: request_form.php?error=" . $message);
+    }
+    $stmt->close();
+    $conn->close();
     exit;
-} else {
-    // Fail! Redirect back to the form with an error.
-    header('Location: request_form.php?error=' . urlencode('Gagal menghantar permohonan. Sila cuba lagi.'));
-    exit;
-}
 ?>

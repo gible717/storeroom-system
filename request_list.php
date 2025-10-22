@@ -20,12 +20,7 @@ $requests_result = $stmt->get_result();
 $pageTitle = "Permohonan Saya";
 require 'staff_header.php'; // This one line fixes the entire header and navbar.
 ?>
-    <?php if (isset($_GET['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show alert-top" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i><?php echo htmlspecialchars($_GET['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    
     <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-danger alert-dismissible fade show alert-top" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($_GET['error']); ?>
@@ -95,6 +90,12 @@ require 'staff_header.php'; // This one line fixes the entire header and navbar.
                                         <?php if ($row['status'] === 'Belum Diproses'): ?>
                                         <a href="edit_request.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-warning btn-sm" title="Kemaskini">
                                         <i class="bi bi-pencil-fill"></i>
+                                        </a>
+
+                                        <a href="request_delete.php?id=<?php echo $row['ID_permohonan']; ?>" 
+                                            class="btn btn-sm btn-outline-danger" title="Padam"
+                                            onclick="return confirm('Adakah anda pasti mahu memadam permohonan ini?');">
+                                        <i class="bi bi-trash3-fill"></i>
                                         </a>
     
                                         <?php elseif ($row['status'] === 'Diluluskan'): ?>
@@ -174,3 +175,4 @@ require 'staff_header.php'; // This one line fixes the entire header and navbar.
     </script>
 </body>
 </html>
+<?php require 'staff_footer.php'; ?>

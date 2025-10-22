@@ -1,7 +1,14 @@
 <?php
-// FILE: profile_update_process.php
-session_start();
-require_once 'db_connect.php';
+session_start(); // 1. Start the session to get the logged-in user
+
+// 2. Check if a user is logged in
+if (!isset($_SESSION['ID_staf'])) {
+    // If no user is logged in, stop right here
+    die("Sila log masuk untuk mengemaskini profil anda.");
+}
+
+// 3. Use __DIR__ to build an absolute path (This is the fix)
+require_once __DIR__ . '/db.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['ID_staf'])) {

@@ -14,6 +14,7 @@ if ($userRole !== 'Admin') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --sidebar-width: 280px; }
         body { background-color: #f8f9fa; font-family: sans-serif; }
@@ -148,20 +149,4 @@ if ($userRole !== 'Admin') {
     <div class="main-content-wrapper">
         <?php require 'admin_top_navbar.php'; ?>
         <main class="page-content">
-            <div class="floating-alert">
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <?php echo htmlspecialchars($_GET['success']); ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <?php echo htmlspecialchars($_GET['error']); ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <?php endif; ?>
-            </div>
+            

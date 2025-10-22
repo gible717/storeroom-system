@@ -15,6 +15,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
         .staff-navbar { background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
