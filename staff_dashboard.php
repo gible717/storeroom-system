@@ -18,6 +18,7 @@ if ($userRole === 'Admin') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -126,14 +127,6 @@ if ($userRole === 'Admin') {
     
     <?php require 'navbar.php'; ?>
 
-    <?php if (isset($_GET['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show alert-top" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <?php echo htmlspecialchars($_GET['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
-
     <main class="main-content">
         <div class="container-fluid">
 
@@ -141,9 +134,31 @@ if ($userRole === 'Admin') {
                 <div class="card-body">
                     <h4 class="card-title fw-bold">Selamat Datang, <?php echo htmlspecialchars($userName); ?>!</h4>
                     <p class="card-subtitle text-muted">
-                        <?php date_default_timezone_set('Asia/Kuala_Lumpur'); echo date('l, j F Y'); ?>
+                        <?php
+                        //Set timezone
+                        date_default_timezone_set('Asia/Kuala_Lumpur');
+
+                        //Check if the 'intl' extension is loaded
+                        if(class_exists('IntlDateFormatter')){
+                            //Create a new formatter for Malay (Malaysia)
+                            $formatter = new IntlDateFormatter(
+                                'ms_MY', 
+                                IntlDateFormatter::FULL, 
+                                IntlDateFormatter::NONE,
+                                'Asia/Kuala_Lumpur',
+                                IntlDateFormatter::GREGORIAN,
+                                "EEEE, dd MMMM yyyy"
+                            );
+
+                            //Output the formatted date
+                            echo $formatter->format(time());
+
+                        } else {
+                                //Fallback if 'intl' is not available
+                            echo date('l, d F Y');
+                        }
+                    ?>
                     </p>
-                </div>
             </div>
 
             <div class="row">
@@ -179,6 +194,5 @@ if ($userRole === 'Admin') {
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<?php require 'staff_footer.php'; ?>

@@ -42,11 +42,14 @@ if ($result && $result->num_rows === 1) {
             exit;
         }
 
-        // UPDATED: Redirect based on role to new English file names
+        // --- AJAX POP-UP FIX: Add success message ---
+        $msg = urlencode("Selamat datang kembali, " . $user['nama'] . "!");
+
+        // Redirect based on role
         if ($user['peranan'] === 'Admin') {
-            header('Location: admin_dashboard.php');
+            header('Location: admin_dashboard.php?success=' . $msg);
         } else {
-            header('Location: staff_dashboard.php');
+            header('Location: staff_dashboard.php?success=' . $msg);
         }
         exit;
     }

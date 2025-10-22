@@ -16,9 +16,9 @@ if (!isset($_SESSION['ID_staf'])) {
 // Check if the user has the correct role for this section
 if ($_SESSION['peranan'] !== 'Staf') {
     if ($_SESSION['peranan'] === 'Admin') {
-         header("Location: admin_dashboard.php");
+        header("Location: admin_dashboard.php");
     } else {
-         header("Location: login.php");
+        header("Location: login.php");
     }
     exit;
 }

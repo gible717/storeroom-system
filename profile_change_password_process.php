@@ -1,7 +1,7 @@
 <?php
 // FILE: profile_change_password_process.php
 session_start();
-require_once 'db_connect.php';
+require_once 'db.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['ID_staf'])) {
@@ -57,13 +57,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // --- Success: Update Password ---
     $new_password_hashed = password_hash($new_password, PASSWORD_DEFAULT);
     
-    $update_stmt = $conn->prepare("UPDATE staf SET kata_laluan = ? WHERE ID_staf = ?");
-    $update_stmt->bind_param("ss", $new_password_hashed, $user_id);
-    
-    if ($update_stmt->execute()) {
-        header("Location: $profile_page?success=" . urlencode("Kata laluan anda telah berjaya dikemaskini."));
+    // Prepare the SQL to update the password...
+    $stmt = $conn->prepare("UPDATE staf SET kata_laluan = ?, is_first_login = 0 WHERE ID_staf = ?");
+    $stmt->bind_param("ss", $hashed_password, $id_staf);
+
+    if ($stmt->execute()) {
+    // --- FIX: Add success message ---
+    $msg = urlencode("Kata laluan anda telah berjaya ditukar.");
+    header("Location: " . $success_redirect_page . "?success=" . $msg);
+
     } else {
-        header("Location: $change_pass_page?error=" . urlencode("Gagal mengemaskini kata laluan. Sila cuba lagi."));
+    // This one is already correct, but we'll standardize it
+    $msg = urlencode("Gagal mengemaskini kata laluan. Sila cuba lagi.");
+    header("Location: " . $return_page . "?error=" . $msg);
     }
     
     $stmt->close();
@@ -71,9 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
     exit;
 
-} else {
+    } else {
     // Not a POST request
     header('Location: '. $profile_page);
     exit;
-}
+    }
 ?>
