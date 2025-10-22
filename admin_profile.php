@@ -5,7 +5,10 @@ require 'admin_header.php';
 
 // Fetch the current admin's data from the session ID
 $admin_id = $_SESSION['ID_staf'];
-$stmt = $conn->prepare("SELECT * FROM staf WHERE ID_staf = ?");
+$stmt = $conn->prepare("SELECT staf.*, jabatan.nama_jabatan 
+                        FROM staf 
+                        LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan 
+                        WHERE staf.ID_staf = ?");
 $stmt->bind_param("s", $admin_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
@@ -53,12 +56,18 @@ function getInitials($name) {
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Profil Saya</h3>
+<div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+    <div></div> 
     
-    <a href="profile_change_password.php" class="btn btn-outline-secondary">
-        <i class="bi bi-key-fill me-2"></i>Tukar Kata Laluan
-    </a>
+    <div class="position-absolute" style="left: 50%; transform: translateX(-50%);">
+        <h3 class="mb-0 fw-bold">Profil Saya</h3>
+    </div>
+    
+    <div>
+        <a href="profile_change_password.php" class="btn btn-outline-secondary">
+            <i class="bi bi-key-fill me-2"></i>Tukar Kata Laluan
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm border-0 profile-card" style="border-radius: 1rem;">
@@ -83,7 +92,7 @@ function getInitials($name) {
             
             <div class="mb-3">
                 <label for="jabatan" class="form-label">Jabatan/Unit</label>
-                <input type="text" class="form-control" id="jabatan" name="jabatan" value="Unit Teknologi Maklumat" disabled readonly>
+                <input type="text" class="form-control" id="jabatan" name="jabatan" value="<?php echo htmlspecialchars($user['nama_jabatan']); ?>" disabled readonly>
             </div>
             
             <div class="text-end mt-4">

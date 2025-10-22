@@ -29,11 +29,18 @@ $profile_page = ($_SESSION['peranan'] == 'Admin') ? 'admin_profile.php' : 'staff
     }
 </style>
 
-<div class="d-flex align-items-center mb-4">
-    <a href="<?php echo $profile_page; ?>" class="btn btn-light me-3">
-        <i class="bi bi-arrow-left"></i>
-    </a>
-    <h3 class="mb-0 fw-bold">Tukar Kata Laluan</h3>
+<div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+    <div>
+        <a href="<?php echo $profile_page; ?>" class="btn btn-light">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    </div>
+    
+    <div class="position-absolute" style="left: 50%; transform: translateX(-50%);">
+        <h3 class="mb-0 fw-bold">Tukar Kata Laluan</h3>
+    </div>
+    
+    <div></div>
 </div>
 
 <div class="card shadow-sm border-0 password-card" style="border-radius: 1rem;">
@@ -45,7 +52,7 @@ $profile_page = ($_SESSION['peranan'] == 'Admin') ? 'admin_profile.php' : 'staff
                 <label for="current_password" class="form-label">Kata Laluan Semasa</label>
                 <div class="password-wrapper">
                     <input type="password" class="form-control" id="current_password" name="current_password" 
-                           placeholder="Masukkan kata laluan semasa..." required>
+                        placeholder="Masukkan kata laluan semasa..." required>
                     <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('current_password', this)"></i>
                 </div>
             </div>
@@ -54,7 +61,7 @@ $profile_page = ($_SESSION['peranan'] == 'Admin') ? 'admin_profile.php' : 'staff
                 <label for="new_password" class="form-label">Kata Laluan Baru</label>
                 <div class="password-wrapper">
                     <input type="password" class="form-control" id="new_password" name="new_password" 
-                           placeholder="Masukkan kata laluan baru..." required>
+                        placeholder="Masukkan kata laluan baru..." required>
                     <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('new_password', this)"></i>
                 </div>
                 <div class="form-text">*Kata laluan mestilah sekurang-kurangnya 8 aksara</div>
@@ -64,7 +71,7 @@ $profile_page = ($_SESSION['peranan'] == 'Admin') ? 'admin_profile.php' : 'staff
                 <label for="confirm_password" class="form-label">Sahkan Kata Laluan Baru</label>
                 <div class="password-wrapper">
                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                           placeholder="Sahkan kata laluan baru..." required>
+                        placeholder="Sahkan kata laluan baru..." required>
                     <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('confirm_password', this)"></i>
                 </div>
             </div>

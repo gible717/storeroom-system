@@ -8,51 +8,59 @@
         <span class="sidebar-brand-text">Sistem Pengurusan Bilik Stor dan Inventori</span>
     </div>
 
-    <ul class="sidebar-nav">
+<ul class="sidebar-nav">
+        
         <li class="sidebar-item">
             <a href="admin_dashboard.php" class="sidebar-link <?php if($current_page == 'admin_dashboard.php') echo 'active'; ?>">
                 <i class="bi bi-house-door-fill me-3"></i>
                 <span>Admin Dashboard</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="admin_products.php" class="sidebar-link <?php if($current_page == 'admin_products.php') echo 'active'; ?>">
-    <i class="bi bi-box-seam-fill me-3"></i>
-    <span>Produk</span>
-            </a>          
+            <a href="admin_products.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_products') || str_starts_with($current_page, 'product_')) echo 'active'; ?>">
+                <i class="bi bi-box-seam-fill me-3"></i>
+                <span>Produk</span>
+            </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="admin_suppliers.php" class="sidebar-link <?php if($current_page == 'admin_suppliers.php' || $current_page == 'supplier_add.php' || $current_page == 'supplier_edit.php') echo 'active'; ?>">
+            <a href="admin_suppliers.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_suppliers') || str_starts_with($current_page, 'supplier_')) echo 'active'; ?>">
                 <i class="bi bi-truck me-3"></i>
                 <span>Pembekal</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="admin_orders.php" class="sidebar-link <?php if($current_page == 'admin_orders.php' || $current_page == 'order_add.php') echo 'active'; ?>">
+            <a href="admin_orders.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_orders') || str_starts_with($current_page, 'order_')) echo 'active'; ?>">
                 <i class="bi bi-cart-check-fill me-3"></i>
                 <span>Pesanan</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
             <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php') echo 'active'; ?>">
                 <i class="bi bi-clipboard2-data-fill me-3"></i>
                 <span>Permohonan</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="admin_reports.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_laporan') || str_starts_with($current_page, 'laporan_')) echo 'active'; ?>">
+            <a href="admin_reports.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_reports') || str_starts_with($current_page, 'report_')) echo 'active'; ?>">
                 <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
                 <span>Laporan</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
+            <a href="admin_users.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_users') || str_starts_with($current_page, 'user_') || str_starts_with($current_page, 'admin_departments') || str_starts_with($current_page, 'department_')) echo 'active'; ?>">
                 <i class="bi bi-people-fill me-3"></i>
                 <span>Pengguna</span>
             </a>
         </li>
+        
         <li class="sidebar-item">
-            <a href="admin_profile.php" class="sidebar-link">
+            <a href="admin_profile.php" class="sidebar-link <?php if($current_page == 'admin_profile.php' || $current_page == 'profile_change_password.php') echo 'active'; ?>">
                 <i class="bi bi-person-circle me-3"></i>
                 <span>Profil Saya</span>
             </a>
