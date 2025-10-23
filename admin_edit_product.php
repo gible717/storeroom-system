@@ -31,15 +31,16 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
 ?>
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+
+    <div class="d-sm-flex align-items-center mb-4">
+        <a href="admin_products.php" class="btn btn-link nav-link p-0 me-3" title="Kembali">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"></i>
+        </a>
         <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle; ?>: <?php echo htmlspecialchars($product['nama_produk']); ?></h1>
-        <a href="admin_products.php" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Borang Kemaskini Maklumat Produk</h6>
-        </div>
+        
         <div class="card-body">
             <form action="admin_edit_product_process.php" method="POST">
                 <input type="hidden" name="id_produk" value="<?php echo htmlspecialchars($product['ID_produk']); ?>">
@@ -80,8 +81,11 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
                     </div>
                 </div>
 
-                <hr>
-                <button type="submit" class="btn btn-success">Kemaskini Produk</button>
+                <div class="d-flex justify-content-end pt-3 mt-3 border-top">
+                    <a href="admin_products.php" class="btn btn-secondary me-2">Batal</a>
+                    <button type="submit" class="btn btn-success">Kemaskini Produk</button>
+                </div>
+                
             </form>
         </div>
     </div>

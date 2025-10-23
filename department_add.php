@@ -6,7 +6,7 @@ require 'admin_header.php';
 
 <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
     <div>
-        <a href="admin_departments.php" class="btn btn-light">
+        <a href="admin_department.php" class="btn btn-light">
             <i class="bi bi-arrow-left"></i>
         </a>
     </div>

@@ -17,10 +17,14 @@
             </a>
         </li>
         
-        <li class="sidebar-item">
-            <a href="admin_products.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_products') || str_starts_with($current_page, 'product_')) echo 'active'; ?>">
-                <i class="bi bi-box-seam-fill me-3"></i>
-                <span>Produk</span>
+        <li class="nav-item">
+            <a class="sidebar-link <?php 
+                if (isset($pageTitle) && ($pageTitle == 'Pengurusan Produk' || $pageTitle == 'Kemaskini Produk' || $pageTitle == 'Tambah Produk')) { 
+                    echo 'active'; 
+                } 
+            ?>" href="admin_products.php">
+                <i class="bi bi-box-seam me-2"></i>
+                Produk
             </a>
         </li>
         
@@ -53,7 +57,7 @@
         </li>
         
         <li class="sidebar-item">
-            <a href="admin_users.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_users') || str_starts_with($current_page, 'user_') || str_starts_with($current_page, 'admin_departments') || str_starts_with($current_page, 'department_')) echo 'active'; ?>">
+            <a href="admin_users.php" class="sidebar-link <?php if(strpos($current_page, 'admin_users') === 0 || strpos($current_page, 'user_') === 0 || strpos($current_page, 'admin_department') === 0 || strpos($current_page, 'department_') === 0) echo 'active'; ?>">
                 <i class="bi bi-people-fill me-3"></i>
                 <span>Pengguna</span>
             </a>

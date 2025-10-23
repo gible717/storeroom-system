@@ -9,11 +9,14 @@ $result = $conn->query($sql);
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Pengurusan Jabatan</h3>
-    <div>
-        <a href="admin_users.php" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-people me-2"></i>Urus Pengguna
+    <div class="d-flex align-items-center">
+        <a href="admin_users.php" class="btn btn-link nav-link p-0 me-3" title="Kembali ke Pengguna">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"></i>
         </a>
+        <h3 class="mb-0 fw-bold">Pengurusan Jabatan</h3>
+    </div>
+    
+    <div>
         <a href="department_add.php" class="btn btn-primary">
             <i class="bi bi-plus-lg me-2"></i>Tambah Jabatan
         </a>
