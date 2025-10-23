@@ -289,14 +289,14 @@
         </div>
         
         <div class="text-404">
-            
-                        <h1>404</h1>
 
-                        <p>Halaman tidak ditemui!</p>
+                        <h1>404</h1>
 
-                        <a class="back-btn" href="/storeroom/login.php">Kembali ke Halaman Utama</a>
+                        <p>Halaman tidak ditemui!</p>
 
-        </div>
+                        <a class="back-btn" href="/storeroom/login.php">Kembali ke Halaman Utama</a>
+
+        </div>
         
         <div class="image"><img id="big_image" src="https://mjavadh.github.io/4X4-Collection/Fantasy/Black%20Box/assets/astronaut.png" alt="#"></div>
     </main>

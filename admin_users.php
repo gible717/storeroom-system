@@ -50,7 +50,7 @@ $users = $stmt->get_result();
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0 fw-bold">Pengurusan Pengguna</h3>
     <div>
-        <a href="admin_departments.php" class="btn btn-outline-secondary me-2">
+        <a href="admin_department.php" class="btn btn-outline-secondary me-2">
             <i class="bi bi-building me-2"></i>Urus Jabatan
         </a>
         <a href="user_add.php" class="btn btn-primary">
@@ -118,6 +118,7 @@ $users = $stmt->get_result();
                                     <a href="user_edit.php?id=<?php echo $user['ID_staf']; ?>" class="btn btn-sm btn-outline-warning" title="Kemaskini">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
+
                                     <?php if ($_SESSION['ID_staf'] !== $user['ID_staf']): ?>
                                         <a href="user_delete.php?id=<?php echo $user['ID_staf']; ?>" 
                                         class="btn btn-sm btn-outline-danger" title="Padam"

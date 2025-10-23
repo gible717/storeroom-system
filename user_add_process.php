@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } else {
     // Not a POST request, redirect to user list
-    header("Location: admin_users.php");
+    header("Location: admin_users.php?success=Maklumat pengguna berjaya dikemaskini!");
     exit;
 }
 ?>
