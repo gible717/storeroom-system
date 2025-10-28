@@ -40,6 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.history.replaceState({}, document.title, newUrl);
     }
 });
-</script>
+</script> 
 </body>
 </html>

@@ -1,58 +1,93 @@
 <?php
-// FILE: admin_edit_product_process.php
+// FILE: admin_edit_product_process.php (NOW 100% "SLAYED" FOR AJAX)
 session_start();
-require 'db.php'; 
-require 'auth_check.php';
+// "SLAY" (FIX) 1: "Slay" (kill) the "Vibe" (GUI) header.
+// We only require the "bland food" (logic) it needs.
+require_once 'db.php';
+require_once 'admin_auth_check.php';
 
-// Turn on error reporting for our try...catch block
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// "SLAY" (FIX) 2: Prepare a "vibe" (JSON) response for your "Slay" (AJAX).
+header('Content-Type: application/json');
+$response = ['status' => 'error', 'message' => 'Ralat tidak diketahui.'];
 
-// 1. Security Check: Ensure this is a POST request
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: admin_products.php");
+// "4x4" (Safe) Check: Ensure user is Admin
+if ($userRole !== 'Admin') {
+    $response['message'] = 'Akses tidak dibenarkan.';
+    echo json_encode($response);
     exit;
 }
 
-// 2. Data Retrieval from the form
-$id_produk = trim($_POST['id_produk'] ?? '');
-$nama_produk = trim($_POST['nama_produk'] ?? '');
-$kategori = trim($_POST['kategori'] ?? '');
-$harga = !empty($_POST['harga']) ? (float)$_POST['harga'] : null;
-$stok_semasa = !empty($_POST['stok_semasa']) ? (int)$_POST['stok_semasa'] : 0;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-// Basic validation
-if (empty($id_produk) || empty($nama_produk)) {
-    header("Location: admin_products.php?error=" . urlencode("Data tidak lengkap. Sila cuba lagi."));
-    exit;
-}
+    // --- 1. "Slay" (Fix) Data Retrieval ---
+    $id_produk = trim($_POST['id_produk'] ?? '');
+    $nama_produk = trim($_POST['nama_produk'] ?? '');
+    $ID_kategori = (int)($_POST['ID_kategori'] ?? 0); // "Slay" (Fix) 3: Get the new "smart" (logic) ID
+    $harga = !empty($_POST['harga']) ? (float)$_POST['harga'] : null;
+    $stok_semasa = (int)($_POST['stok_semasa'] ?? 0);
 
-// 3. The SQL UPDATE Command
-$sql = "UPDATE PRODUK SET nama_produk = ?, kategori = ?, harga = ?, stok_semasa = ? WHERE ID_produk = ?";
-
-try {
-    $stmt = $conn->prepare($sql);
-    // Bind parameters: s = string, d = double, i = integer
-    $stmt->bind_param("ssdii", $nama_produk, $kategori, $harga, $stok_semasa, $id_produk);
-    
-    // 4. Execute and Redirect with Feedback
-    $stmt->execute();
-    
-    // Check if any row was actually updated
-    if ($stmt->affected_rows > 0) {
-        $message = "Produk '" . htmlspecialchars($nama_produk) . "' berjaya dikemaskini!";
-    } else {
-        $message = "Tiada perubahan dikesan untuk produk '" . htmlspecialchars($nama_produk) . "'.";
+    if (empty($id_produk) || empty($nama_produk)) {
+        $response['message'] = 'ID Produk and Nama Produk wajib diisi.';
+        echo json_encode($response);
+        exit;
     }
-    
-    header("Location: admin_products.php?success=" . urlencode($message));
+    if (empty($ID_kategori)) {
+        $response['message'] = 'Kategori wajib dipilih.';
+        echo json_encode($response);
+        exit;
+    }
 
-} catch (mysqli_sql_exception $e) {
-    // Catch any database errors
-    $error_message = "Ralat semasa mengemaskini produk: " . $e->getMessage();
-    header("Location: admin_edit_product.php?id=" . urlencode($id_produk) . "&error=" . urlencode($error_message));
+    // --- 2. "Slay" (Fix) Database Update ---
+    // We "slay" (kill) the "ghost" (kategori) and use the "steak" (ID_kategori)
+    $sql = "UPDATE PRODUK SET 
+                nama_produk = ?, 
+                ID_kategori = ?, 
+                harga = ?, 
+                stok_semasa = ? 
+            WHERE ID_produk = ?";
+            
+    $stmt = $conn->prepare($sql);
+    
+    if ($stmt === false) {
+        $response['message'] = 'Ralat pangkalan data: ' . $conn->error;
+        echo json_encode($response);
+        exit;
+    }
+
+    // --- 3. "Slay" (Fix) Parameter Binding ---
+    // The "vibe" (types) is now "sidis" (string, int, double, int, string)
+    $stmt->bind_param("sidis", 
+        $nama_produk,
+        $ID_kategori,
+        $harga,
+        $stok_semasa,
+        $id_produk
+    );
+
+    // --- 4. "Slay" (Execute) ---
+    try {
+        $stmt->execute();
+        
+        $response['status'] = 'success';
+        $response['message'] = 'Produk berjaya dikemaskini!';
+        
+        // "SLAY" (FIX) 4: "Slay" (kill) the "Joker" (double pop-up) bug.
+        // We "slay" (redirect) *silently*. The "vibe" (pop-up) is already done.
+        $response['redirectUrl'] = 'admin_products.php';
+
+    } catch (mysqli_sql_exception $e) {
+        $response['message'] = 'Ralat kemaskini: ' . $e->getMessage();
+    }
+
+    $stmt->close();
+    $conn->close();
+
+} else {
+    // "Ghost" (Bug) check: If someone just types the URL
+    $response['message'] = 'Kaedah tidak sah.';
 }
 
-$stmt->close();
-$conn->close();
+// "SLAY" (FIX) 6: "Vibe" (send) the final "bland food" (JSON) to your "Slay" (AJAX).
+echo json_encode($response);
 exit;
 ?>

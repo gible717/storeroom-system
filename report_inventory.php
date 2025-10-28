@@ -11,7 +11,9 @@ $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Fetch product categories for the filter dropdown
-$kategori_result = $conn->query("SELECT DISTINCT kategori FROM produk ORDER BY kategori");
+// THIS IS THE "SLAY" (THE FIX)
+// We now "vibe" (get) the list from the new "KATEGORI" table
+$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
 
 // --- SQL Queries for Summary Cards (Based on CURRENT stock) ---
 // We define "Low Stock" as > 0 and <= 10.
@@ -24,15 +26,16 @@ FROM produk";
 $cards = $conn->query($sql_cards)->fetch_assoc();
 
 // --- SQL for Chart 1: Stok mengikut Kategori (Bar Chart) ---
-$sql_cat_chart = "SELECT kategori, SUM(stok_semasa) AS total_stok
-                FROM produk
-                GROUP BY kategori
-                ORDER BY kategori ASC";
+$sql_cat_chart = "SELECT k.nama_kategori, SUM(p.stok_semasa) AS total_stok
+                FROM produk p
+                INNER JOIN kategori k ON p.ID_kategori = k.ID_kategori
+                GROUP BY k.nama_kategori
+                ORDER BY k.nama_kategori ASC";
 $cat_chart_result = $conn->query($sql_cat_chart);
 $cat_labels = [];
 $cat_data = [];
 while ($row = $cat_chart_result->fetch_assoc()) {
-    $cat_labels[] = $row['kategori'];
+    $cat_labels[] = $row['nama_kategori'];
     $cat_data[] = $row['total_stok'];
 }
 

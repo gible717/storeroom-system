@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // --- 1. Data Retrieval from your form ---
 $id_produk = trim($_POST['id_produk'] ?? '');
 $nama_produk = trim($_POST['nama_produk'] ?? '');
-$kategori = trim($_POST['kategori'] ?? '');
+$ID_kategori = (int)$_POST['ID_kategori'];
 $harga = !empty($_POST['harga']) ? (float)$_POST['harga'] : null;
 $stok_semasa = !empty($_POST['stok_semasa']) ? (int)$_POST['stok_semasa'] : 0;
 
@@ -22,7 +22,7 @@ if (empty($id_produk) || empty($nama_produk)) {
 }
 
 // --- 2. Database Insertion with Correct Table/Column Names ---
-$sql = "INSERT INTO PRODUK (ID_produk, nama_produk, kategori, harga, stok_semasa) VALUES (?, ?, ?, ?, ?)";
+$sql = "INSERT INTO PRODUK (ID_produk, nama_produk, ID_kategori, harga, stok_semasa) VALUES (?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
 
@@ -31,7 +31,7 @@ if ($stmt === false) {
     exit;
 }
 
-$stmt->bind_param("sssdi", $id_produk, $nama_produk, $kategori, $harga, $stok_semasa);
+$stmt->bind_param("ssidi", $id_produk, $nama_produk, $ID_kategori, $harga, $stok_semasa);
 
 // --- 3. Execute and Redirect using try...catch ---
 try {

@@ -1,19 +1,20 @@
 <?php
-// FILE: admin_edit_product.php
+// FILE: admin_edit_product.php (NOW 100% "SLAYED")
 $pageTitle = "Kemaskini Produk";
-require 'admin_header.php';
-require 'db.php';
+require 'admin_header.php'; // "Slay" (includes) db.php
+
+// "GHOST" (BUG) 1: "KILLED" (DELETED) the extra 'require db.php'.
 
 // 1. Get the Product ID from the URL
 $product_id = $_GET['id'] ?? null;
 if (!$product_id) {
-    // Redirect if no ID is provided
     header("Location: admin_products.php?error=ID Produk tidak sah.");
     exit;
 }
 
-// 2. Fetch the product's current data from the database
-$sql = "SELECT ID_produk, nama_produk, kategori, harga, stok_semasa FROM PRODUK WHERE ID_produk = ?";
+// "SLAY" (FIX) 2: "Slay" (fix) the "Fatal Error" query.
+// We now "vibe" (get) the "smart" (logic) ID_kategori.
+$sql = "SELECT ID_produk, nama_produk, ID_kategori, harga, stok_semasa FROM PRODUK WHERE ID_produk = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $product_id);
 $stmt->execute();
@@ -26,8 +27,9 @@ if (!$product) {
     exit;
 }
 
-// Fetch unique categories for the datalist
-$kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC");
+// "SLAY" (FIX) 3: "Slay" (fix) the "T_T" bug. 
+// Get "vibe" (options) from the NEW KATEGORI table.
+$kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori ASC");
 ?>
 
 <div class="container-fluid">
@@ -39,9 +41,9 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
         <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle; ?>: <?php echo htmlspecialchars($product['nama_produk']); ?></h1>
     </div>
 
-    <div class="card shadow mb-4">
+    <div class="card shadow mb-4 border-0" style="border-radius: 1rem;">
         
-        <div class="card-body">
+        <div class="card-body p-4 p-md-5">
             <form action="admin_edit_product_process.php" method="POST">
                 <input type="hidden" name="id_produk" value="<?php echo htmlspecialchars($product['ID_produk']); ?>">
 
@@ -56,16 +58,26 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
                         <input type="text" class="form-control" id="id_produk_display" value="<?php echo htmlspecialchars($product['ID_produk']); ?>" disabled>
                         <div class="form-text">ID Produk tidak boleh diubah.</div>
                     </div>
+                    
                     <div class="col-md-6">
-                        <label for="kategori" class="form-label">Kategori</label>
-                        <input class="form-control" list="kategoriOptions" id="kategori" name="kategori" value="<?php echo htmlspecialchars($product['kategori']); ?>" placeholder="Taip atau pilih kategori...">
-                        <datalist id="kategoriOptions">
-                            <?php while($kategori_row = $kategori_result->fetch_assoc()): ?>
-                                <option value="<?php echo htmlspecialchars($kategori_row['kategori']); ?>">
-                            <?php endwhile; ?>
-                        </datalist>
+                        <label for="ID_kategori" class="form-label">Kategori</label>
+                        <select class="form-select" id="ID_kategori" name="ID_kategori" required>
+                            <option value="">-- Sila Pilih Kategori --</option>
+                            <?php
+                            if ($kategori_result->num_rows > 0) {
+                                while($kategori_row = $kategori_result->fetch_assoc()) {
+                                    // This is the "smart" (UX) move:
+                                    // We "vibe" (check) if this row's ID matches the product's ID_kategori
+                                    $selected = ($product['ID_kategori'] == $kategori_row['ID_kategori']) ? 'selected' : '';
+                                    echo "<option value='{$kategori_row['ID_kategori']}' $selected>{$kategori_row['nama_kategori']}</option>";
+                                }
+                            } else {
+                                echo "<option value='' disabled>Tiada kategori. Sila 'Urus Kategori' dahulu.</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
-                </div>
+                    </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -91,7 +103,61 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
     </div>
 </div>
 
+
+<script>
+// "Vibe" (Listen) for when the form is submitted
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.querySelector('form[action="admin_edit_product_process.php"]');
+    
+    editForm.addEventListener('submit', function(event) {
+        
+        // 1. "Slay" (KILL) the "bland food" (old) redirect
+        event.preventDefault(); 
+        
+        // 2. "Vibe" (Get) all the "steak" (form data)
+        const formData = new FormData(editForm);
+        
+        // 3. "Kernel" (Logic): Send the "slay" (AJAX) request
+        fetch('admin_edit_product_process.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json()) // 4. "Vibe" (Read) the "steak" (JSON) from your screenshot
+        .then(data => {
+            // 5. "SLAY" (THE SWEETALERT VIBE)
+            if (data.status === 'success') {
+                // This is the "Slay" (Success) pop-up
+                Swal.fire({
+                    title: 'Berjaya!',
+                    text: data.message,
+                    icon: 'success'
+                }).then(() => {
+                    // "Slay" (Redirect) to the product list
+                    window.location.href = data.redirectUrl;
+                });
+            } else {
+                // This is the "Joker" (Ralat!) pop-up
+                Swal.fire({
+                    title: 'Ralat!',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        })
+        .catch(error => {
+            // "Ghost" (Bug) check
+            Swal.fire({
+                title: 'Aaaaa! (Crash)!',
+                text: 'Gagal menghubungi server: ' + error,
+                icon: 'error'
+            });
+        });
+    });
+});
+</script>
+
 <?php
-$conn->close();
+// "SLAY" (FIX) 6: "Kill" the "ghost" (bug)
+// $conn->close(); // "KILLED"
 require 'admin_footer.php';
 ?>

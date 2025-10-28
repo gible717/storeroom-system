@@ -1,5 +1,6 @@
 <?php
 // FILE: admin_header.php
+require_once 'db.php';
 require_once 'admin_auth_check.php';
 $current_page = basename($_SERVER['PHP_SELF']); 
 if ($userRole !== 'Admin') {

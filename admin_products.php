@@ -1,94 +1,120 @@
 <?php
-// FILE: admin_products.php (with Toast Notification)
+// FILE: admin_products.php (NOW 100% "SLAYED")
 $pageTitle = "Pengurusan Produk";
-require 'admin_header.php';
-require 'db.php';
+require 'admin_header.php'; // This now includes db.php
+
+// "GHOST" (BUG) 1: "KILLED" (DELETED) the extra 'require db.php'.
 
 if ($conn === null || $conn->connect_error) {
     die("<div class='container-fluid'><div class='alert alert-danger'>Ralat Sambungan Pangkalan Data.</div></div>");
 }
+
+// --- "SLAY" (STRATEGIST) FIX 2: NEW KATEGORI QUERY ---
+// This now "vibes" (gets) from your NEW KATEGORI table.
+$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
 
 // --- Filter Logic Starts Here ---
 $where_clauses = [];
 $params = [];
 $types = '';
 
-// Status Filter
+// Status Filter (NOW "SLAYED" with 'p.' alias)
 $status_filter = $_GET['status'] ?? '';
 if ($status_filter === 'in_stock') {
-    $where_clauses[] = "stok_semasa > 10";
+    $where_clauses[] = "p.stok_semasa > 10";
 } elseif ($status_filter === 'low_stock') {
-    $where_clauses[] = "stok_semasa > 0 AND stok_semasa <= 10";
+    $where_clauses[] = "p.stok_semasa > 0 AND p.stok_semasa <= 10";
 } elseif ($status_filter === 'out_of_stock') {
-    $where_clauses[] = "stok_semasa = 0";
+    $where_clauses[] = "p.stok_semasa = 0";
 }
 
-// Category Filter
-$category_filter = $_GET['kategori'] ?? '';
+// --- "SLAY" (STRATEGIST) FIX 3: NEW KATEGORI FILTER LOGIC ---
+// This "ghost" (bug) is "slain". We now filter by the ID.
+$category_filter = $_GET['kategori'] ?? ''; // This will be the ID
 if (!empty($category_filter)) {
-    $where_clauses[] = "kategori = ?";
+    $where_clauses[] = "p.ID_kategori = ?"; // 'p.' is the "vibe" (alias) for PRODUK
     $params[] = $category_filter;
-    $types .= 's';
+    $types .= 'i'; // 'i' for Integer (it's an ID, not text)
 }
 
-// Build the SQL query
-$sql = "SELECT ID_produk, nama_produk, kategori, harga, stok_semasa FROM PRODUK";
+// --- "SLAY" (STRATEGIST) FIX 4: NEW "STEAK" (JOIN) QUERY ---
+// This "slays" the "Fatal Error".
+$sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.stok_semasa,
+            k.nama_kategori 
+        FROM PRODUK p
+        LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori"; // This is the "smart" (UX) JOIN
+
 if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(' AND ', $where_clauses);
 }
-$sql .= " ORDER BY ID_produk ASC";
+$sql .= " ORDER BY p.ID_produk ASC"; // "SLAYED" with 'p.' alias
 
 $stmt = $conn->prepare($sql);
+if ($stmt === false) {
+    die("Aaaaa! Query failed! The 'Kernel' says: " . $conn->error);
+}
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Fetch unique categories for the dropdown
-$kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC");
-
 ?>
 
 <style>
-    .btn-icon-only { background-color: transparent; border: none; padding: 0.375rem 0.5rem; font-size: 1.1rem; transition: transform 0.2s ease-in-out; }
-    .btn-icon-only:hover { transform: scale(1.2); }
-    .text-view { color: #667EEA; }
-    .text-edit { color: #64748B; }
-    .text-delete { color: #DC2626; }
+.btn-icon-only {
+    background-color: transparent;
+    border: none;
+    padding: 0.375rem 0.5rem;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease-in-out;
+}
+.btn-icon-only:hover {
+    transform: scale(1.2);
+}
+.text-view {
+    color: #667EEA;
+}
+.text-edit {
+    color: #64748B;
+}
+.text-delete {
+    color: #DC2626;
+}
 </style>
 
 <div class="container-fluid">
 
-    <div class="toast-container">
-        <?php if (isset($_GET['success'])): ?>
-            <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <?php echo htmlspecialchars($_GET['success']); ?>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        <?php endif; ?>
-    </div>
-    
     <div class="d-sm-flex align-items-center justify-content-between mb-2">
         <h1 class="h3 mb-0 text-gray-800">Senarai Produk Inventori</h1>
-        <a href="admin_add_product.php" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Tambah Produk</a>
-    </div>
+        
+        <div>
+            <a href="admin_category.php" class="btn btn-outline-secondary">
+                <i class="bi bi-tags-fill me-1"></i> Urus Kategori
+            </a>
+            <a href="admin_add_product.php" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+            </a>
+        </div>
+        </div>
 
     <form action="admin_products.php" method="GET" id="filterForm">
         <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
             <div class="d-flex align-items-center">
+                
                 <select name="kategori" class="form-select form-select-sm me-2" onchange="this.form.submit()" style="width: auto;">
                     <option value="">Semua Kategori</option>
-                    <?php while($kategori_row = $kategori_result->fetch_assoc()): ?>
-                        <option value="<?php echo htmlspecialchars($kategori_row['kategori']); ?>" <?php if ($category_filter === $kategori_row['kategori']) echo 'selected'; ?>>
-                            <?php echo htmlspecialchars($kategori_row['kategori']); ?>
-                        </option>
-                    <?php endwhile; ?>
+                    <?php 
+                    if ($kategori_result && $kategori_result->num_rows > 0):
+                        // We must "rewind" this result to use it
+                        $kategori_result->data_seek(0); 
+                        while($kategori_row = $kategori_result->fetch_assoc()): ?>
+                            <option value="<?php echo htmlspecialchars($kategori_row['ID_kategori']); ?>" <?php if ($category_filter == $kategori_row['ID_kategori']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($kategori_row['nama_kategori']); ?>
+                            </option>
+                        <?php endwhile; 
+                    endif;
+                    ?>
                 </select>
                 <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
                     <option value="">Status</option>
@@ -121,7 +147,9 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['ID_produk']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['kategori']); ?></td>
+                                    
+                                    <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
+                                    
                                     <td><?php echo htmlspecialchars(number_format((float)$row['harga'], 2)); ?></td>
                                     <td><?php echo htmlspecialchars($row['stok_semasa']); ?> unit</td>
                                     <td>
@@ -138,7 +166,7 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
                                     </td>
                                     <td>
                                         <button class="btn btn-icon-only text-view" title="Lihat"><i class="bi bi-eye-fill"></i></button>
-                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk']); ?>" class="btn btn-icon-only text-edit" title="Kemaskini"><i class="bi bi-pencil-fill"></i></a>                                         
+                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk']); ?>" class="btn btn-icon-only text-edit" title="Kemaskini"><i class="bi bi-pencil-fill"></i></a>                                        
                                         <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk']); ?>" 
                                         class="btn btn-icon-only text-delete" 
                                         title="Padam" 
@@ -169,6 +197,6 @@ $kategori_result = $conn->query("SELECT DISTINCT kategori FROM PRODUK WHERE kate
 </div>
 
 <?php
-$conn->close(); 
+// "GHOST" (BUG) 7: "KILLED" (DELETED) the extra 'conn->close()'.
 require 'admin_footer.php';
 ?>

@@ -19,7 +19,7 @@
         
         <li class="nav-item">
             <a class="sidebar-link <?php 
-                if (isset($pageTitle) && ($pageTitle == 'Pengurusan Produk' || $pageTitle == 'Kemaskini Produk' || $pageTitle == 'Tambah Produk')) { 
+                if (isset($pageTitle) && ($pageTitle == 'Pengurusan Produk' || $pageTitle == 'Kemaskini Produk' || $pageTitle == 'Tambah Produk' || $pageTitle == 'Pengurusan Kategori')) { 
                     echo 'active'; 
                 } 
             ?>" href="admin_products.php">
@@ -27,18 +27,11 @@
                 Produk
             </a>
         </li>
-        
-        <li class="sidebar-item">
-            <a href="admin_suppliers.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_suppliers') || str_starts_with($current_page, 'supplier_')) echo 'active'; ?>">
-                <i class="bi bi-truck me-3"></i>
-                <span>Pembekal</span>
-            </a>
-        </li>
-        
-        <li class="sidebar-item">
-            <a href="admin_orders.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_orders') || str_starts_with($current_page, 'order_')) echo 'active'; ?>">
-                <i class="bi bi-cart-check-fill me-3"></i>
-                <span>Pesanan</span>
+
+        <li class="nav-item"> 
+            <a class="sidebar-link <?php echo ($current_page == 'admin_stock_manual.php') ? 'active' : ''; ?>" href="admin_stock_manual.php">
+                <i class="bi bi-pencil-square me-3"></i> 
+                    <span>Kemaskini Stok </span>
             </a>
         </li>
         
