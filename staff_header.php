@@ -22,6 +22,21 @@ $userInitials = strtoupper(substr($userName, 0, 2));
         .staff-navbar { background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
         .main-content { padding-top: 2rem; }
+
+        /* --- Styles for the Logout Button --- */
+        .btn-logout {
+            background-color: #ffe5e5; /* Light red background */
+            color: #dc3545; /* Darker red text */
+            border: none;
+            font-weight: 600;
+            padding: 0.375rem 0.75rem; /* Standard Bootstrap small button padding */
+        }
+        .btn-logout:hover {
+            background-color: #f8d7da; /* Slightly darker red background on hover */
+            color: #842029; /* Darker red text on hover */
+        }
+        /* --- End of Styles --- */
+
     </style>
 </head>
 <body>
@@ -35,7 +50,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
         <div class="d-flex align-items-center">
             <span class="me-3 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
             <div class="user-initials-badge me-3"><?php echo htmlspecialchars($userInitials); ?></div>
-            <a href="logout.php" class="btn btn-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i> Log Keluar</a>
+            <a href="logout.php" class="btn btn-logout btn-sm"><i class="bi bi-box-arrow-right me-1"></i> Log Keluar</a>
         </div>
     </div>
 </nav>

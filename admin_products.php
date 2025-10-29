@@ -37,6 +37,45 @@ if (!empty($category_filter)) {
     $types .= 'i'; // 'i' for Integer (it's an ID, not text)
 }
 
+// --- START: PAGINATION LOGIC ---
+
+// 1. Define Variables
+$limit = 7; // 7 entries per page as requested
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+// 2. Get Total Row Count (with filters)
+$count_sql = "SELECT COUNT(p.ID_produk) AS total
+            FROM PRODUK p
+            LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori";
+if (!empty($where_clauses)) {
+    $count_sql .= " WHERE " . implode(' AND ', $where_clauses);
+}
+
+$count_stmt = $conn->prepare($count_sql);
+if ($count_stmt === false) { die("Error preparing count query: " . $conn->error); }
+if (!empty($params)) {
+    // Note: We only bind the filter params here (s or i), not the pagination params yet
+    $count_stmt->bind_param($types, ...$params); 
+}
+$count_stmt->execute();
+$count_result = $count_stmt->get_result();
+$total_rows = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_rows / $limit);
+$count_stmt->close();
+
+// 5. Build Base URL for Links (preserves filters)
+$query_params = $_GET; 
+unset($query_params['page']); 
+$base_url = http_build_query($query_params); 
+if (!empty($base_url)) {
+    $base_url = 'admin_products.php?' . $base_url . '&';
+} else {
+    $base_url = 'admin_products.php?';
+}
+// --- END: PAGINATION LOGIC ---
+
 // --- "SLAY" (STRATEGIST) FIX 4: NEW "STEAK" (JOIN) QUERY ---
 // This "slays" the "Fatal Error".
 $sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.stok_semasa,
@@ -47,7 +86,12 @@ $sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.stok_semasa,
 if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(' AND ', $where_clauses);
 }
-$sql .= " ORDER BY p.ID_produk ASC"; // "SLAYED" with 'p.' alias
+$sql .= " ORDER BY p.ID_produk ASC LIMIT ? OFFSET ?"; // Added LIMIT and OFFSET
+
+// Add the pagination types ('ii' for limit, offset) and values to our params
+$types .= 'ii';
+$params[] = $limit;
+$params[] = $offset;
 
 $stmt = $conn->prepare($sql);
 if ($stmt === false) {
@@ -184,15 +228,38 @@ $result = $stmt->get_result();
             </div>
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
-            <small class="text-muted">Showing 1 to <?php echo $result ? $result->num_rows : 0; ?> of <?php echo $result ? $result->num_rows : 0; ?> entries</small>
-            <nav>
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-                </ul>
-            </nav>
-        </div>
+        <?php
+        // Calculate starting and ending entry numbers
+        $start_entry = ($total_rows > 0) ? $offset + 1 : 0;
+        $end_entry = $offset + $result->num_rows;
+        ?>
+        <small class="text-muted">Showing <?php echo $start_entry; ?> to <?php echo $end_entry; ?> of <?php echo $total_rows; ?> entries</small>
+
+        <nav aria-label="Product pagination">
+            <ul class="pagination pagination-sm mb-0">
+                
+                <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
+                    <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page - 1; ?>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?php if($page == $i) echo 'active'; ?>">
+                        <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $i; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
+                    <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page + 1; ?>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
     </div>
 </div>
 

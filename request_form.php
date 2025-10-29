@@ -3,7 +3,32 @@
 $pageTitle = "Borang Permohonan Stok";
 require 'staff_header.php'; // This includes security, CSS, and the navbar
 
-// Fetch products for the dropdown
+// --- START: FETCH STAFF DEPARTMENT ---
+// We must fetch the department name, as it's not stored in the session.
+$nama_jabatan = 'Jabatan Tidak Ditemui'; // Default value
+$staff_id = $_SESSION['ID_staf'] ?? null;
+
+if ($staff_id) {
+    $stmt_dept = $conn->prepare("SELECT j.nama_jabatan
+                                FROM staf s
+                                LEFT JOIN jabatan j ON s.ID_jabatan = j.ID_jabatan
+                                WHERE s.ID_staf = ?");
+    if ($stmt_dept) {
+        $stmt_dept->bind_param("s", $staff_id);
+        $stmt_dept->execute();
+        $dept_result = $stmt_dept->get_result();
+        if ($dept_row = $dept_result->fetch_assoc()) {
+            // Check if nama_jabatan is not null or empty
+            if (!empty($dept_row['nama_jabatan'])) {
+                $nama_jabatan = $dept_row['nama_jabatan'];
+            }
+        }
+        $stmt_dept->close();
+    }
+}
+// --- END: FETCH STAFF DEPARTMENT ---
+
+// Fetch products for the dropdown (existing code)
 $products_result = $conn->query("SELECT ID_produk, nama_produk, stok_semasa FROM produk WHERE stok_semasa > 0 ORDER BY nama_produk ASC");
 ?>
 
@@ -80,9 +105,15 @@ $products_result = $conn->query("SELECT ID_produk, nama_produk, stok_semasa FROM
                         </div>
 
                         <div class="col-12">
-                            <label for="jabatan_unit" class="form-label">*Jabatan/Unit</label>
-                            <input type="text" class="form-control" id="jabatan_unit" name="jabatan_unit" placeholder="Contoh: Unit Teknologi Maklumat" required>
-                        </div>
+    <label for="jabatan_unit_display" class="form-label">Jabatan/Unit</label> 
+    <input 
+        type="text" 
+        class="form-control" 
+        id="jabatan_unit_display" 
+        value="<?php echo htmlspecialchars($nama_jabatan); ?>" 
+        readonly 
+    >
+    </div>
                         
                         <div class="col-12">
                             <label for="catatan" class="form-label">Catatan</label>

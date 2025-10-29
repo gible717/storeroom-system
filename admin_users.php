@@ -37,7 +37,51 @@ if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(" AND ", $where_clauses);
 }
 
-$sql .= " ORDER BY nama ASC";
+// --- START: PAGINATION LOGIC ---
+
+// 1. Define Variables
+$limit = 7; // 7 entries per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+// 2. Get Total Row Count (with filters)
+$count_sql = "SELECT COUNT(staf.ID_staf) AS total 
+            FROM staf 
+            LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan";
+if (!empty($where_clauses)) {
+    $count_sql .= " WHERE " . implode(" AND ", $where_clauses);
+}
+
+$count_stmt = $conn->prepare($count_sql);
+if ($count_stmt === false) { die("Error preparing count query: " . $conn->error); }
+if (!empty($params)) {
+    // Bind the same filter params
+    $count_stmt->bind_param($types, ...$params); 
+}
+$count_stmt->execute();
+$count_result = $count_stmt->get_result();
+$total_rows = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_rows / $limit);
+$count_stmt->close();
+
+// 5. Build Base URL for Links (preserves filters)
+$query_params = $_GET; // Get all current query params
+unset($query_params['page']); // Remove 'page' to avoid duplication
+$base_url = http_build_query($query_params); // Rebuild (e.g., "peranan=Admin&search=test")
+if (!empty($base_url)) {
+    $base_url = 'admin_users.php?' . $base_url . '&';
+} else {
+    $base_url = 'admin_users.php?';
+}
+// --- END: PAGINATION LOGIC ---
+
+$sql .= " ORDER BY nama ASC LIMIT ? OFFSET ?";
+
+// Add the pagination types ('ii' for limit, offset) and values
+$types .= 'ii';
+$params[] = $limit;
+$params[] = $offset;
 
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
@@ -139,16 +183,40 @@ $users = $stmt->get_result();
                 </tbody>
             </table>
         </div>
-        
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <span class="text-muted">
-                Menunjukkan <?php echo $users->num_rows; ?> rekod
-            </span>
-            </div>
-        
+        <div class="card-footer d-flex justify-content-between align-items-center">
+        <?php
+        // Calculate starting and ending entry numbers
+        $start_entry = ($total_rows > 0) ? $offset + 1 : 0;
+        $end_entry = $offset + $users->num_rows;
+        ?>
+        <small class="text-muted">Showing <?php echo $start_entry; ?> to <?php echo $end_entry; ?> of <?php echo $total_rows; ?> entries</small>
+
+        <nav aria-label="User pagination">
+            <ul class="pagination pagination-sm mb-0">
+                
+                <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
+                    <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page - 1; ?>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?php if($page == $i) echo 'active'; ?>">
+                        <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $i; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
+                    <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page + 1; ?>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
-
 <?php 
 $stmt->close();
 $conn->close();
