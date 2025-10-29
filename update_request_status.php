@@ -59,24 +59,48 @@ if ($action === 'approve') {
         $stmt_update_status->bind_param("ssi", $new_status, $completed_date, $request_id);
         $stmt_update_status->execute();
         
-        // --- STEP E: NEW (Based on your Proposal) ---
-        // Create the audit trail in 'transaksi_inventori'
+        // --- STEP E: Corrected Transaction Log ---
+        // Log the stock movement in the 'transaksi_inventori' table
         $jenis_transaksi = 'Keluar'; // Stock OUT
-        $jumlah_transaksi = -$quantity_requested; // Store as a negative number
+        $jumlah_transaksi = -$quantity_requested; // Store as a negative number (as per your original code)
         $tarikh_transaksi = date('Y-m-d H:i:s');
         
         // Get product price for logging
         $harga_seunit = $product['harga'] ?? 0.00; // 'harga' from produk table
         $jumlah_harga = $harga_seunit * $quantity_requested;
 
+        // Use the request ID as the document number for reference
+        $no_dokumen_ref = 'REQ' . str_pad($request_id, 4, '0', STR_PAD_LEFT); 
+
+        // Corrected SQL for the 'transaksi_inventori' table structure
         $sql_transaksi = "INSERT INTO transaksi_inventori 
-        (ID_produk, ID_staf, ID_permohonan, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                        (ID_produk, ID_staf, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga, no_dokumen)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"; // Matches your screenshot
 
         $stmt_transaksi = $conn->prepare($sql_transaksi);
-        $stmt_transaksi->bind_param("ssisidds", $product_id, $admin_id, $request_id, $jenis_transaksi, $jumlah_transaksi, $tarikh_transaksi, $harga_seunit, $jumlah_harga);
-        $stmt_transaksi->execute();
+        if (!$stmt_transaksi) {
+             // If prepare fails, rollback and throw error
+            throw new Exception("Gagal menyediakan log transaksi: " . $conn->error);
+        }
+
+        // Corrected bind_param: s(ID_produk), s(ID_staf), s(jenis), i(jumlah), s(tarikh), d(harga_seunit), d(jumlah_harga), s(no_dokumen)
+        $stmt_transaksi->bind_param("ssisidds", 
+            $product_id, 
+            $admin_id, 
+            $jenis_transaksi, 
+            $jumlah_transaksi, 
+            $tarikh_transaksi, 
+            $harga_seunit, 
+            $jumlah_harga,
+            $no_dokumen_ref // Pass the formatted request ID here
+        );
         
+        if (!$stmt_transaksi->execute()) {
+             // If execute fails, rollback and throw error
+            throw new Exception("Gagal melaksanakan log transaksi: " . $stmt_transaksi->error);
+        }
+        $stmt_transaksi->close(); // Close the statement
+
         // Commit the transaction
         $conn->commit();
         header("Location: manage_requests.php?success=" . urlencode("Permohonan telah diluluskan dan stok telah dikemaskini."));
