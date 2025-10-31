@@ -10,7 +10,8 @@ $userInitials = strtoupper(substr($userName, 0, 2));
     <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle ?? 'Dashboard'; ?></h1>
 
     <div class="user-info d-flex align-items-center">
-        <span class="me-3 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
+        <a href="admin_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">
+        <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
         <div class="user-initials-badge me-3">
             <?php echo htmlspecialchars($userInitials); ?>
         </div>
@@ -18,4 +19,5 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
         </a>
     </div>
+
 </nav>

@@ -47,10 +47,17 @@ $userInitials = strtoupper(substr($userName, 0, 2));
             <img src="assets/img/logo.png" alt="Logo" style="height: 40px;">
             <span class="ms-2">Sistem Pengurusan Bilik Stor dan Inventori</span>
         </a>
-        <div class="d-flex align-items-center">
-            <span class="me-3 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
-            <div class="user-initials-badge me-3"><?php echo htmlspecialchars($userInitials); ?></div>
-            <a href="logout.php" class="btn btn-logout btn-sm"><i class="bi bi-box-arrow-right me-1"></i> Log Keluar</a>
+
+        <div class="d-flex align-items-center ms-auto">
+            <a href="staff_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">
+                <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($userName); ?></span>
+                <div class="user-initials-badge">
+                    <?php echo htmlspecialchars($userInitials); ?>
+                </div>
+            </a>
+            <a href="logout.php" class="btn btn-logout btn-sm">
+                <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
+            </a>
         </div>
     </div>
 </nav>

@@ -58,12 +58,12 @@ require 'staff_header.php'; // This one line fixes the entire header and navbar.
                     <table class="table table-hover align-middle" id="requestTable">
                         <thead>
                             <tr>
-                                <th scope="col">No.</th>
+                                <th scope="col" class="text-center">No.</th>
                                 <th scope="col">Nama Produk</th>
-                                <th scope="col">Kuantiti</th>
+                                <th scope="col" class="text-center">Kuantiti</th>
                                 <th scope="col">Tarikh</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Tindakan</th>
+                                <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,11 +71,11 @@ require 'staff_header.php'; // This one line fixes the entire header and navbar.
                                 $row_number = 1;
                                 while ($row = $requests_result->fetch_assoc()): ?>
                                     <tr>
-                                        <td><?php echo $row_number++; ?></td>
+                                        <td class="text-center"><?php echo $row_number++; ?></td>
                                         <td class="product-name"><?php echo htmlspecialchars($row['nama_produk']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['jumlah_diminta']); ?></td>
+                                        <td class="text-center"><?php echo htmlspecialchars($row['jumlah_diminta']); ?></td>
                                         <td><?php echo date('d M Y', strtotime($row['tarikh_mohon'])); ?></td>
-                                        <td class="status-cell">
+                                        <td class="status-cell text-center">
                                             <?php
                                             $status = htmlspecialchars($row['status']);
                                             $badge_class = 'bg-secondary';
