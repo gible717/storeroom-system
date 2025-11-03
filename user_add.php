@@ -64,14 +64,12 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
             </div>
             
             <div class="mb-3">
-                <label for="password" class="form-label">Kata Laluan Sementara <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="password" name="password" 
-                    value="User123" readonly>
-                <div class="form-text">
-                    Pengguna akan dipaksa untuk menukar kata laluan ini semasa log masuk pertama.
-                </div>
+                <label class="form-label">Kata Laluan Sementara</label>  
+                <p class="form-control-plaintext"><strong>User123</strong></p>    
+                    <input type="hidden" name="kata_laluan_sementara" value="User123">   
+                <div class="form-text">Pengguna akan dipaksa untuk menukar kata laluan ini semasa log masuk pertama.</div>
             </div>
-
+            
             <div class="text-end mt-4">
                 <a href="admin_users.php" class="btn btn-light me-2">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan</button>

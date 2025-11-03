@@ -1,76 +1,78 @@
 <?php
-// FILE: user_add_process.php
-require 'admin_auth_check.php';
+// FILE: user_add_process.php (FIXED)
+require 'db.php'; 
+session_start(); 
 
-// Handle POST request
+// Admin-only security check
+if (!isset($_SESSION['peranan']) || $_SESSION['peranan'] != 'Admin') {
+    die("Akses ditolak.");
+}
+
+// Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // 1. Get all data from the form
+    $id_staf = $_POST['id_staf'];
+    $nama = $_POST['nama'];
+    $emel = $_POST['emel'];
+    $id_jabatan = $_POST['id_jabatan'];
+    $peranan = $_POST['peranan'];
     
-    // 1. Get all form data
-    $id_staf = $_POST['id_staf'] ?? '';
-    $nama = $_POST['nama'] ?? '';
-    $emel = $_POST['emel'] ?? '';
-    $id_jabatan = $_POST['id_jabatan'] ?? '';
-    $peranan = $_POST['peranan'] ?? '';
-    $password = $_POST['password'] ?? ''; // This is the temporary password
-    
-    // 2. --- Server-side Validation ---
-    if (empty($id_staf) || empty($nama) || empty($emel) || empty($id_jabatan) || empty($peranan) || empty($password)) {
-        header("Location: user_add.php?error=" . urlencode("Sila isi semua ruangan yang bertanda *."));
-        exit;
+    // This is the variable from your hidden "User123" input field
+    $kata_laluan_sementara = $_POST['kata_laluan_sementara']; 
+
+    // 2. Validate data
+    if (empty($id_staf) || empty($nama) || empty($emel) || empty($id_jabatan) || empty($peranan) || empty($kata_laluan_sementara)) {
+        header("Location: user_add.php?error=Sila lengkapkan semua medan.");
+        exit();
     }
+
+    // 3. Hash the password
+    $hashed_password = password_hash($kata_laluan_sementara, PASSWORD_BCRYPT);
     
-    // 3. --- Check for Duplicates ---
-    // Check if ID Staf already exists
-    $stmt_check_id = $conn->prepare("SELECT ID_staf FROM staf WHERE ID_staf = ?");
-    $stmt_check_id->bind_param("s", $id_staf);
-    $stmt_check_id->execute();
-    if ($stmt_check_id->get_result()->num_rows > 0) {
-        header("Location: user_add.php?error=" . urlencode("ID Staf ini telah wujud."));
-        $stmt_check_id->close();
-        exit;
-    }
-    $stmt_check_id->close();
-    
-    // Check if Emel already exists
-    $stmt_check_emel = $conn->prepare("SELECT emel FROM staf WHERE emel = ?");
-    $stmt_check_emel->bind_param("s", $emel);
-    $stmt_check_emel->execute();
-    if ($stmt_check_emel->get_result()->num_rows > 0) {
-        header("Location: user_add.php?error=" . urlencode("Emel ini telah wujud."));
-        $stmt_check_emel->close();
-        exit;
-    }
-    $stmt_check_emel->close();
-    
-    // 4. --- Process and Insert Data ---
-    
-    // Hash the password securely
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    
-    // Set is_first_login to 1 (true)
+    // 4. Set is_first_login to 1 (true)
     $is_first_login = 1;
+
+    // 5. Insert into the database
+    // THIS IS THE CORRECTED QUERY with 'katalaluan' and 'is_first_login'
+    $sql = "INSERT INTO staf (
+                ID_staf, 
+                nama, 
+                emel, 
+                ID_jabatan, 
+                peranan, 
+                katalaluan,  -- <-- This was the problem
+                is_first_login -- <-- This was the problem
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)"; // 7 question marks
     
-    // Prepare the final SQL INSERT statement
-    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, peranan, kata_laluan, is_first_login) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-            
     $stmt = $conn->prepare($sql);
-    // 's' = string, 'i' = integer
-    $stmt->bind_param("sssisbi", $id_staf, $nama, $emel, $id_jabatan, $peranan, $hashed_password, $is_first_login);
     
+    // 6. THIS IS THE CORRECTED BIND_PARAM
+    // s(ID_staf), s(nama), s(emel), i(ID_jabatan), s(peranan), s(hashed_password), i(is_first_login)
+    $stmt->bind_param("sssissi", 
+        $id_staf, 
+        $nama, 
+        $emel, 
+        $id_jabatan, 
+        $peranan, 
+        $hashed_password, 
+        $is_first_login
+    );
+
+    // 7. Execute and redirect
     if ($stmt->execute()) {
-        header("Location: admin_users.php?success=" . urlencode("Pengguna baru berjaya ditambah."));
+        header("Location: admin_users.php?success=Pengguna baru berjaya dicipta.");
     } else {
-        header("Location: user_add.php?error=" . urlencode("Gagal menambah pengguna. Sila cuba lagi."));
+        header("Location: user_add.php?error=Gagal mencipta pengguna. Ralat pangkalan data.");
     }
     
     $stmt->close();
     $conn->close();
-    exit;
+    exit();
 
 } else {
-    // Not a POST request, redirect to user list
-    header("Location: admin_users.php?success=Maklumat pengguna berjaya dikemaskini!");
-    exit;
+    // Not a POST request
+    header("Location: user_add.php");
+    exit();
 }
 ?>
