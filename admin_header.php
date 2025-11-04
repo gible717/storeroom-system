@@ -3,10 +3,7 @@
 require_once 'db.php';
 require_once 'admin_auth_check.php';
 $current_page = basename($_SERVER['PHP_SELF']); 
-if ($userRole !== 'Admin') {
-    header("Location: staff_dashboard.php");
-    exit;
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="ms">

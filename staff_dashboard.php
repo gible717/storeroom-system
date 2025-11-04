@@ -1,12 +1,3 @@
-<?php 
-// FILE: staff_dashboard.php (Updated with new styling and layout)
-require 'auth_check.php'; 
-
-if ($userRole === 'Admin') {
-    header("Location: admin_dashboard.php");
-    exit;
-}
-?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>

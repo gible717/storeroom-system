@@ -1,23 +1,38 @@
 <?php
-// FILE: change_password.php (FIXED - Key icon removed, Title outside card)
-$pageTitle = "Tukar Kata Laluan"; // This will set the title in the header
+// FILE: change_password.php (FIXED)
+$pageTitle = "Tukar Kata Laluan";
 
-require 'auth_check.php'; // This already starts the session
+// --- "STEAK" (FIX): "4x4" (Safe) Auth Check ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'db.php';
 
-// The logic below ensures only first-time users can see this page
-$stmt = $conn->prepare("SELECT is_first_login FROM staf WHERE ID_staf = ?");
-$stmt->bind_param('s', $_SESSION['ID_staf']);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
-
-if ($user['is_first_login'] != 1) {
-    $redirect_url = ($_SESSION['peranan'] === 'Admin') ? 'admin_dashboard.php' : 'staff_dashboard.php';
-    header("Location: $redirect_url");
+// "Slay" (Check) if user is logged in at all
+if (!isset($_SESSION['ID_staf'])) {
+    header("Location: login.php?error=Sila log masuk dahulu");
     exit;
 }
 
+// "Slay" (Check) if this is NOT a first-time login
+// If they are not a first-time user, "slay" (redirect) them away.
+if (!isset($_SESSION['is_first_login']) || $_SESSION['is_first_login'] != 1) {
+    
+    // "Slay" (Send) them to their correct dashboard
+    if(isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
+        header("Location: admin_dashboard.php");
+    } else {
+        header("Location: staff_dashboard.php");
+    }
+    exit;
+}
+$userID = $_SESSION['ID_staf'];
+// --- END OF "STEAK" (FIX) ---
+
+
 // We now load the correct, full header based on the user's role.
-if ($_SESSION['peranan'] == 'Admin') {
+// "Slay" (Fix) the "ghost" (old) variable
+if ($_SESSION['is_admin'] == 1) { 
     require 'admin_header.php';
 } else {
     require 'staff_header.php';
@@ -106,7 +121,8 @@ if ($_SESSION['peranan'] == 'Admin') {
 </script>
 
 <?php 
-if ($_SESSION['peranan'] == 'Admin') {
+// "Slay" (Fix) the "ghost" (old) variable
+if ($_SESSION['is_admin'] == 1) {
     require 'admin_footer.php';
 } else {
     require 'staff_footer.php';

@@ -1,6 +1,19 @@
 <?php
-// FILE: change_password_process.php
-require 'auth_check.php';
+// FILE: change_password_process.php (FIXED)
+
+// --- "STEAK" (FIX): "4x4" (Safe) Auth Check ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'db.php';
+
+// "Slay" (Check) if user is logged in at all
+if (!isset($_SESSION['ID_staf'])) {
+    header("Location: login.php?error=Sila log masuk dahulu");
+    exit;
+}
+// --- END OF "STEAK" (FIX) ---
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: change_password.php');
@@ -29,10 +42,13 @@ $stmt = $conn->prepare("UPDATE staf SET katalaluan = ?, is_first_login = 0 WHERE
 $stmt->bind_param('ss', $hashed_password, $user_id);
 
 if ($stmt->execute()) {
-    // Determine the correct dashboard URL
-    $dashboard_url = ($_SESSION['peranan'] === 'Admin') ? 'admin_dashboard.php' : 'staff_dashboard.php';
     
-    // UPDATED: Redirect to the dashboard with a success message
+    // --- "STEAK" (FIX): "Slay" (Update) the session "ghost" (variable) ---
+    $_SESSION['is_first_login'] = 0;
+    
+    // --- "STEAK" (FIX): "Slay" (Check) the NEW variable ---
+    $dashboard_url = ($_SESSION['is_admin'] == 1) ? 'admin_dashboard.php' : 'staff_dashboard.php';
+    
     header("Location: $dashboard_url?success=" . urlencode('Kata laluan anda telah berjaya dikemaskini.'));
     exit;
 } else {

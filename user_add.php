@@ -28,19 +28,19 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
             <div class="mb-3">
                 <label for="id_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="id_staf" name="id_staf" 
-                    placeholder="Cth: S002" required>
+                    placeholder="Cth: 12345" required>
             </div>
             
             <div class="mb-3">
                 <label for="nama" class="form-label">Nama Penuh <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="nama" name="nama" 
-                    placeholder="Cth: Haikal Iman" required>
+                    placeholder="Cth: Ali Bin Ahmad" required>
             </div>
             
             <div class="mb-3">
                 <label for="emel" class="form-label">Emel <span class="text-danger">*</span></label>
                 <input type="email" class="form-control" id="emel" name="emel" 
-                    placeholder="Cth: haikal@mpk.gov.my" required>
+                    placeholder="Cth: ali@mpk.gov.my" required>
             </div>
 
             <div class="mb-3">
@@ -55,13 +55,29 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
                 </select>
             </div>
             
-            <div class="mb-3">
-                <label for="peranan" class="form-label">Peranan <span class="text-danger">*</span></label>
-                <select class="form-select" id="peranan" name="peranan" required>
-                    <option value="Staf" selected>Staf</option>
-                    <option value="Admin">Admin</option>
-                </select>
-            </div>
+            <?php // --- THIS IS THE NEW "STEAK" (SMART) LOGIC --- ?>
+            
+            <?php if ($is_superadmin): // If you ARE a Super Admin... ?>
+            
+                <div class="mb-3">
+                    <label for="is_admin" class="form-label">Peranan *</label>
+                    <select class="form-select" id="is_admin" name="is_admin" required>
+                        <option value="0">Staf</option>
+                        <option value="1">Admin</option>
+                    </select>
+                    <div class="form-text">Super Admin boleh mendaftar Staf atau Admin.</div>
+                </div>
+
+            <?php else: // If you are a Regular Admin... ?>
+
+                <div class="mb-3">
+                    <label class="form-label">Peranan</label>
+                    <p class="form-control-plaintext"><strong>Staf</strong></p>
+                    <input type="hidden" name="is_admin" value="0"> <div class="form-text">Sebagai Admin, anda hanya boleh mendaftar pengguna Staf.</div>
+                </div>
+
+            <?php endif; ?>
+            <?php // --- END OF "STEAK" (FIX) --- ?>
             
             <div class="mb-3">
                 <label class="form-label">Kata Laluan Sementara</label>  
@@ -69,7 +85,7 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
                     <input type="hidden" name="kata_laluan_sementara" value="User123">   
                 <div class="form-text">Pengguna akan dipaksa untuk menukar kata laluan ini semasa log masuk pertama.</div>
             </div>
-            
+
             <div class="text-end mt-4">
                 <a href="admin_users.php" class="btn btn-light me-2">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan</button>

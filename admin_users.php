@@ -149,28 +149,58 @@ $users = $stmt->get_result();
                                 <td><?php echo htmlspecialchars($user['emel']); ?></td>
                                 <td><?php echo htmlspecialchars($user['nama_jabatan']); ?></td>
                                 <td>
-                                    <?php if ($user['peranan'] == 'Admin'): ?>
-                                        <span class="badge bg-primary">Admin</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Staf</span>
-                                    <?php endif; ?>
+                                <?php 
+                                // --- THIS IS THE "STEAK" (FIXED) CODE ---
+                                if ($user['is_superadmin'] == 1) {
+                                echo '<span class="badge bg-danger">Super Admin</span>';
+                                } elseif ($user['is_admin'] == 1) {
+                                echo '<span class="badge bg-primary">Admin</span>';
+                                } else {
+                                echo '<span class="badge bg-secondary">Staf</span>';
+                                }
+                                ?>
                                 </td>
                                 <td class="text-end">
-                                    <a href="user_view.php?id=<?php echo $user['ID_staf']; ?>" class="btn btn-sm btn-outline-info" title="Lihat">
-                                        <i class="bi bi-eye-fill"></i>
-                                    </a>
-                                    <a href="user_edit.php?id=<?php echo $user['ID_staf']; ?>" class="btn btn-sm btn-outline-warning" title="Kemaskini">
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </a>
+    <a href="user_view.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>" class="btn btn-sm btn-outline-info" title="Lihat">
+        <i class="bi bi-eye-fill"></i>
+    </a>
 
-                                    <?php if ($_SESSION['ID_staf'] !== $user['ID_staf']): ?>
-                                        <a href="user_delete.php?id=<?php echo $user['ID_staf']; ?>" 
-                                        class="btn btn-sm btn-outline-danger" title="Padam"
-                                        onclick="return confirm('Adakah anda pasti mahu memadam pengguna ini?');">
-                                            <i class="bi bi-trash3-fill"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                </td>
+    <?php
+    // --- THIS IS THE "STEAK" (FIX) ---
+    // $is_superadmin (logged-in user) comes from admin_auth_check.php
+    // $user['is_admin'] is the user in the row
+    
+    // We show the buttons IF:
+    // 1. You are a Super Admin
+    //    OR
+    // 2. You are a regular Admin AND the user in the row is Staff (is_admin == 0)
+    
+    $show_buttons = false;
+    if ($is_superadmin) {
+        $show_buttons = true;
+    } elseif ($user['is_admin'] == 0) { // You are a regular Admin, and this user is Staff
+        $show_buttons = true;
+    }
+    ?>
+
+    <?php if ($show_buttons): ?>
+        
+        <a href="user_edit.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>" class="btn btn-sm btn-outline-warning" title="Kemaskini">
+            <i class="bi bi-pencil-fill"></i>
+        </a>
+
+        <?php // The "4x4" (safe) check: don't let anyone delete themselves ?>
+        <?php if ($_SESSION['ID_staf'] !== $user['ID_staf']): ?>
+            
+            <a href="user_delete.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>" 
+            class="btn btn-sm btn-outline-danger" title="Padam"
+            onclick="return confirm('Adakah anda pasti mahu memadam pengguna ini?');">
+                <i class="bi bi-trash3-fill"></i>
+            </a>
+        <?php endif; ?>
+
+        <?php endif; // --- END OF "STEAK" (FIX) --- ?>
+                        </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>

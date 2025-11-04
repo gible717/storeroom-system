@@ -48,13 +48,13 @@
                 <span>Laporan</span>
             </a>
         </li>
-        
+                
         <li class="sidebar-item">
             <a href="admin_users.php" class="sidebar-link <?php if(strpos($current_page, 'admin_users') === 0 || strpos($current_page, 'user_') === 0 || strpos($current_page, 'admin_department') === 0 || strpos($current_page, 'department_') === 0) echo 'active'; ?>">
                 <i class="bi bi-people-fill me-3"></i>
                 <span>Pengguna</span>
             </a>
-        </li>
+        </li>        
         
         <li class="sidebar-item">
             <a href="admin_profile.php" class="sidebar-link <?php if($current_page == 'admin_profile.php' || $current_page == 'profile_change_password.php') echo 'active'; ?>">

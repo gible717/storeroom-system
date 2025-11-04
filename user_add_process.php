@@ -3,10 +3,13 @@
 require 'db.php'; 
 session_start(); 
 
-// Admin-only security check
-if (!isset($_SESSION['peranan']) || $_SESSION['peranan'] != 'Admin') {
+// --- "STEAK" (FIX) #1: Check the NEW session variable ---
+// We now check if the user 'is_admin'
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     die("Akses ditolak.");
 }
+$is_superadmin = $_SESSION['is_superadmin'] ?? 0;
+// ---------------- END OF FIX -------------------
 
 // Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -16,16 +19,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama = $_POST['nama'];
     $emel = $_POST['emel'];
     $id_jabatan = $_POST['id_jabatan'];
-    $peranan = $_POST['peranan'];
+    $is_admin = $_POST['is_admin']; // This is correct from your file
+
+// --- "STEAK" (FIX): "4x4" (Safe) Security Check ---
+// If the logged-in user is NOT a super admin, "slay" (force) any new user to be a Staf.
+    if (!$is_superadmin) {
+       $is_admin = 0; // "Slay" (force) them to be Staf (is_admin = 0)
+    }
+// ---------------- END OF FIX ----------------
+
+    $is_superadmin = 0; // New users are never Super Admins
     
-    // This is the variable from your hidden "User123" input field
     $kata_laluan_sementara = $_POST['kata_laluan_sementara']; 
 
-    // 2. Validate data
-    if (empty($id_staf) || empty($nama) || empty($emel) || empty($id_jabatan) || empty($peranan) || empty($kata_laluan_sementara)) {
+    // --- "STEAK" (FIX) #2: Validate the NEW variable ---
+    // We remove 'empty($peranan)' and check if 'is_admin' was set
+    if (empty($id_staf) || empty($nama) || empty($emel) || empty($id_jabatan) || !isset($is_admin) || empty($kata_laluan_sementara)) {
         header("Location: user_add.php?error=Sila lengkapkan semua medan.");
         exit();
     }
+    // ---------------- END OF FIX -------------------
 
     // 3. Hash the password
     $hashed_password = password_hash($kata_laluan_sementara, PASSWORD_BCRYPT);
@@ -34,30 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $is_first_login = 1;
 
     // 5. Insert into the database
-    // THIS IS THE CORRECTED QUERY with 'katalaluan' and 'is_first_login'
-    $sql = "INSERT INTO staf (
-                ID_staf, 
-                nama, 
-                emel, 
-                ID_jabatan, 
-                peranan, 
-                katalaluan,  -- <-- This was the problem
-                is_first_login -- <-- This was the problem
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)"; // 7 question marks
+    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, katalaluan, is_first_login, is_admin, is_superadmin) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
     
-    // 6. THIS IS THE CORRECTED BIND_PARAM
-    // s(ID_staf), s(nama), s(emel), i(ID_jabatan), s(peranan), s(hashed_password), i(is_first_login)
-    $stmt->bind_param("sssissi", 
-        $id_staf, 
-        $nama, 
-        $emel, 
-        $id_jabatan, 
-        $peranan, 
-        $hashed_password, 
-        $is_first_login
-    );
+    // 6. Bind parameters (this was already correct)
+    $stmt->bind_param("sssissii", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $is_first_login, $is_admin, $is_superadmin);
 
     // 7. Execute and redirect
     if ($stmt->execute()) {
