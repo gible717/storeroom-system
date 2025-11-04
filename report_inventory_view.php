@@ -11,7 +11,7 @@ $params = [];
 $types = "";
 
 if ($kategori_filter !== 'Semua') {
-    $where_clause = " WHERE p.kategori = ?";
+    $where_clause = " WHERE k.nama_kategori = ?";
     $params[] = $kategori_filter;
     $types = "s";
 }
@@ -20,15 +20,16 @@ if ($kategori_filter !== 'Semua') {
 $sql = "SELECT 
             p.ID_produk,
             p.nama_produk,
-            p.kategori,
+            k.nama_kategori AS kategori,
             p.stok_semasa,
             p.harga,
             (p.stok_semasa * p.harga) AS nilai_semasa
         FROM 
             produk p
-        $where_clause
+        JOIN 
+            kategori k ON p.ID_kategori = k.ID_kategori
         ORDER BY 
-            p.nama_produk ASC";
+            p.ID_produk ASC";
 
 $stmt = $conn->prepare($sql);
 if ($kategori_filter !== 'Semua') {
@@ -36,6 +37,9 @@ if ($kategori_filter !== 'Semua') {
 }
 $stmt->execute();
 $inventory = $stmt->get_result();
+$total_harga_seunit = 0;
+$total_nilai_semasa = 0;
+$total_stok_semasa = 0;
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -66,6 +70,11 @@ $inventory = $stmt->get_result();
                 <tbody>
                     <?php if ($inventory && $inventory->num_rows > 0): ?>
                         <?php while ($row = $inventory->fetch_assoc()): ?>
+                        <?php
+                            $total_harga_seunit += $row['harga'];
+                            $total_nilai_semasa += $row['nilai_semasa'];
+                            $total_stok_semasa += $row['stok_semasa'];
+                        ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($row['ID_produk']); ?></td>
                                 <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
@@ -83,6 +92,20 @@ $inventory = $stmt->get_result();
                         </tr>
                     <?php endif; ?>
                 </tbody>
+
+                <?php // ADD THIS BLOCK: Only show footer if there are results ?>
+            <?php if ($inventory && $inventory->num_rows > 0): ?>
+            <tfoot class="table-group-divider">
+                <tr>
+                    <th colspan="3" class="text-end">JUMLAH KESELURUHAN (RM)</th>
+                    <th class="text-center fw-bold"><?php echo $total_stok_semasa; ?></th>
+                    <th class="text-end fw-bold"><?php echo number_format($total_harga_seunit, 2); ?></th>
+                    <th class="text-end fw-bold"><?php echo number_format($total_nilai_semasa, 2); ?></th>
+                </tr>
+            </tfoot>
+            <?php endif; ?>
+            <?php // END OF ADDED BLOCK ?>
+
             </table>
         </div>
     </div>

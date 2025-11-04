@@ -1,15 +1,16 @@
 <?php
-// FILE: print_request.php (Corrected and Final Version)
+// FILE: print_request.php (Corrected and "SLAIN" 🥹)
 require 'db.php';
 session_start();
 
-// 1. GENERIC AUTHENTICATION
+// 1. "STEAK" (FIX) 1: "Slay" (fix) the "ghost" (buggy) auth
 if (!isset($_SESSION['ID_staf'])) {
     die("Akses tidak dibenarkan. Sila log masuk.");
 }
 $userID = $_SESSION['ID_staf'];
-$userRole = $_SESSION['peranan'];
+$isAdmin = $_SESSION['is_admin'] ?? 0; // <-- "SLAYED" (FIXED)
 $userName = $_SESSION['nama'];
+// --- END OF "STEAK" (FIX) ---
 
 // 2. GET REQUEST ID
 $request_id = $_GET['id'] ?? null;
@@ -17,8 +18,7 @@ if (!$request_id) {
     die("ID Permohonan tidak dijumpai.");
 }
 
-// 3. FETCH DATA (FIXED SQL QUERY)
-// This query now correctly selects 'p.ID_produk' (not 'kod_produk')
+// 3. FETCH DATA (This SQL is "steak" 🥩)
 $sql = "SELECT 
             pr.*, 
             s_pemohon.nama AS nama_pemohon,
@@ -39,10 +39,13 @@ if (!$request) {
     die("Rekod permohonan tidak dijumpai.");
 }
 
-// 4. CRITICAL SECURITY CHECK
-if ($userRole !== 'Admin' && $request['ID_staf'] !== $userID) {
+// 4. "STEAK" (FIX) 2: "Slay" (fix) the "4x4" (safe) security check
+// An Admin ($isAdmin == 1) can "vibe" (see) everything.
+// A "bland food" (Staff) ($isAdmin == 0) can only "vibe" (see) their *own* request.
+if ($isAdmin != 1 && $request['ID_staf'] !== $userID) {
     die("Anda tidak mempunyai kebenaran untuk melihat rekod ini.");
 }
+// --- END OF "STEAK" (FIX) ---
 
 // 5. GET APPROVER'S NAME
 $approver_name = "-";
@@ -143,7 +146,7 @@ if ($request['status'] === 'Diluluskan' || $request['status'] === 'Selesai') {
                 </table>
             </div>
 
-            <div class="signature-boxes">
+            <div classs="signature-boxes">
                 <div class="signature-box">
                     (Tandatangan Pemohon)
                 </div>
