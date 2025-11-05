@@ -3,6 +3,11 @@
 $pageTitle = "Laporan Inventori";
 require 'admin_header.php';
 
+// --- "STEAK" (FIX): "Slay" (get) all categories for the "steak" (dropdown) ---
+$kategori_sql = "SELECT DISTINCT nama_kategori FROM kategori ORDER BY nama_kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+// --- END OF "STEAK" (FIX) ---
+
 // --- Filter Logic ---
 $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
@@ -11,7 +16,7 @@ $params = [];
 $types = "";
 
 if ($kategori_filter !== 'Semua') {
-    $where_clause = " WHERE k.nama_kategori = ?";
+    $where_clause = "WHERE k.nama_kategori = ?";
     $params[] = $kategori_filter;
     $types = "s";
 }
@@ -28,6 +33,7 @@ $sql = "SELECT
             produk p
         JOIN 
             kategori k ON p.ID_kategori = k.ID_kategori
+            $where_clause
         ORDER BY 
             p.ID_produk ASC";
 
@@ -43,15 +49,30 @@ $total_stok_semasa = 0;
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
+    <div class="d-flex align-items-center">
+        <a href="report_inventory.php" class="btn btn-link nav-link p-0 me-3" title="Kembali ke Pilihan Laporan">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"> </i>
+        </a>
+        <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
+    </div>
     <button class="btn btn-primary" onclick="window.print()">
         <i class="bi bi-printer-fill me-2"></i>Cetak Laporan
     </button>
 </div>
 
-<p>
-    <strong>Kategori:</strong> <?php echo htmlspecialchars($kategori_filter); ?>
-</p>
+<form action="report_inventory_view.php" method="GET" class="mb-4">
+    <div class="d-flex align-items-center">
+        <label for="kategori" class="form-label fw-bold me-2 mb-0">Kategori:</label>
+        <select name="kategori" id="kategori" class="form-select" style="width: 250px;" onchange="this.form.submit()">
+            <option value="Semua" <?php if ($kategori_filter == 'Semua') echo 'selected'; ?>>Semua</option>
+            <?php while($k = $kategori_result->fetch_assoc()): ?>
+                <option value="<?php echo htmlspecialchars($k['nama_kategori']); ?>" <?php if ($kategori_filter == $k['nama_kategori']) echo 'selected'; ?>>
+                    <?php echo htmlspecialchars($k['nama_kategori']); ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
+    </div>
+</form>
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
@@ -68,7 +89,7 @@ $total_stok_semasa = 0;
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($inventory && $inventory->num_rows > 0): ?>
+                        <?php if ($inventory && $inventory->num_rows > 0): ?>
                         <?php while ($row = $inventory->fetch_assoc()): ?>
                         <?php
                             $total_harga_seunit += $row['harga'];
@@ -83,14 +104,14 @@ $total_stok_semasa = 0;
                                 <td class="text-end"><?php echo number_format($row['harga'], 2); ?></td>
                                 <td class="text-end fw-bold"><?php echo number_format($row['nilai_semasa'], 2); ?></td>
                             </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
+                            <?php endwhile; ?>
+                        <?php else: ?>
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
                                 Tiada produk ditemui untuk kategori ini.
-                            </td>
+                        </td>
                         </tr>
-                    <?php endif; ?>
+                        <?php endif; ?>
                 </tbody>
 
                 <?php // ADD THIS BLOCK: Only show footer if there are results ?>

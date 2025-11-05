@@ -35,23 +35,38 @@ $sql = "SELECT
             t.tarikh_transaksi DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $transactions = $stmt->get_result();
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Laporan Transaksi</h3>
+    <div class="d-flex align-items-center">
+        <a href="report_transactions.php" class="btn btn-link nav-link p-0 me-3" title="Kembali ke Pilihan Laporan">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"></i>
+        </a>
+        <h3 class="mb-0 fw-bold">Laporan Transaksi</h3>
+    </div>
     <button class="btn btn-primary" onclick="window.print()">
         <i class="bi bi-printer-fill me-2"></i>Cetak Laporan
     </button>
 </div>
 
-<p>
-    <strong>Julat Tarikh:</strong> <?php echo date('d M Y', strtotime($tarikh_mula)); ?>
-    <strong>Hingga:</strong> <?php echo date('d M Y', strtotime($tarikh_akhir)); ?><br>
-    <strong>Jenis Transaksi:</strong> <?php echo htmlspecialchars($jenis); ?>
-</p>
+<form action="report_transactions_view.php" method="GET" class="mb-4">
+    <div class="d-flex align-items-center">
+        <label for="jenis" class="form-label fw-bold me-2 mb-0">Jenis Transaksi:</label>
+        <select name="jenis" id="jenis" class="form-select" style="width: 250px;" onchange="this.form.submit()">
+            <option value="Semua" <?php if ($jenis == 'Semua') echo 'selected'; ?>>Semua Transaksi</option>
+            <option value="Masuk" <?php if ($jenis == 'Masuk') echo 'selected'; ?>>Masuk</option>
+            <option value="Keluar" <?php if ($jenis == 'Keluar') echo 'selected'; ?>>Keluar</option>
+        </select>
+
+        <input type="hidden" name="mula" value="<?php echo htmlspecialchars($tarikh_mula); ?>">
+        <input type="hidden" name="akhir" value="<?php echo htmlspecialchars($tarikh_akhir); ?>">
+    </div>
+</form>
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">

@@ -10,14 +10,15 @@ if (!isset($_SESSION['ID_staf'])) {
 }
 
 // Load the correct header based on user's role
-if ($_SESSION['peranan'] == 'Admin') {
+// Load the correct header based on user's role
+if ($_SESSION['is_admin'] == 1) {
     require 'admin_header.php';
 } else {
     require 'staff_header.php';
 }
 
-// Determine the correct back-page
-$profile_page = ($_SESSION['peranan'] == 'Admin') ? 'admin_profile.php' : 'staff_profile.php';
+// Determine the correct back-page link
+$profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_profile.php';
 ?>
 <style>
     .password-card { max-width: 500px; margin: 0 auto; }
@@ -102,7 +103,7 @@ function togglePassword(fieldId, icon) {
 
 <?php 
 // Load the correct footer
-if ($_SESSION['peranan'] == 'Admin') {
+if ($_SESSION['is_admin'] == 1) {
     require 'admin_footer.php';
 } else {
     require 'staff_footer.php';

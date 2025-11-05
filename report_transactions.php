@@ -84,10 +84,10 @@ $bar_chart_data = $trend_data;
         font-size: 2rem; padding: 1.25rem; border-radius: 50%; display: inline-flex;
         align-items: center; justify-content: center; margin-right: 1.25rem;
     }
-    .stat-card-icon.bg-primary-light { background-color: #eef2ff; color: #4f46e5; }
-    .stat-card-icon.bg-success-light { background-color: #e6f7f0; color: #10b981; }
-    .stat-card-icon.bg-danger-light { background-color: #fef2f2; color: #ef4444; }
-    .stat-card-icon.bg-warning-light { background-color: #fffbeb; color: #f59e0b; }
+    .stat-card-icon.bg-primary-light {color: #4f46e5; }
+    .stat-card-icon.bg-success-light {color: #10b981; }
+    .stat-card-icon.bg-danger-light {color: #ef4444; }
+    .stat-card-icon.bg-warning-light {color: #f59e0b; }
     .stat-card-info h6 { color: #6c757d; font-size: 0.9rem; margin-bottom: 0.25rem; }
     .stat-card-info h4 { margin-bottom: 0; font-weight: 700; }
 </style>
@@ -109,7 +109,7 @@ $bar_chart_data = $trend_data;
     <div class="card-body p-4">
         <h5 class="card-title fw-bold mb-3">Tetapan Laporan</h5> 
 
-            <form action="report_transactions_view.php" method="GET" target="_blank" id="filterForm">
+            <form action="report_transactions_view.php" method="GET" id="filterForm">
         <div class="row g-3">
         <div class="col-md-4">
         <label for="mula" class="form-label">Dari Tarikh</label>

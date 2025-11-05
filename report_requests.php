@@ -33,9 +33,9 @@ $cards = $stmt_cards->get_result()->fetch_assoc();
 
 // --- SQL for Chart 1: Pecahan Status (Pie Chart) ---
 $sql_status_chart = "SELECT status, COUNT(ID_permohonan) AS jumlah
-                  FROM permohonan
-                  $where_clause
-                  GROUP BY status";
+                    FROM permohonan
+                    $where_clause
+                    GROUP BY status";
 $stmt_status_chart = $conn->prepare($sql_status_chart);
 $stmt_status_chart->bind_param($types, ...$params);
 $stmt_status_chart->execute();
@@ -53,10 +53,10 @@ while ($row = $status_chart_result->fetch_assoc()) {
 $sql_monthly = "SELECT 
                 DATE_FORMAT(tarikh_mohon, '%Y-%m') AS 'bulan', 
                 COUNT(ID_permohonan) AS 'jumlah'
-              FROM permohonan
-              $where_clause
-              GROUP BY DATE_FORMAT(tarikh_mohon, '%Y-%m')
-              ORDER BY bulan ASC";
+                FROM permohonan
+                $where_clause
+                GROUP BY DATE_FORMAT(tarikh_mohon, '%Y-%m')
+                ORDER BY bulan ASC";
 $stmt_monthly = $conn->prepare($sql_monthly);
 $stmt_monthly->bind_param($types, ...$params);
 $stmt_monthly->execute();
@@ -85,10 +85,10 @@ $monthly_chart_data = $monthly_data;
         font-size: 2rem; padding: 1.25rem; border-radius: 50%; display: inline-flex;
         align-items: center; justify-content: center; margin-right: 1.25rem;
     }
-    .stat-card-icon.bg-primary-light { background-color: #eef2ff; color: #4f46e5; }
-    .stat-card-icon.bg-success-light { background-color: #e6f7f0; color: #10b981; }
-    .stat-card-icon.bg-danger-light { background-color: #fef2f2; color: #ef4444; }
-    .stat-card-icon.bg-warning-light { background-color: #fffbeb; color: #f59e0b; }
+    .stat-card-icon.bg-primary-light {color: #4f46e5; }
+    .stat-card-icon.bg-success-light {color: #10b981; }
+    .stat-card-icon.bg-danger-light { color: #ef4444; }
+    .stat-card-icon.bg-warning-light {color: #f59e0b; }
     .stat-card-info h6 { color: #6c757d; font-size: 0.9rem; margin-bottom: 0.25rem; }
     .stat-card-info h4 { margin-bottom: 0; font-weight: 700; }
 </style>
@@ -109,7 +109,7 @@ $monthly_chart_data = $monthly_data;
     <div class="card-body p-4">
         <h5 class="card-title fw-bold mb-3">Tetapan Laporan</h5>
         
-        <form action="report_requests_view.php" method="GET" target="_blank" id="filterForm">
+        <form action="report_requests_view.php" method="GET" id="filterForm">
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="mula" class="form-label">Dari Tarikh</label>

@@ -35,23 +35,40 @@ $sql = "SELECT
             p.tarikh_mohon DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $requests = $stmt->get_result();
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Laporan Permohonan</h3>
+    <div class="d-flex align-items-center">
+        <a href="report_requests.php" class="btn btn-link nav-link p-0 me-3" title="Kembali ke Pilihan Laporan">
+            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"></i>
+        </a>
+        <h3 class="mb-0 fw-bold">Laporan Permohonan</h3>
+    </div>
     <button class="btn btn-primary" onclick="window.print()">
         <i class="bi bi-printer-fill me-2"></i>Cetak Laporan
     </button>
 </div>
 
-<p>
-    <strong>Julat Tarikh:</strong> <?php echo date('d M Y', strtotime($tarikh_mula)); ?>
-    <strong>Hingga:</strong> <?php echo date('d M Y', strtotime($tarikh_akhir)); ?><br>
-    <strong>Status:</strong> <?php echo htmlspecialchars($status_filter); ?>
-</p>
+<form action="report_requests_view.php" method="GET" class="mb-4">
+    <div class="d-flex align-items-center">
+        <label for="status" class="form-label fw-bold me-2 mb-0">Status:</label>
+        <select name="status" id="status" class="form-select" style="width: 250px;" onchange="this.form.submit()">
+            <option value="Semua" <?php if ($status_filter == 'Semua') echo 'selected'; ?>>Semua Status</option>
+            <option value="Belum Diproses" <?php if ($status_filter == 'Belum Diproses') echo 'selected'; ?>>Belum Diproses</option>
+            <option value="Diluluskan" <?php if ($status_filter == 'Diluluskan') echo 'selected'; ?>>Diluluskan</option>
+            <option value="Ditolak" <?php if ($status_filter == 'Ditolak') echo 'selected'; ?>>Ditolak</option>
+            <option value="Selesai" <?php if ($status_filter == 'Selesai') echo 'selected'; ?>>Selesai</option>
+        </select>
+
+        <input type="hidden" name="mula" value="<?php echo htmlspecialchars($tarikh_mula); ?>">
+        <input type="hidden" name="akhir" value="<?php echo htmlspecialchars($tarikh_akhir); ?>">
+    </div>
+</form>
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
