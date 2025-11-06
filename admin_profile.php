@@ -80,6 +80,9 @@ function getInitials($name) {
 }
 </style>
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
 <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
     <div></div> 
     
@@ -136,7 +139,7 @@ function getInitials($name) {
                         </div>
 
                         <div class="text-end mt-4">
-                            <a href="staff_dashboard.php" class="btn btn-light me-2">Batal</a>
+                            <a href="admin_dashboard.php" class="btn btn-light me-2">Batal</a>
                             <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
 
@@ -144,18 +147,122 @@ function getInitials($name) {
                 </div>
             </div>
 
+            <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Potong Imej (Crop Image)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="img-container" style="max-height: 500px;">
+            <img id="imageToCrop" src="" alt="Source Image">
+        </div>
+        <p class="text-muted small mt-2">Gunakan 'mouse wheel' untuk zoom. Seret untuk gerakkan kotak.</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" id="cropButton">Potong & Muat Naik</button>
+        </div>
+    </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // "Slay" (Vibe) 💄 all the "Steak" (Elements) 🥩
     const profilePictureInput = document.getElementById('profilePictureInput');
-    const profileUploadForm = document.getElementById('profileUploadForm');
+    const cropModalElement = document.getElementById('cropModal');
+    const cropModal = new bootstrap.Modal(cropModalElement);
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropButton = document.getElementById('cropButton');
+    let cropper;
 
-// 1. When the user selects a file (triggered by the <label>)
-    profilePictureInput.addEventListener('change', function() {
-// 2. Check if a file was actually selected
-    if (this.files && this.files.length > 0) {
-// 3. Automatically submit the form to upload the new picture
-    profileUploadForm.submit();}
-});
+    // --- "STEAK" (FIX) 1: "Slay" (Remember) 💡 the "Vibe" (File Type) 💄 ---
+    let originalFileType = 'image/jpeg'; // "Slay" (Default)
+    // --- END OF "STEAK" (FIX) 1 ---
+
+    // 1. "Vibe" (Listen) 👂 for a "Staf" "slay" (file selection)
+    profilePictureInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+
+            // --- "STEAK" (FIX) 2: "Slay" (Store) the "vibe" (type) 💄 ---
+            originalFileType = files[0].type; 
+            // --- END OF "STEAK" (FIX) 2 ---
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imageToCrop.src = e.target.result;
+                cropModal.show();
+            };
+            reader.readAsDataURL(files[0]);
+        }
+        e.target.value = null;
+    });
+
+    // 2. "Slay" (Start) 🚀 the "Joker" (Cropper) 🃏
+    cropModalElement.addEventListener('shown.bs.modal', function () {
+        if (cropper) { cropper.destroy(); }
+        cropper = new Cropper(imageToCrop, {
+            aspectRatio: 1 / 1,
+            viewMode: 2,
+            autoCropArea: 0.9,
+        });
+    });
+
+    // 3. "Slay" (Listen) 👂 for the "Staf" "slay" (crop) ✂️
+    cropButton.addEventListener('click', function() {
+        if (!cropper) { return; }
+        cropButton.disabled = true;
+        cropButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memuat naik...';
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 300, 
+            height: 300,
+            imageSmoothingQuality: 'high',
+        });
+
+        // --- "STEAK" (FIX) 3: "Slay" (Use) the "Steak" (Original) 🥩 "Vibe" (Type) 💄 ---
+        // "Slay" (Force) "4x4" (safe) 🚙 "vibes" (types) 💄
+        let outputType = originalFileType;
+        if (outputType !== 'image/jpeg' && outputType !== 'image/png') {
+            outputType = 'image/jpeg'; // "Slay" (Default) to JPEG
+        }
+
+        canvas.toBlob(function(blob) {
+            const formData = new FormData();
+            formData.append('profile_picture', blob, 'profile_upload');
+
+            // "Slay" (Send) 🚀 the "steak" (type) 🥩 to the "Kernel" (PHP) 🧠
+            formData.append('file_type', outputType); 
+
+            // 4. "Slay" (Upload) 🚀
+            fetch('upload_profile_picture.php', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload(); // "Slay!" 🥹
+                } else {
+                    alert('Ralat: ' + data.error);
+                    cropModal.hide();
+                }
+            })
+            .catch(error => {
+                alert('Ralat besar telah berlaku: ' + error);
+                cropModal.hide();
+            })
+            .finally(() => {
+                cropButton.disabled = false;
+                cropButton.innerHTML = 'Potong & Muat Naik';
+            });
+
+        }, outputType, 0.85); // "Slay" (Send) as the "steak" (correct) 🥩 "vibe" (type) 💄
+        // --- END OF "STEAK" (FIX) 3 ---
+    });
 });
 </script>
 

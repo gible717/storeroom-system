@@ -4,6 +4,30 @@ require_once 'db.php';
 require_once 'admin_auth_check.php';
 $current_page = basename($_SERVER['PHP_SELF']); 
 
+// --- NEW ROBUST HEADER LOGIC ---
+// Fetch user's name AND picture path directly from the DB on every page load.
+
+$header_user_id = $_SESSION['ID_staf'];
+$header_user_name = 'Admin'; // Default
+$header_user_pic = null; // Default
+
+$stmt_header = $conn->prepare("SELECT nama, gambar_profil FROM staf WHERE ID_staf = ?");
+$stmt_header->bind_param("s", $header_user_id);
+if ($stmt_header->execute()) {
+    $result = $stmt_header->get_result();
+    if ($user = $result->fetch_assoc()) {
+        $header_user_name = $user['nama'];
+
+        // Check if the picture exists on the server
+        if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])) {
+            $header_user_pic = $user['gambar_profil'];
+        }
+    }
+}
+$stmt_header->close();
+
+// We still need the initials as a fallback
+$header_user_initials = strtoupper(substr($header_user_name, 0, 2));
 ?>
 <!DOCTYPE html>
 <html lang="ms">
@@ -70,7 +94,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .page-content { padding: 2.5rem; }
 
         .top-navbar { justify-content: space-between; }
-        .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .user-initials-badge { width: 32px; height: 32px; border-radius: 50%; background-color: #6c757d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; object-fit: cover; }
     
     /* --- ADD THIS CODE FOR THE LOGOUT BUTTON --- */
         .btn-logout {

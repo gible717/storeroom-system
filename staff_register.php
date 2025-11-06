@@ -31,10 +31,19 @@ $jabatan_result = $conn->query($sql);
             border-radius: 1rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .logo {
-            max-height: 100px;
-            margin-bottom: 1.5rem;
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem; /* We keep the 1.5rem margin */
+            text-align: center;
         }
+        .logo {
+            width: 50px;
+            height: 50px;
+        }
+
     </style>
 </head>
 <body>
@@ -42,9 +51,13 @@ $jabatan_result = $conn->query($sql);
     <div class="card register-card">
         <div class="card-body">
             
+            <div class="form-header">
+                                <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
+                <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+            </div>
+
             <div class="text-center mb-4">
-                <img src="assets/img/logo.png" alt="Logo" class="logo">
-                <h2 class="h4 fw-bold mb-2">Daftar Akaun Staf Baru</h2>
+                <h2 class="h4 fw-bold mb-2">Daftar Akaun Baru</h2>
                 <p class="text-muted">Sila lengkapkan maklumat di bawah.</p>
             </div>
 
@@ -56,7 +69,7 @@ $jabatan_result = $conn->query($sql);
                 
                 <div class="mb-3">
                     <label for="id_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="id_staf" name="id_staf" placeholder="Contoh: STAF001" required>
+                    <input type="text" class="form-control" id="id_staf" name="id_staf" placeholder="Masukkan no. gaji" required>
                 </div>
 
                 <div class="mb-3">

@@ -110,7 +110,7 @@ if (isset($_SESSION['ID_staf'])) {
                 <form action="login_process.php" method="POST">
                     <div class="mb-3">
                         <label for="ID_staf" class="form-label">ID Staf</label>
-                        <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no.gaji" required>
+                        <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no. gaji" required>
                     </div>
                     <div class="mb-3">
                         <label for="katalaluan" class="form-label">Kata Laluan</label>

@@ -1,3 +1,10 @@
+<?php
+// --- "STEAK" (FIX): "Slay" (start) the "Vibe" (session) 🥩 *before* the "bland food" (HTML) 🍞 ---
+require_once 'staff_auth_check.php'; // This "slays" (calls) session_start()
+$userName = $_SESSION['nama'] ?? 'Staf'; // This "slays" (gets) your *real* name
+$userInitials = strtoupper(substr($userName, 0, 2)); // This "slays" (gets) your *real* initials
+// --- END OF "STEAK" (FIX) ---
+?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -116,7 +123,7 @@
 </head>
 <body>
     
-    <?php require 'navbar.php'; ?>
+<?php require 'navbar.php'; ?>
 
     <main class="main-content">
         <div class="container-fluid">

@@ -79,7 +79,7 @@ $products_result = $conn->query("SELECT ID_produk, nama_produk, stok_semasa FROM
                 <form action="request_form_process.php" method="POST">
                     <div class="row g-4">
                         <div class="col-12">
-                            <label for="nama_staf" class="form-label">*Nama Staf</label>
+                            <label for="nama_staf" class="form-label">Nama Staf</label>
                             <input type="text" class="form-control" id="nama_staf" value="<?php echo htmlspecialchars($userName); ?>" readonly>
                         </div>
                         

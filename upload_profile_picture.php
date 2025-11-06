@@ -1,103 +1,96 @@
 <?php
 // FILE: upload_profile_picture.php
-// This script handles the upload for BOTH staff and admin,
-// as they are all in the 'staf' table.
+// This is the NEW backend (Solution B) designed to work with Cropper.js
 
-// 1. Start session and check authentication
+// 1. Start session and set header to speak JSON
 session_start();
-require 'db.php'; // Include your database connection
+require 'db.php';
+header('Content-Type: application/json');
 
-// We check if *any* user is logged in. 
-// We will use the 'staff_auth_check.php' logic.
-if (!isset($_SESSION['ID_staf']) || !isset($_SESSION['peranan'])) {
-    header("Location: login.php?error=" . urlencode("Sila log masuk."));
+// 2. Authenticate the user
+if (!isset($_SESSION['ID_staf'])) {
+    // Send a JSON error, not an HTML redirect
+    echo json_encode(['success' => false, 'error' => 'Sila log masuk.']);
     exit();
 }
 
-// 2. Get the user's ID from the SESSION (much safer than POST)
 $id_staf = $_SESSION['ID_staf'];
-$user_role = $_SESSION['peranan']; // 'Staf', 'Admin', or 'Superadmin'
+$is_admin = $_SESSION['is_admin'] ?? 0;
 
-// 3. Check if a file was uploaded
+// 3. Check if the file from Cropper.js exists
 if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] == UPLOAD_ERR_OK) {
     
     $file = $_FILES['profile_picture'];
-    $upload_dir = 'uploads/profile_pictures/'; // Make sure this folder exists!
-    
-    // Create the directory if it doesn't exist
+    $upload_dir = 'uploads/profile_pictures/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
 
-    // 4. Validation
-    $imageFileType = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-    $max_size = 5 * 1024 * 1024; // 5 MB
-
-    // Check if it's a real image
+    // 4. Validate that it's a real image
     if (getimagesize($file['tmp_name']) === false) {
-        $error = "Fail bukan imej.";
+        echo json_encode(['success' => false, 'error' => 'Fail bukan imej.']);
+        exit;
     } 
-    // Check file size
-    elseif ($file['size'] > $max_size) {
-        $error = "Saiz fail terlalu besar (Max 5MB).";
-    } 
-    // Check file type
-    elseif (!in_array($imageFileType, $allowed_types)) {
-        $error = "Hanya fail JPG, JPEG, PNG & GIF dibenarkan.";
-    } else {
-        // 5. Create a unique, permanent file name
-        // We use the ID_staf to ensure it's unique and overwrites the old one
-        $new_filename = $id_staf . '.' . $imageFileType;
-        $target_path = $upload_dir . $new_filename;
 
-        // 6. Delete the old picture (if it exists)
-        // This prevents wasting space with old jpgs, pngs, etc.
-        $stmt_old = $conn->prepare("SELECT gambar_profil FROM staf WHERE ID_staf = ?");
-        $stmt_old->bind_param("s", $id_staf);
-        $stmt_old->execute();
-        $old_pic = $stmt_old->get_result()->fetch_assoc();
-        
-        if ($old_pic && !empty($old_pic['gambar_profil']) && file_exists($old_pic['gambar_profil'])) {
-            if ($old_pic['gambar_profil'] != $target_path) {
-                unlink($old_pic['gambar_profil']); // Delete old file
-            }
-        }
-        $stmt_old->close();
+    // 5. Get the file type we sent from JavaScript
+    $file_type = $_POST['file_type'] ?? 'image/jpeg'; // Get the type from the FETCH request
+    $ext = '.jpeg'; // Default to .jpeg
+    
+    if ($file_type === 'image/png') {
+        $ext = '.png';
+    }
 
-        // 7. Move the new file
-        if (move_uploaded_file($file['tmp_name'], $target_path)) {
-            // 8. Update the database
-            $stmt_update = $conn->prepare("UPDATE staf SET gambar_profil = ? WHERE ID_staf = ?");
-            $stmt_update->bind_param("ss", $target_path, $id_staf);
-            $stmt_update->execute();
-            $stmt_update->close();
-            
-            $success = "Gambar profil berjaya dikemaskini.";
-            
-        } else {
-            $error = "Ralat semasa memuat naik fail.";
+    // 6. Create the new, unique filename
+    $new_filename = $id_staf . $ext;
+    $target_path = $upload_dir . $new_filename;
+
+    // 7. Delete the old picture (if one exists)
+    $stmt_old = $conn->prepare("SELECT gambar_profil FROM staf WHERE ID_staf = ?");
+    $stmt_old->bind_param("s", $id_staf);
+    $stmt_old->execute();
+    $old_pic = $stmt_old->get_result()->fetch_assoc();
+    
+    if ($old_pic && !empty($old_pic['gambar_profil']) && file_exists($old_pic['gambar_profil'])) {
+        // Delete old file, *even if the extension is different*
+        if ($old_pic['gambar_profil'] != $target_path) {
+            unlink($old_pic['gambar_profil']); 
         }
     }
+    $stmt_old->close();
+
+    // 8. Save the uploaded (already cropped) file
+    // We DON'T need resizeAndSquareImage() because Cropper.js already did the work!
+    $source_image = null;
+    if ($file_type === 'image/png') {
+        // Create from PNG
+        $source_image = imagecreatefrompng($file['tmp_name']);
+        imagealphablending($source_image, true);
+        imagesavealpha($source_image, true);
+        imagepng($source_image, $target_path, 9); // Save as high-quality PNG
+    } else {
+        // Default to create from JPEG
+        $source_image = imagecreatefromjpeg($file['tmp_name']);
+        imagejpeg($source_image, $target_path, 85); // Save as 85% quality JPEG
+    }
+    
+    if ($source_image) {
+        imagedestroy($source_image);
+    }
+
+    // 9. Update the database
+    $stmt_update = $conn->prepare("UPDATE staf SET gambar_profil = ? WHERE ID_staf = ?");
+    $stmt_update->bind_param("ss", $target_path, $id_staf);
+    $stmt_update->execute();
+    $stmt_update->close();
+    
+    // 10. Send the "Success" JSON message back to the browser
+    echo json_encode(['success' => true]);
+    
 } else {
-    $error = "Tiada fail dipilih atau ralat muat naik.";
+    // Send a JSON error
+    echo json_encode(['success' => false, 'error' => 'Tiada fail dipilih atau ralat muat naik.']);
 }
 
 $conn->close();
-
-// 9. Redirect back to the correct profile page
-$redirect_page = 'staff_profile.php'; // Default
-if ($user_role == 'Admin' || $user_role == 'Superadmin') {
-    // We assume admins have a different profile page, 
-    // If not, just use staff_profile.php
-    // $redirect_page = 'admin_profile.php'; 
-    $redirect_page = 'staff_profile.php'; // Keeping it simple for now
-}
-
-if (isset($error)) {
-    header("Location: $redirect_page?error=" . urlencode($error));
-} else {
-    header("Location: $redirect_page?success=" . urlencode($success));
-}
 exit();
 ?>
