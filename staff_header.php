@@ -32,9 +32,13 @@ if ($stmt_header->execute()) {
 }
 $stmt_header->close();
 
-// We still need the initials as a fallback
-$header_user_initials = strtoupper(substr($header_user_name, 0, 2));
+// We still need the initials as a fallback (using the "smart" logic)
+$words = explode(" ", $header_user_name);
+$initials = "";
+foreach ($words as $w) {$initials .= strtoupper(substr($w, 0, 1));}
+$header_user_initials = substr($initials, 0, 2);
 ?>
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -149,10 +153,28 @@ $header_user_initials = strtoupper(substr($header_user_name, 0, 2));
             z-index: 1050; 
             min-width: 300px; 
         }
+
+        /* --- WCAG "Skip Link" Easter Egg --- */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #0d6efd; /* A strong blue */
+            color: white;
+            padding: 8px 12px;
+            z-index: 9999;
+            text-decoration: none;
+            font-weight: 600;
+            transition: top 0.3s;
+        }
+        .skip-link:focus {
+            top: 10px; /* "Pops" into view */
+        }
     </style>
 </head>
 <body>
 
+    <a href="#main-content" class="skip-link">Langkau ke Kandungan Utama (Skip to Main Content)</a>
 <nav class="navbar navbar-expand-lg staff-navbar">
     <div class="container-fluid">
         <a class="navbar-brand" href="staff_dashboard.php">
@@ -188,4 +210,4 @@ $header_user_initials = strtoupper(substr($header_user_name, 0, 2));
     </div>
 </nav>
 
-<div class="main-content container">
+<div class="main-content container" id="main-content">

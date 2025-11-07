@@ -22,7 +22,7 @@ function getInitials($name) {
         $initials .= strtoupper(substr($w, 0, 1));
     }
     return substr($initials, 0, 2);
-}
+    }
 ?>
 
 <style>
@@ -184,7 +184,7 @@ function getInitials($name) {
                 <?php if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])): ?>
                     <img src="<?php echo htmlspecialchars($user['gambar_profil']) . '?t=' . time(); ?>" alt="Gambar Profil" class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
                 <?php else: ?>
-                    <div class="profile-avatar mb-3" style="width: 200px; height: 200px; font-size: 4rem;">
+                    <div class="profile-avatar mx-auto mb-3" style="width: 200px; height: 200px; font-size: 4rem;">
                         <?php echo getInitials($user['nama']); ?>
                     </div>
                 <?php endif; ?>
