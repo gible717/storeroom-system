@@ -118,9 +118,9 @@ function getInitials($name) {
                         <?php endif; ?>
                         </div>
 
-                                <label for="profilePictureInput" class="upload-camera-button" title="Tukar Gambar Profil">
-                        <i class="bi bi-camera-fill"></i>
-                                </label>
+                            <label class="upload-camera-button" title="Tukar Gambar Profil" data-bs-toggle="modal" data-bs-target="#editPictureModal">
+                                <i class="bi bi-pencil-fill"></i>
+                            </label>
                         </div> 
 
                         <div class="mb-3">
@@ -168,8 +168,44 @@ function getInitials($name) {
     </div>
 </div>
 
+<div class="modal fade" id="editPictureModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Kemaskini Gambar Profil</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+
+        <?php if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])): ?>
+            <img src="<?php echo htmlspecialchars($user['gambar_profil']) . '?t=' . time(); ?>" alt="Gambar Profil" class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+        <?php else: ?>
+                    <div class="profile-avatar mx-auto mb-3" style="width: 200px; height: 200px; font-size: 5rem; border-width: 4px;">
+            <?php echo getInitials($user['nama']); ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="d-grid gap-2">
+        <button type="button" class="btn btn-primary" id="triggerUploadButton">
+            <i class="bi bi-upload me-2"></i>Tukar Gambar Baharu
+        </button>
+
+        <button type="button" class="btn btn-outline-danger" id="triggerDeleteButton" <?php if (empty($user['gambar_profil'])) echo 'disabled'; ?>>
+            <i class="bi bi-trash me-2"></i>Padam Gambar
+        </button>
+    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php 
+$conn->close();
+require 'admin_footer.php'; // Use staff footer
+?>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
     // "Slay" (Vibe) 💄 all the "Steak" (Elements) 🥩
     const profilePictureInput = document.getElementById('profilePictureInput');
     const cropModalElement = document.getElementById('cropModal');
@@ -181,6 +217,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- "STEAK" (FIX) 1: "Slay" (Remember) 💡 the "Vibe" (File Type) 💄 ---
     let originalFileType = 'image/jpeg'; // "Slay" (Default)
     // --- END OF "STEAK" (FIX) 1 ---
+
+    // --- ADDED: Selectors for the new modal and its buttons ---
+    const editModalElement = document.getElementById('editPictureModal');
+    const editModal = new bootstrap.Modal(editModalElement);
+    const triggerUploadButton = document.getElementById('changePictureButton');
+    const triggerDeleteButton = document.getElementById('triggerDeleteButton');
+    // --- END OF ADDED CODE ---
 
     // 1. "Vibe" (Listen) 👂 for a "Staf" "slay" (file selection)
     profilePictureInput.addEventListener('change', function(e) {
@@ -201,6 +244,38 @@ document.addEventListener('DOMContentLoaded', function() {
         e.target.value = null;
     });
 
+    // --- ADDED: Listeners for the new buttons ---
+
+   // Listen for click on "Tukar Gambar Baharu" in the EDIT modal
+    triggerUploadButton.addEventListener('click', function() {
+    editModal.hide(); // Hide the EDIT modal
+
+   // Programmatically click the hidden file input
+   // This will trigger the 'change' event above, which opens the CROP modal
+    profilePictureInput.click(); 
+    });
+
+    // Listen for click on "Padam Gambar" in the EDIT modal
+    triggerDeleteButton.addEventListener('click', function() {
+    // Use SweetAlert for confirmation
+    Swal.fire({
+        title: 'Adakah anda pasti?',
+        text: "Tindakan ini tidak boleh dibatalkan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, padamkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to delete_profile_picture.php
+            window.location.href = 'delete_profile_picture.php';
+        }
+    });
+    });
+    // --- END OF ADDED CODE ---
+    
     // 2. "Slay" (Start) 🚀 the "Joker" (Cropper) 🃏
     cropModalElement.addEventListener('shown.bs.modal', function () {
         if (cropper) { cropper.destroy(); }
@@ -263,10 +338,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }, outputType, 0.85); // "Slay" (Send) as the "steak" (correct) 🥩 "vibe" (type) 💄
         // --- END OF "STEAK" (FIX) 3 ---
     });
-});
 </script>
-
-<?php 
-$conn->close();
-require 'admin_footer.php'; // Use staff footer
-?>

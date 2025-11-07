@@ -5,128 +5,13 @@ $userName = $_SESSION['nama'] ?? 'Staf'; // This "slays" (gets) your *real* name
 $userInitials = strtoupper(substr($userName, 0, 2)); // This "slays" (gets) your *real* initials
 // --- END OF "STEAK" (FIX) ---
 ?>
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Staf - Sistem Pengurusan Stor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Poppins', sans-serif;
-        }
-        /* Styles for the new navbar from navbar.php */
-        .top-navbar {
-            background-color: #ffffff;
-            border-bottom: 1px solid #dee2e6;
-            padding: 0.75rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar-brand-custom {
-            display: flex;
-            align-items: center;
-            color: #212529;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .navbar-brand-custom img {
-            height: 40px;
-            width: 40px;
-            margin-right: 10px;
-        }
-        .user-initials-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #6c757d;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-        .btn-logout {
-            background-color: #ffe5e5;
-            color: #dc3545;
-            border: none;
-            font-weight: 600;
-            padding: 0.375rem 0.75rem;
-        }
-        .btn-logout:hover {
-            background-color: #f8d7da;
-            color: #842029;
-        }
+<?php 
+$pageTitle = "Dashboard Staf";
+require 'staff_header.php'; 
+?>
 
-        /* Styles for the main content */
-        .main-content {
-            padding: 2.5rem;
-        }
-        .welcome-card, .action-card {
-            background-color: #ffffff;
-            border: none;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        .welcome-card {
-            padding: 1.5rem;
-        }
-        .action-card {
-            text-align: center;
-            padding: 2rem 1.5rem;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-        .action-card .icon-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #e7f3ff; /* Light Blue */
-            color: #0d6efd; /* Primary Blue */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem auto;
-            font-size: 1.75rem;
-        }
-        .action-card h5 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #212529;
-            margin-bottom: 0.25rem;
-        }
-        .action-card p {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        .alert-top { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            z-index: 1050; 
-            min-width: 300px; 
-        }
-    </style>
-</head>
-<body>
     
-<?php require 'navbar.php'; ?>
-
-    <main class="main-content">
-        <div class="container-fluid">
 
             <div class="card welcome-card mb-4">
                 <div class="card-body">
@@ -188,9 +73,5 @@ $userInitials = strtoupper(substr($userName, 0, 2)); // This "slays" (gets) your
                     </a>
                 </div>
             </div>
-
-        </div>
-    </main>
-
 
 <?php require 'staff_footer.php'; ?>
