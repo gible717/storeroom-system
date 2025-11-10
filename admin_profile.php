@@ -129,6 +129,11 @@ function getInitials($name) {
                         </div>
 
                         <div class="mb-3">
+                            <label for="jawatan" class="form-label">Jawatan</label>
+                            <input type="text" class="form-control" id="jawatan" name="jawatan" value="<?php echo htmlspecialchars($user['jawatan'] ?? ''); ?>" placeholder="e.g., Pegawai Teknologi Maklumat">
+                        </div>
+
+                        <div class="mb-3">
                             <label for="emel" class="form-label">Emel</label>
                             <input type="email" class="form-control" id="emel" name="emel" value="<?php echo htmlspecialchars($user['emel']); ?>" required>
                         </div>

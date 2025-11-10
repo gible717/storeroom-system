@@ -24,6 +24,7 @@ $user_role = $_SESSION['peranan'];
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama = $_POST['nama'];
     $emel = $_POST['emel'];
+    $jawatan = $_POST['jawatan'];
 
     // Validation
     if (empty($nama) || empty($emel) || !filter_var($emel, FILTER_VALIDATE_EMAIL)) {
@@ -38,8 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare and execute the update
-    $stmt = $conn->prepare("UPDATE staf SET nama = ?, emel = ? WHERE ID_staf = ?");
-    $stmt->bind_param("sss", $nama, $emel, $user_id);
+    $stmt = $conn->prepare("UPDATE staf SET nama = ?, emel = ?, jawatan = ? WHERE ID_staf = ?");
+    $stmt->bind_param("ssss", $nama, $emel, $jawatan, $user_id);
     
     if ($stmt->execute()) {
         $success_msg = urlencode("Profil anda telah berjaya dikemaskini.");

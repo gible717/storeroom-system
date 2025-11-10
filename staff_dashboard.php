@@ -46,7 +46,7 @@ require 'staff_header.php';
 
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="request_form.php" class="text-decoration-none h-100 d-block">
+                    <a href="kewps8_form.php" class="text-decoration-none h-100 d-block">
                         <div class="card action-card">
                             <div class="icon-circle"><i class="bi bi-plus-circle"></i></div>
                             <h5>Permohonan Baru</h5>

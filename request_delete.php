@@ -7,10 +7,10 @@ require 'staff_auth_check.php';
 // Get the ID of the request to delete
 $id_permohonan = $_GET['id'] ?? null;
 // Get the ID of the logged-in staff
-$id_staf = $_SESSION['ID_staf'] ?? null;
+$id_pemohon = $_SESSION['ID_staf'] ?? null;
 
 // Security: Check if we have both IDs
-if (empty($id_permohonan) || empty($id_staf)) {
+if (empty($id_permohonan) || empty($id_pemohon)) {
     $msg = urlencode("Permintaan tidak sah.");
     header("Location: request_list.php?error=" . $msg);
     exit;
@@ -23,13 +23,11 @@ if (empty($id_permohonan) || empty($id_staf)) {
 // 3. Match the status (users can only delete 'Belum Diproses')
 $sql = "DELETE FROM permohonan 
         WHERE ID_permohonan = ? 
-        AND ID_staf = ? 
-        AND status = 'Belum Diproses'";
+        AND ID_pemohon = ? 
+        AND status = 'Baru'";
 
 $stmt = $conn->prepare($sql);
-// Assuming ID_permohonan is an integer (i) and ID_staf is a string (s)
-// If ID_permohonan is a string like 'P001', use "ss"
-$stmt->bind_param("is", $id_permohonan, $id_staf);
+$stmt->bind_param("is", $id_permohonan, $id_pemohon);
 
 if ($stmt->execute()) {
     // Check if a row was actually deleted
@@ -42,11 +40,21 @@ if ($stmt->execute()) {
         header("Location: request_list.php?error=" . $msg);
     }
 } else {
-    // Generic database error
-    $msg = urlencode("Gagal memadam permohonan. Ralat pangkalan data.");
-    header("Location: request_list.php?error=" . $msg);
-}
+// Example for an error
+$_SESSION['error_msg'] = "Permintaan tidak sah.";
+header("Location: request_list.php");
 
+// Example for the success
+$_SESSION['success_msg'] = "Permohonan berjaya dipadam.";
+header("Location: request_list.php");
+
+// Example for the "fail" message
+$_SESSION['error_msg'] = "Gagal memadam permohonan. Ia mungkin telah diluluskan oleh admin.";
+header("Location: request_list.php");
+}
+    $msg = urlencode("Ralat semasa memadam permohonan: " . $stmt->error);
+    header("Location: request_list.php?error=" . $msg);
+    
 $stmt->close();
 $conn->close();
 exit;
