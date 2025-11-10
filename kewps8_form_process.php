@@ -1,5 +1,5 @@
 <?php
-// FILE: kewps8_form_process.php
+// FILE: kewps8_form_process.php (VERSI 3.0 - Smart Form)
 session_start();
 require_once __DIR__ . '/db.php';
 
@@ -13,16 +13,26 @@ if (!isset($_SESSION['ID_staf']) || $_SESSION['peranan'] != 'Staf') {
 // Check if the form was submitted via POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // --- 1. Get Data from Session & Form ---
-    $staff_id = $_SESSION['ID_staf'];
-    
-    // The 'items' array from the form
-    $items = $_POST['items'] ?? [];
+    // --- 1. Get Data from Session & Form (Smart Mode) ---
+    $staff_id = $_SESSION['ID_staf']; // The user's ID from session
+    $form_mode = $_POST['form_mode'] ?? 'single'; // Get the new hidden input
     $catatan = $_POST['catatan'] ?? null;
+    $items = []; // Initialize an empty items array
 
-    // Validation: Check if at least one item was submitted
+    if ($form_mode === 'single') {
+        // If it's single mode, manually build the $items array
+        if (!empty($_POST['single_no_kod']) && !empty($_POST['single_kuantiti'])) {
+            $items[1]['no_kod'] = $_POST['single_no_kod'];
+            $items[1]['kuantiti_mohon'] = $_POST['single_kuantiti'];
+        }
+    } else {
+        // If it's multi mode, just get the array like before
+        $items = $_POST['items'] ?? [];
+    }
+
+    // Validation: Check if the $items array is *still* empty
     if (empty($items)) {
-        // No items were submitted, send back an error
+        // This catches both single-mode fails and multi-mode fails
         $_SESSION['error_msg'] = "Sila tambah sekurang-kurangnya satu barang.";
         header('Location: kewps8_form.php');
         exit;
@@ -36,7 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     if (!$user) {
-        // This should not happen if user is logged in, but it's a good safety check
         die("Ralat: Data staf tidak dijumpai.");
     }
 
@@ -46,19 +55,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tarikh_mohon = date('Y-m-d'); // Current date
 
     // --- 3. Database Transaction ---
-    // We use a transaction because we need to insert into TWO tables.
-    // If one fails, we can roll back both.
     $conn->begin_transaction();
 
     try {
         // --- 4. Insert into `permohonan` (Header Table) ---
-        // --- EDITED: Added 'catatan' to the SQL query ---
         $sql_header = "INSERT INTO permohonan 
                     (tarikh_mohon, status, ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan, catatan)
                     VALUES (?, 'Baru', ?, ?, ?, ?, ?)";
         $stmt_header = $conn->prepare($sql_header);
-        // --- EDITED: Added 's' for catatan and $catatan variable ---
-        $stmt_header->bind_param("ssssis", $tarikh_mohon, $ID_staf, $nama_pemohon, $jawatan_pemohon, $ID_jabatan, $catatan);
+        
+        // ### THIS IS THE FINAL, CORRECTED LINE ###
+        $stmt_header->bind_param("ssssis", $tarikh_mohon, $staff_id, $nama_pemohon, $jawatan_pemohon, (int)$id_jabatan, $catatan);
+        
         $stmt_header->execute();
 
         // Get the ID of the new request we just created
@@ -77,7 +85,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $no_kod = $item['no_kod'];
             $kuantiti_mohon = $item['kuantiti_mohon'];
 
-            // Bind the values and execute for each item
             $stmt_items->bind_param("iii", $id_permohonan_baru, $no_kod, $kuantiti_mohon);
             $stmt_items->execute();
         }
@@ -86,20 +93,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // --- 6. If everything is OK, commit the transaction ---
         $conn->commit();
 
-        // Set a success message and redirect to the list page
         $_SESSION['success_msg'] = "Permohonan anda (ID: $id_permohonan_baru) telah berjaya dihantar.";
-        // We will create kewps8_list.php next
-        header('Location: kewps8_list.php'); 
+        header('Location: request_list.php'); // This is the correct success redirect
         exit;
 
     } catch (Exception $e) {
         // --- 7. If anything fails, roll back the transaction ---
         $conn->rollback();
 
-        // Log the error (optional, but good practice)
-        // error_log("Error in kewps8_form_process.php: " . $e->getMessage());
-
-        // Send user back with an error message
         $_SESSION['error_msg'] = "Gagal menghantar borang. Sila cuba lagi. Ralat: " . $e->getMessage();
         header('Location: kewps8_form.php');
         exit;
@@ -107,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 } else {
     // Not a POST request, redirect to the form
-    header('Location: request_list.php');
+    header('Location: kewps8_form.php');
     exit;
 }
 ?>
