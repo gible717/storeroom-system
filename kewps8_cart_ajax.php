@@ -31,6 +31,7 @@ switch ($action) {
         $kuantiti = (int)($data['kuantiti'] ?? 0);
         $perihal_stok = $data['perihal_stok'] ?? 'Unknown';
         $catatan = $data['catatan'] ?? '';
+        $jawatan = $data['jawatan'] ?? ''; // <-- ADD THIS
 
         if ($kuantiti <= 0) {
             $response['message'] = 'Kuantiti mestilah 1 atau lebih.';
@@ -45,6 +46,7 @@ switch ($action) {
             ];
             // Always update the catatan
             $_SESSION['request_catatan'] = $catatan;
+            $_SESSION['request_jawatan'] = $jawatan; // <-- ADD THIS
             
             $response['success'] = true;
             $response['message'] = 'Item berjaya ditambah!';

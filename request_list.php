@@ -37,6 +37,15 @@ $total_rows = $requests_result->num_rows; // Get the total number of rows
 $pageTitle = "Permohonan Saya";
 require 'staff_header.php'; 
 ?>
+
+<style>
+.highlight {
+    background-color: rgba(255, 224, 46, 1); 
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+</style>
     
     <?php if (isset($_SESSION['success_msg'])): ?>
         <div class="alert alert-success alert-dismissible fade show alert-top" role="alert">
@@ -127,9 +136,10 @@ require 'staff_header.php';
                                                 <a href="request_edit.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-warning btn-sm" title="Kemaskini">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
+
                                                 <a href="request_delete.php?id=<?php echo $row['ID_permohonan']; ?>" 
-                                                class="btn btn-sm btn-outline-danger" title="Padam"
-                                                onclick="return confirm('Adakah anda pasti mahu memadam permohonan #<?php echo $row['ID_permohonan']; ?>?');">
+                                                class="btn btn-sm btn-outline-danger btn-delete-request" title="Padam"
+                                                data-id="<?php echo $row['ID_permohonan']; ?>">
                                                     <i class="bi bi-trash3-fill"></i>
                                                 </a>
                                             
@@ -148,7 +158,7 @@ require 'staff_header.php';
                                     </tr>
                                 <?php endwhile; ?>
                             <?php else: ?>
-                                <tr><td colspan="6" class="text-center text-muted">Tiada permohonan dijumpai.</td></tr>
+                                <tr id="original-no-results"><td colspan="6" class="text-center text-muted">Tiada permohonan dijumpai.</td></tr>
                             <?php endif; ?>
                             
                             <tr id="no-results-row" style="display: none;"><td colspan="6" class="text-center text-muted">Tiada padanan ditemui.</td></tr>
@@ -171,16 +181,43 @@ require 'staff_header.php';
         </div>
     </div>
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
+        // --- 1. Get all elements ---
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const tableBody = document.querySelector('#requestTable tbody');
-        const tableRows = tableBody.querySelectorAll('tr:not(#no-results-row)'); 
         const noResultsRow = document.getElementById('no-results-row');
+        const originalNoResultsRow = document.getElementById('original-no-results');
         const paginationInfo = document.getElementById('pagination-info');
-        const totalRows = <?php echo $total_rows; ?>;
+        
+        // --- 2. Get all data rows (this is the key fix) ---
+        // We get ALL rows that are not the "template" rows
+        const tableRows = tableBody.querySelectorAll('tr:not(#no-results-row):not(#original-no-results)');
+        const totalRows = tableRows.length; // Get the count from the rows we just found
+        
+        // --- 3. The Highlight Function (v2.4 - Inline Style) ---
+        // This version forces the style, bypassing all CSS issues.
+        function highlightText(cell, text) {
+            if (!cell) return;
+            
+            if (!cell.dataset.originalHtml) {
+                cell.dataset.originalHtml = cell.innerHTML;
+            }
+            let html = cell.dataset.originalHtml;
 
+            if (text) {
+                const safeText = text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`(${safeText})`, 'gi');
+                
+                 // ### THE FIX: We apply the style directly ###
+                html = html.replace(regex, '<mark style="background-color:#ffff00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
+            }
+            
+            cell.innerHTML = html;
+        }
+
+        // --- 4. The Main Filter Function ---
         function filterTable() {
             const searchText = searchInput.value.toLowerCase().replace('#', '');
             const statusText = statusFilter.value.toLowerCase();
@@ -189,12 +226,9 @@ require 'staff_header.php';
             for (let i = 0; i < tableRows.length; i++) {
                 const row = tableRows[i];
                 
-                const requestId = row.querySelector('.request-id')?.textContent.toLowerCase().replace('#', '') || '';
-                
-                // ### BUG 1 (FIXED): We now read the hidden item list from 'data-item-list' ###
+                const requestIdCell = row.querySelector('.request-id'); // The <td>
+                const requestId = requestIdCell?.textContent.toLowerCase().replace('#', '') || '';
                 const itemList = row.dataset.itemList || ''; 
-                
-                // ### BUG 2 (FIXED): Added .trim() to remove whitespace ###
                 const status = row.querySelector('.status-cell')?.textContent.toLowerCase().trim() || '';
 
                 const matchesSearch = searchText === '' || requestId.includes(searchText) || itemList.includes(searchText);
@@ -203,26 +237,44 @@ require 'staff_header.php';
                 if (matchesSearch && matchesStatus) {
                     row.style.display = '';
                     visibleRows++;
+                    // Apply highlight
+                    highlightText(requestIdCell, searchText);
                 } else {
                     row.style.display = 'none';
+                    // Clear highlight
+                    highlightText(requestIdCell, ''); 
                 }
             }
             
+            // --- 5. Show/Hide "No Results" Rows ---
+            const hasData = totalRows > 0;
+            const hasVisibleRows = visibleRows > 0;
+
+            // Show "Tiada padanan" if we have data, but filter hides it
             if (noResultsRow) {
-                noResultsRow.style.display = (visibleRows === 0 && totalRows > 0) ? '' : 'none';
+                noResultsRow.style.display = (hasData && !hasVisibleRows) ? '' : 'none';
             }
             
-            // ### REQ 2 (FIXED): Update pagination text in English ###
+            // Show "Tiada permohonan" only if the table is completely empty
+            if (originalNoResultsRow) {
+                originalNoResultsRow.style.display = (!hasData) ? '' : 'none';
+            }
+            
+            // --- 6. Update Pagination Text ---
             if (paginationInfo) {
                 paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
             }
         }
 
+        // --- 7. Attach Event Listeners ---
         searchInput.addEventListener('keyup', filterTable);
         statusFilter.addEventListener('change', filterTable);
+        
+        // --- 8. Run filter on page load (to fix 0-of-0 bug) ---
+        filterTable(); 
     });
     </script>
-    
+
     <?php require 'staff_footer.php'; ?>
 </body>
 </html>

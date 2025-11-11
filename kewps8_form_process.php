@@ -24,6 +24,7 @@ $staff_id = $_SESSION['ID_staf']; // The user's ID
 // Get the cart and catatan from the SESSION
 $items = $_SESSION['cart'] ?? [];
 $catatan = $_SESSION['request_catatan'] ?? null;
+$jawatan_pemohon_session = $_SESSION['request_jawatan'] ?? null; // <-- ADD THIS
 
 // Validation: Check if the cart is empty
 if (empty($items)) {
@@ -44,7 +45,8 @@ if (!$user) {
 }
 
 $nama_pemohon = $user['nama'];
-$jawatan_pemohon = $user['jawatan'] ?? '';
+// Use the Jawatan from the form (session). If empty, use the one from their profile.
+$jawatan_pemohon = $jawatan_pemohon_session ?? ($user['jawatan'] ?? '');
 $id_jabatan = (int)$user['ID_jabatan']; // Cast to integer
 $tarikh_mohon = date('Y-m-d'); // Current date
 
@@ -76,8 +78,8 @@ try {
 
     // --- 5. Insert into `permohonan_barang` (Detail Table) ---
     $sql_items = "INSERT INTO permohonan_barang 
-                  (ID_permohonan, no_kod, kuantiti_mohon) 
-                  VALUES (?, ?, ?)";
+                (ID_permohonan, no_kod, kuantiti_mohon) 
+                VALUES (?, ?, ?)";
     
     $stmt_items = $conn->prepare($sql_items);
 
@@ -97,11 +99,12 @@ try {
     // --- 7. Clear the cart from the session ---
     unset($_SESSION['cart']);
     unset($_SESSION['request_catatan']);
+    unset($_SESSION['request_jawatan']); // <-- ADD THIS
 
     // --- 8. Send the "Success" JSON response ---
     echo json_encode([
         'success' => true, 
-        'message' => "Permohonan anda (ID: $id_permohonan_baru) telah berjaya dihantar."
+        'message' => "Permohonan anda telah berjaya dihantar."
     ]);
     exit;
 

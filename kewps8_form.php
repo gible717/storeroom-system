@@ -68,6 +68,11 @@ if (!isset($_SESSION['cart'])) {
                         <input type="text" class="form-control" value="<?php echo htmlspecialchars($nama_jabatan); ?>" disabled readonly>
                     </div>
 
+                    <div class="mb-4">
+                        <label for="jawatan_input" class="form-label">Jawatan</label>
+                        <input type="text" class="form-control" id="jawatan_input" value="<?php echo htmlspecialchars($jawatan_pemohon ?? ''); ?>" placeholder="Cth: Pegawai Teknologi Maklumat">
+                    </div>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
                             <label for="item_select" class="form-label">*Perihal Stok</label>
@@ -149,6 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemSelect = document.getElementById('item_select');
     const itemQuantity = document.getElementById('item_quantity');
     const itemCatatan = document.getElementById('item_catatan');
+    const jawatanInput = document.getElementById('jawatan_input'); // <-- ADD THIS
     const modalItemList = document.getElementById('modal_item_list');
     
     // NOTE: We get these *after* the modal element
@@ -200,7 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 no_kod: no_kod,
                 kuantiti: kuantiti,
                 perihal_stok: perihal_stok, // We send text for the session
-                catatan: catatan
+                catatan: catatan,
+                jawatan: jawatanInput.value
             })
         })
         .then(response => response.json())
@@ -249,7 +256,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     no_kod: current_no_kod,
                     kuantiti: current_kuantiti,
                     perihal_stok: current_perihal,
-                    catatan: current_catatan
+                    catatan: current_catatan,
+                    jawatan: jawatanInput.value
                 })
             })
             .then(response => response.json())

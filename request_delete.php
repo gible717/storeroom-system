@@ -1,11 +1,17 @@
 <?php
-// FILE: request_delete.php
+// FILE: request_delete.php (AJAX Version)
 require 'staff_auth_check.php';
+
+// Set header to JSON for AJAX responses
+header('Content-Type: application/json');
+
+// Start with a default error response
+$response = ['success' => false, 'message' => 'Ralat tidak diketahui.'];
 
 // 1. Check if ID is provided
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $_SESSION['error_msg'] = "ID Permohonan tidak sah.";
-    header('Location: request_list.php');
+    $response['message'] = 'ID Permohonan tidak sah.';
+    echo json_encode($response);
     exit;
 }
 
@@ -21,8 +27,8 @@ $result = $stmt->get_result();
 
 if ($result->num_rows != 1) {
     // Either not owned by user, or status is no longer 'Baru'
-    $_SESSION['error_msg'] = "Permohonan tidak dapat dipadam (mungkin telah diluluskan atau bukan milik anda).";
-    header('Location: request_list.php');
+    $response['message'] = 'Permohonan tidak dapat dipadam (mungkin telah diluluskan atau bukan milik anda).';
+    echo json_encode($response);
     exit;
 }
 $stmt->close();
@@ -44,14 +50,19 @@ try {
 
     // If both succeed, commit
     $conn->commit();
-    $_SESSION['success_msg'] = "Permohonan (ID: $id_permohonan) telah berjaya dipadam.";
+    
+    // --- Send SUCCESS JSON Response ---
+    $response['success'] = true;
+    $response['message'] = "Permohonan telah berjaya dipadam.";
 
 } catch (Exception $e) {
     // If anything fails, roll back
     $conn->rollback();
-    $_SESSION['error_msg'] = "Gagal memadam permohonan. Ralat: " . $e->getMessage();
+    // --- Send ERROR JSON Response ---
+    $response['message'] = "Gagal memadam permohonan. Ralat: " . $e->getMessage();
 }
 
-header('Location: request_list.php');
+// 4. Echo final JSON response
+echo json_encode($response);
 exit;
 ?>
