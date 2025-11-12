@@ -1,197 +1,267 @@
 <?php
-// FILE: kewps8_print.php
-// This file is for PRINTING the KEW.PS-8 form.
-session_start();
-require_once __DIR__ . '/db.php';
+// FILE: kewps8_print.php (v3.0 - Unified Table Structure)
+require 'auth_check.php'; 
 
-// Check if user is logged in (staff or admin can print)
-if (!isset($_SESSION['ID_staf'])) {
-    die("Sila log masuk.");
-}
-
-// 1. Get Request ID & Validate
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+// 1. Get the Request ID
+$id_permohonan = $_GET['id'] ?? null;
+if (!$id_permohonan) {
     die("ID Permohonan tidak sah.");
 }
-$id_permohonan = (int)$_GET['id'];
 
-// 2. Fetch 'permohonan' (Header) Data
-$stmt_header = $conn->prepare("SELECT p.*, j.nama_jabatan 
-                               FROM permohonan p
-                               LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
-                               WHERE p.ID_permohonan = ?");
+// 2. Fetch Request Header
+$stmt_header = $conn->prepare("SELECT 
+                                p.ID_permohonan, p.tarikh_mohon, p.tarikh_lulus,
+                                pemohon.nama AS nama_pemohon, pemohon.jawatan AS jawatan_pemohon,
+                                pelulus.nama AS nama_pelulus, pelulus.jawatan AS jawatan_pelulus
+                            FROM permohonan p
+                            JOIN staf pemohon ON p.ID_pemohon = pemohon.ID_staf
+                            LEFT JOIN staf pelulus ON p.ID_pelulus = pelulus.ID_staf
+                            WHERE p.ID_permohonan = ?");
 $stmt_header->bind_param("i", $id_permohonan);
 $stmt_header->execute();
-$permohonan = $stmt_header->get_result()->fetch_assoc();
+$header = $stmt_header->get_result()->fetch_assoc();
 $stmt_header->close();
 
-if (!$permohonan) {
+if (!$header) {
     die("Permohonan tidak dijumpai.");
 }
 
-// 3. Fetch 'permohonan_barang' (Items) Data
-$stmt_items = $conn->prepare("SELECT pb.*, b.no_kod, b.perihal_stok, b.unit_pengukuran 
-                             FROM permohonan_barang pb
-                             LEFT JOIN barang b ON pb.no_kod = b.no_kod
-                             WHERE pb.ID_permohonan = ?");
+// 3. Fetch Request Items
+$stmt_items = $conn->prepare("SELECT 
+                                pb.no_kod, 
+                                b.perihal_stok, 
+                                pb.kuantiti_mohon, 
+                                pb.kuantiti_lulus,
+                                (t.baki_selepas_transaksi + t.kuantiti) AS baki_sedia_ada,
+                                p.catatan AS catatan_pemohon
+                            FROM permohonan_barang pb
+                            JOIN barang b ON pb.no_kod = b.no_kod
+                            JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
+                            LEFT JOIN transaksi_stok t ON pb.ID_permohonan = t.ID_rujukan_permohonan AND pb.no_kod = t.no_kod
+                            WHERE pb.ID_permohonan = ?
+                            ORDER BY pb.ID_permohonan_barang ASC");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
-$items_result = $stmt_items->get_result();
+$items = $stmt_items->get_result();
+$stmt_items->close();
 $conn->close();
-
-// Store items in an array for looping
-$items = [];
-while ($row = $items_result->fetch_assoc()) {
-    $items[] = $row;
-}
 ?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-M-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak KEW.PS-8 (ID: <?php echo $id_permohonan; ?>)</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        /* This is the core CSS for the "look and feel" */
+        @page {
+            size: A4 landscape;
+            margin: 0.5in;
+        }
         body {
             font-family: Arial, sans-serif;
-            font-size: 11pt; /* Standard font size for official docs */
             color: #000;
-            background-color: #eee; /* Grey background for the screen */
+            background-color: #F8F8F8; 
         }
         .page-container {
-            width: 29.7cm; /* A4 Landscape width */
-            min-height: 21cm; /* A4 Landscape height */
-            padding: 1.5cm;
-            margin: 2rem auto;
-            background: #fff;
+            width: 27.7cm; 
+            min-height: 19cm; 
+            padding: 20px;
+            margin: 20px auto;
+            background: #FFF;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative; /* Needed for footer positioning */
         }
-        .form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
+        
+        strong { font-weight: bold; }
+
+        .text-header-gray {
+            color: #555;
+            font-weight: normal; 
         }
-        .form-header .doc-title {
-            font-size: 14pt;
-            font-weight: bold;
-            text-align: right;
-        }
-        .form-header .doc-code {
-            font-size: 12pt;
-            font-weight: bold;
-            border: 1px solid #000;
-            padding: 5px 10px;
-        }
-        .info-table {
-            width: 100%;
-            margin-bottom: 1.5rem;
-            border: 1px solid #000;
-            border-collapse: collapse;
-        }
-        .info-table td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            vertical-align: top;
-        }
-        .info-table .label {
-            width: 25%;
-            font-weight: bold;
-            background-color: #f3f3f3;
+        .text-gray {
+            color: #555;
+            font-weight: normal;
         }
 
-        .items-table {
+        /* 1 & 3. UNIFIED TABLE: No bottom margin */
+        .report-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 1.5rem;
+            font-size: 10px; 
+            /* margin-bottom: 10px; <-- REMOVED this gap */
         }
-        .items-table th, .items-table td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            text-align: center;
-        }
-        .items-table th {
-            font-weight: bold;
-            background-color: #f3f3f3;
-        }
-        .items-table .text-left {
+        .report-table th, .report-table td {
+            border: 2px solid #000;
+            padding: 5px;
+            vertical-align: top;
+            height: 35px; 
             text-align: left;
         }
-        /* Make sure the item rows are tall enough */
-        .items-table .item-row td {
-            height: 40px; 
-        }
+        .report-table .center { text-align: center; }
 
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        .signature-box {
-            width: 32%;
-            border: 1px solid #000;
-            padding: 10px;
-        }
-        .signature-box .title {
-            font-weight: bold;
-            font-size: 11pt;
-            margin-bottom: 4rem; /* Space for the signature */
-        }
-        .signature-box .info {
-            font-size: 10pt;
-            border-top: 1px solid #000;
-            padding-top: 8px;
-        }
-        .signature-box .info div {
-            line-height: 1.5;
-        }
-
-        .print-button-container {
+        .report-table th.header-main {
+            background-color: #E0E0E0; 
+            color: #000;
+            font-size: 11px;
+            font-weight: normal; 
             text-align: center;
-            padding: 1rem;
-            background: #333;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
+            vertical-align: middle;
+        }
+        .report-table th.header-sub {
+            background-color: #E0E0E0; 
+            color: #000;
+            font-weight: normal; 
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        /* 1 & 3. UNIFIED TABLE: Styling for the new signature footer row */
+        .report-table tfoot td {
+            height: 150px;
+            vertical-align: top;
+            padding: 10px;
+            font-size: 11px;
         }
 
-        /* --- PRINT STYLES --- */
+        .header-info {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .main-title {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .signature-space {
+            height: 60px; 
+            border-bottom: 1px dotted #000;
+            margin-top: 20px;
+        }
+        .footer-note {
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 10px; /* Give it space from the table */
+        }
+
         @media print {
-            /* This is the magic for horizontal printing */
-            @page {
-                size: A4 landscape;
-                margin: 0;
-            }
-            body {
-                background-color: #fff;
-            }
-            .print-button-container {
-                display: none; /* Hide the print button */
-            }
+            .no-print { display: none; }
+            body { background-color: #FFF; }
             .page-container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
                 width: 100%;
                 min-height: 0;
-                margin: 0;
-                padding: 1.5cm; /* Apply padding to the printable area */
-                box-shadow: none;
-                border: none;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="print-button-container">
-        <button class="btn btn-primary btn-lg" onclick="window.print()">Cetak Dokumen</button>
-        <button class="btn btn-secondary btn-lg" onclick="window.close()">Tutup</button>
+    <div class="no-print text-center mb-3" style="padding-top: 20px;">
+        <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
+        <a href="manage_requests.php" class="btn btn-secondary">Kembali</a>
     </div>
 
     <div class="page-container">
-        <div class="form-header">
-            <div>
-                <img src="path/to/your/logo.png" alt="Logo" style="width: 150px;">
+
+        <div class="row header-info">
+            <div class="col-6">
+                <span class="text-header-gray">Pekeliling Perbendaharaan Malaysia</span>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+                <div class="text-start"> <span class="text-header-gray">AM 6.5 Lampiran B</span><br>
+                    <strong style="font-size: 1.1em;">KEW.PS-8</strong><br>
+                    No. BPSI: <?php echo htmlspecialchars($header['ID_permohonan']); ?>
+                </div>
+            </div>
+            </div>
+
+        <div class="main-title">
+            <strong>BORANG PERMOHONAN STOK<br>(INDIVIDU KEPADA STOR)</strong>
+        </div>
+
+        <div class="header-info mb-2" style="padding-left: 40px;">
+            Jabatan / Unit: <?php echo htmlspecialchars($header['jawatan_pemohon']); ?>
+        </div>
+
+        <table class="report-table">
+            <thead class="header-row">
+                <tr class="header-row-main">
+                    <th colspan="4" class="header-main"><strong>Permohonan</strong></th>
+                    <th colspan="3" class="header-main"><strong>Pegawai Pelulus</strong></th>
+                    <th colspan="2" class="header-main"><strong>Perakuan Penerimaan</strong></th>
+                </tr>
+                <tr class="header-row-sub">
+                    <th class="header-sub" style="width: 5%;"><strong>No. Kod</strong></th>
+                    <th class="header-sub" style="width: 20%;"><strong>Perihal Stok</strong></th>
+                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Dimohon</strong></th>
+                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
+                    <th class="header-sub center" style="width: 7%;"><strong>Baki Sedia Ada</strong></th>
+                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Diluluskan</strong></th>
+                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
+                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Diterima</strong></th>
+                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                $item_count = 0;
+                while($item = $items->fetch_assoc()): 
+                    $item_count++;
+                ?>
+                <tr>
+                    <td class="center"><?php echo htmlspecialchars($item['no_kod']); ?></td>
+                    <td><?php echo htmlspecialchars($item['perihal_stok']); ?></td>
+                    <td class="center"><?php echo htmlspecialchars($item['kuantiti_mohon']); ?></td>
+                    <td><?php echo $item_count == 1 ? htmlspecialchars($item['catatan_pemohon']) : ''; ?></td>
+                    <td class="center"><?php echo htmlspecialchars($item['baki_sedia_ada'] ?? '-'); ?></td>
+                    <td class="center"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
+                    <td></td> <td class="center" style="color: red; font-weight: bold;"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
+                    <td></td> </tr>
+                <?php endwhile; ?>
+
+                <?php 
+                for ($i = $item_count; $i < 8; $i++): 
+                ?>
+                <tr>
+                    <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td>
+                    <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td>
+                    <td>&nbsp;</td> <td>&nbsp;</td>
+                </tr>
+                <?php endfor; ?>
+            </tbody>
+            
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <strong>Pemohon:</strong> <div class="signature-space"></div>
+                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span> <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
+                        <span class="text-gray-label">Jawatan:</span> <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
+                        <span class="text-gray-label">Tarikh:</span> <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?><br>
+                    </td>
+                    <td colspan="3">
+                        <strong>Pegawai Pelulus:</strong> <div class="signature-space"></div>
+                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span> <?php echo htmlspecialchars($header['nama_pelulus'] ?? '-'); ?><br>
+                        <span class="text-gray-label">Jawatan:</span> <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? '-'); ?><br>
+                        <span class="text-gray-label">Tarikh:</span> <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : '-'; ?><br>
+                    </td>
+                    <td colspan="2">
+                        <strong>Pemohon/ Wakil:</strong> <div class="signature-space"></div>
+                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span><br>
+                        <span class="text-gray-label">Jawatan:</span><br>
+                        <span class="text-gray-label">Tarikh:</span><br>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer-note">M.S. 12/13</div>
+
+    </div> </body>
+</html>

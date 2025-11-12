@@ -115,7 +115,14 @@ require 'staff_header.php';
                                     <tr data-item-list="<?php echo htmlspecialchars(strtolower($row['senarai_barang'])); ?>">
                                         <td class="text-center"><?php echo $row_number++; ?></td>
                                         
-                                        <td class="request-id fw-bold">#<?php echo htmlspecialchars($row['ID_permohonan']); ?></td>
+                                        <td class="request-id fw-bold">
+                                            <button type="button" class="btn btn-link p-0 fw-bold btn-view-details" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detailsModal" 
+                                                    data-id="<?php echo $row['ID_permohonan']; ?>">
+                                                #<?php echo htmlspecialchars($row['ID_permohonan']); ?>
+                                            </button>
+                                        </td>
                                         
                                         <td class="text-center"><?php echo htmlspecialchars($row['bilangan_item']); ?></td>
                                         <td><?php echo date('d M Y', strtotime($row['tarikh_mohon'])); ?></td>
@@ -196,25 +203,41 @@ require 'staff_header.php';
         const tableRows = tableBody.querySelectorAll('tr:not(#no-results-row):not(#original-no-results)');
         const totalRows = tableRows.length; // Get the count from the rows we just found
         
-        // --- 3. The Highlight Function (v2.4 - Inline Style) ---
-        // This version forces the style, bypassing all CSS issues.
+        // --- 3. The Highlight Function (v2.5 - Smart Target) ---
+        // This version targets the button *inside* the cell to avoid
+        // breaking HTML attributes.
         function highlightText(cell, text) {
             if (!cell) return;
             
-            if (!cell.dataset.originalHtml) {
-                cell.dataset.originalHtml = cell.innerHTML;
+             // ### THE FIX: Find the button *inside* the cell ###
+            const button = cell.querySelector('button.btn-view-details');
+            
+             // If this cell doesn't have our button, just return.
+            if (!button) { 
+                // We clear any old highlights on non-button cells just in case
+                if (cell.dataset.originalHtml) {
+                    cell.innerHTML = cell.dataset.originalHtml;
+                }
+                return; 
             }
-            let html = cell.dataset.originalHtml;
+
+             // --- Smart logic for the button ---
+             // Store the button's original text (e.g., "#10")
+            if (!button.dataset.originalHtml) {
+                button.dataset.originalHtml = button.innerHTML; 
+            }
+             let html = button.dataset.originalHtml; // Start from original text
 
             if (text) {
                 const safeText = text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                 const regex = new RegExp(`(${safeText})`, 'gi');
                 
-                 // ### THE FIX: We apply the style directly ###
-                html = html.replace(regex, '<mark style="background-color:#ffff00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
+                 // This now *only* replaces the text inside the button
+                html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
             }
             
-            cell.innerHTML = html;
+             // Apply the new HTML *only* to the button's content
+            button.innerHTML = html; 
         }
 
         // --- 4. The Main Filter Function ---
@@ -272,8 +295,89 @@ require 'staff_header.php';
         
         // --- 8. Run filter on page load (to fix 0-of-0 bug) ---
         filterTable(); 
+
+        // --- 10. NEW (v2.4): "Quick View" Modal Logic ---
+        const detailsModal = document.getElementById('detailsModal');
+        const detailsModalTitle = document.getElementById('detailsModalLabel');
+        const detailsModalBody = document.getElementById('detailsModalBody');
+
+        // Get all the new "view" buttons
+        const viewButtons = document.querySelectorAll('.btn-view-details');
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.dataset.id;
+                
+                // 1. Set the title and "loading" state
+                detailsModalTitle.textContent = 'Maklumat Permohonan #' + requestId;
+                detailsModalBody.innerHTML = '<div class="text-center p-4"><span class="spinner-border spinner-border-sm" role="status"></span> Loading...</div>';
+
+                // 2. Fetch the data from our new AJAX file
+                fetch('request_details_ajax.php?id=' + requestId)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 3. Build the HTML to show in the modal
+                            let html = `
+                                <h6 class="fw-bold">Maklumat Am</h6>
+                                <p class_="">
+                                    <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}<br>
+                                    <strong>Catatan:</strong> ${data.header.catatan || '-'}
+                                </p>
+                                <hr>
+                                <h6 class="fw-bold">Senarai Item (${data.items.length})</h6>
+                                <table class="table table-sm table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Perihal Stok</th>
+                                            <th class="text-center">Kuantiti Mohon</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+                            
+                            // Add each item to the table
+                            data.items.forEach(item => {
+                                html += `
+                                    <tr>
+                                        <td>${item.perihal_stok}</td>
+                                        <td class="text-center">${item.kuantiti_mohon}</td>
+                                    </tr>
+                                `;
+                            });
+
+                            html += `
+                                    </tbody>
+                                </table>
+                            `;
+                            
+                            // 4. Set the modal body
+                            detailsModalBody.innerHTML = html;
+
+                        } else {
+                            detailsModalBody.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        detailsModalBody.innerHTML = '<div class="alert alert-danger">Gagal menghubungi server.</div>';
+                    });
+            });
+        });
     });
     </script>
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Maklumat Permohonan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailsModalBody">
+                    </div>
+            </div>
+        </div>
+    </div>
 
     <?php require 'staff_footer.php'; ?>
 </body>

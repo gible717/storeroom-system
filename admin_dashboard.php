@@ -25,19 +25,23 @@ function time_ago($datetime) {
 }
 
 // --- PHP LOGIC FOR DASHBOARD ---
-$jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM produk");
+$jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM barang");
 $jumlahProduk = $jumlahProduk_result ? $jumlahProduk_result->fetch_assoc()['total'] : 0;
 
-$tertunda_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Belum Diproses'");
+$tertunda_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Baru'");
 $tertunda = $tertunda_result ? $tertunda_result->fetch_assoc()['total'] : 0;
 
 $stokRendah = 8;
 $pesananBulanIni = 24;
 
-$sql_requests = "SELECT s.nama, p.jumlah_diminta, pr.nama_produk, p.status, p.tarikh_mohon
+$sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
+                    COUNT(pb.ID_permohonan_barang) AS bilangan_item,
+                    GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
                 FROM permohonan p
-                JOIN staf s ON p.ID_staf = s.ID_staf
-                JOIN produk pr ON p.ID_produk = pr.ID_produk
+                JOIN staf s ON p.ID_pemohon = s.ID_staf
+                LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+                LEFT JOIN barang b ON pb.no_kod = b.no_kod
+                GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, s.nama
                 ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC
                 LIMIT 4";
 $recent_requests = $conn->query($sql_requests);
@@ -106,17 +110,17 @@ $recent_requests = $conn->query($sql_requests);
                 <?php while($req = $recent_requests->fetch_assoc()): ?>
                 <div class="list-group-item d-flex justify-content-between align-items-center px-0">
                     <div class="flex-grow-1">
-                        <strong><?php echo htmlspecialchars($req['nama_produk']); ?></strong>
+                        <strong><?php echo htmlspecialchars($req['senarai_barang'] ?? 'Tiada Item'); ?></strong>
                         <small class="text-muted d-block">
                             <?php echo htmlspecialchars($req['nama']); ?> - <?php echo time_ago($req['tarikh_mohon']); ?>
                         </small>
                     </div>
-                    <span class="fw-bold me-4"><?php echo htmlspecialchars($req['jumlah_diminta']); ?> unit</span>
+                    <span class="fw-bold me-4"><?php echo htmlspecialchars($req['bilangan_item']); ?> item</span>
                     <?php
                         $status = htmlspecialchars($req['status']);
                         $badge_class = 'bg-secondary';
                         if ($status === 'Diluluskan') $badge_class = 'bg-success';
-                        elseif ($status === 'Belum Diproses') $badge_class = 'bg-warning text-dark';
+                        elseif ($status === 'Baru') $badge_class = 'bg-warning text-dark';
                         elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
                     ?>
                     <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
