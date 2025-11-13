@@ -171,6 +171,7 @@ $header_user_initials = substr($initials, 0, 2);
             top: 10px; /* "Pops" into view */
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 

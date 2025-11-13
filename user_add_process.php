@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $is_first_login = 1;
 
     // 5. Insert into the database
-    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, katalaluan, is_first_login, is_admin, is_superadmin) 
+    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, is_first_login, is_admin, is_superadmin) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);

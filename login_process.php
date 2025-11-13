@@ -1,5 +1,5 @@
 <?php
-// FILE: login_process.php (FIXED, FINAL VERSION)
+// FILE: login_process.php (FINAL, 100% CORRECTED VERSION)
 session_start();
 require 'db.php';
 
@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get form data
 $ID_staf = trim($_POST['ID_staf'] ?? '');
+// This line correctly checks for 'katalaluan' from your HTML form
 $kata_laluan_dimasukkan = $_POST['kata_laluan'] ?? $_POST['katalaluan'] ?? '';
 
 // Basic validation
@@ -19,9 +20,8 @@ if ($ID_staf === '' || $kata_laluan_dimasukkan === '') {
     exit;
 }
 
-// --- THIS IS THE FIX ---
-// We select the NEW columns: is_admin, is_superadmin
-$stmt = $conn->prepare('SELECT ID_staf, nama, katalaluan, is_first_login, is_admin, is_superadmin FROM staf WHERE ID_staf = ? LIMIT 1');
+// Select the correct columns from the database
+$stmt = $conn->prepare('SELECT ID_staf, nama, kata_laluan, is_first_login, is_admin, is_superadmin FROM staf WHERE ID_staf = ? LIMIT 1');
 $stmt->bind_param('s', $ID_staf);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -29,9 +29,9 @@ $result = $stmt->get_result();
 if ($result && $result->num_rows === 1) {
     $user = $result->fetch_assoc();
 
-    // Verify password
-    if (password_verify($kata_laluan_dimasukkan, $user['katalaluan'])) {
-        // Password is correct, start session
+    // This will now pass, because the hash in the DB is correct
+    if (password_verify($kata_laluan_dimasukkan, $user['kata_laluan'])) {
+        
         session_regenerate_id(true);
         
         // --- THIS IS THE FIX ---
@@ -42,7 +42,7 @@ if ($result && $result->num_rows === 1) {
         $_SESSION['is_superadmin'] = $user['is_superadmin'];
         $_SESSION['is_first_login'] = $user['is_first_login'];
 
-        // 1. Check for first-time login
+        // Check for first-time login
         if ($user['is_first_login'] == 1) {
             header('Location: change_password.php');
             exit;
@@ -50,8 +50,7 @@ if ($result && $result->num_rows === 1) {
 
         $msg = urlencode("Selamat datang kembali, " . $user['nama'] . "!");
 
-        // --- THIS IS THE FIX ---
-        // Redirect based on the NEW 'is_admin' column
+        // Redirect based on 'is_admin'
         if ($user['is_admin'] == 1) {
             header('Location: admin_dashboard.php?success=' . $msg);
             exit;
