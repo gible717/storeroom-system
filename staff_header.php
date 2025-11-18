@@ -19,9 +19,9 @@ if ($stmt_header->execute()) {
     if ($user = $result->fetch_assoc()) {
  // --- THIS IS THE FIX ---
 // Only update the name if the database value is NOT empty
-    if (!empty($user['nama'])) {
-        $header_user_name = $user['nama'];
-    }
+        if (!empty($user['nama'])) {
+            $header_user_name = $user['nama'];
+        }
 // --- END OF FIX ---
 
 // Check if the picture exists on the server
@@ -51,6 +51,9 @@ $header_user_initials = substr($initials, 0, 2);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href="/storeroom/css/cropper.min.css" rel="stylesheet">
+    <script src="/storeroom/js/cropper.min.js"></script>
 
     <style>
         body {

@@ -264,33 +264,39 @@ require 'staff_footer.php'; // Use staff footer
         profilePictureInput.click(); 
     });
 
-    // Listen for click on "Padam Gambar" in the EDIT modal
-    triggerDeleteButton.addEventListener('click', function() {
-        // Use SweetAlert2 for confirmation
-        Swal.fire({
-            title: 'Adakah anda pasti?',
-            text: "Tindakan ini tidak boleh dibatalkan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, padamkan!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to delete script
-                window.location.href = 'delete_profile_picture.php';
-            }
-        });
-    // --- END OF ADDED CODE ---
+// Listen for click on "Padam Gambar" in the EDIT modal
+triggerDeleteButton.addEventListener('click', function() {
+    // Use SweetAlert2 for confirmation
+    Swal.fire({
+        title: 'Adakah anda pasti?',
+        text: "Tindakan ini tidak boleh dibatalkan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, padamkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to delete script
+            window.location.href = 'delete_profile_picture.php';
+        }
+    });
+});
+// --- END OF ADDED CODE ---
 
-    // 2. "Slay" (Start) 🚀 the "Joker" (Cropper) 🃏
-    cropModalElement.addEventListener('shown.bs.modal', function () {
+// 2. "Slay" (Start) 🚀 the "Joker" (Cropper) 🃏
+cropModalElement.addEventListener('shown.bs.modal', function () {
         if (cropper) { cropper.destroy(); }
         cropper = new Cropper(imageToCrop, {
             aspectRatio: 1 / 1,
             viewMode: 2,
             autoCropArea: 0.9,
+            zoomable: true,       // Enable zooming
+            scalable: true,       // Enable scaling
+            movable: true,        // Enable moving
+            background: false,    // Hides the grid background
+            guides: true,         // Shows the crop box guides (the grid)
         });
     });
 
@@ -346,5 +352,9 @@ require 'staff_footer.php'; // Use staff footer
         }, outputType, 0.85); // "Slay" (Send) as the "steak" (correct) 🥩 "vibe" (type) 💄
         // --- END OF "STEAK" (FIX) 3 ---
     });
-});
 </script>
+</script>
+
+<?php 
+require '../staff/staff_footer.php'; // This is now the LAST line
+?>

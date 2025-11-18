@@ -1,0 +1,106 @@
+storeroom/
+│
+├── .vscode/                          # VS Code settings (keep as is)
+│
+├── assets/                           # Assets folder (keep as is)
+│
+├── css/                              # CSS folder (keep as is)
+│
+├── js/                               # JavaScript folder (keep as is)
+│
+├── uploads/                          # User uploads folder (keep as is)
+│
+├── admin/                            # ADMIN & SUPERADMIN PAGES
+│   ├── dashboard.php                 (was: admin_dashboard.php)
+│   ├── products.php                  (was: admin_products.php)
+│   ├── add_product.php               (was: admin_add_product.php)
+│   ├── edit_product.php              (was: admin_edit_product.php)
+│   ├── delete_product.php            (was: admin_delete_product.php)
+│   ├── category.php                  (was: admin_category.php)
+│   ├── department.php                (was: admin_department.php)
+│   ├── users.php                     (was: admin_users.php)
+│   ├── stock_manual.php              (was: admin_stock_manual.php)
+│   ├── manage_requests.php           (was: manage_requests.php)
+│   ├── profile.php                   (was: admin_profile.php)
+│   ├── header.php                    (was: admin_header.php)
+│   ├── footer.php                    (was: admin_footer.php)
+│   ├── sidebar.php                   (was: admin_sidebar.php)
+│   ├── top_navbar.php                (was: admin_top_navbar.php)
+│   ├── auth_check.php                (was: admin_auth_check.php)
+│   │
+│   └── reports/                      # Admin Reports Subfolder
+│       ├── inventory.php             (was: report_inventory.php)
+│       ├── inventory_view.php        (was: report_inventory_view.php)
+│       ├── requests.php              (was: report_requests.php)
+│       ├── requests_view.php         (was: report_requests_view.php)
+│       ├── suppliers.php             (was: report_suppliers.php)
+│       ├── suppliers_view.php        (was: report_suppliers_view.php)
+│       ├── transactions.php          (was: report_transactions.php)
+│       └── transactions_view.php     (was: report_transactions_view.php)
+│
+├── staff/                            # STAFF PAGES
+│   ├── dashboard.php                 (was: staff_dashboard.php)
+│   ├── request_list.php              (was: request_list.php)
+│   ├── request_edit.php              (was: request_edit.php) - NEW cart system
+│   ├── edit_request.php              (was: edit_request.php) - LEGACY single item
+│   ├── request_review.php            (was: request_review.php)
+│   ├── request_details_ajax.php      (was: request_details_ajax.php)
+│   ├── kewps8_form.php               (was: kewps8_form.php)
+│   ├── kewps8_cart_ajax.php          (was: kewps8_cart_ajax.php)
+│   ├── kewps8_approval.php           (was: kewps8_approval.php)
+│   ├── kewps8_receipt.php            (was: kewps8_receipt.php)
+│   ├── kewps8_print.php              (was: kewps8_print.php)
+│   ├── profile.php                   (was: staff_profile.php)
+│   ├── register.php                  (was: staff_register.php)
+│   ├── header.php                    (was: staff_header.php)
+│   ├── footer.php                    (was: staff_footer.php)
+│   └── auth_check.php                (was: staff_auth_check.php)
+│
+├── includes/                         # SHARED CONFIG & PROCESSING FILES
+│   ├── db.php                        (was: db.php)
+│   ├── login_process.php             (was: login_process.php)
+│   ├── hash_generator.php            (was: hash_generator.php)
+│   │
+│   ├── admin/                        # Admin Processing Files
+│   │   ├── add_product_process.php               (was: admin_add_product_process.php)
+│   │   ├── edit_product_process.php              (was: admin_edit_product_process.php)
+│   │   ├── delete_product.php                    (was: admin_delete_product.php)
+│   │   ├── category_process.php                  (was: admin_category_process.php)
+│   │   ├── stock_manual_process.php              (was: admin_stock_manual_process.php)
+│   │   ├── department_add.php                    (was: department_add.php)
+│   │   ├── department_edit.php                   (was: department_edit.php)
+│   │   ├── department_process.php                (was: department_process.php)
+│   │   ├── user_add.php                          (was: user_add.php)
+│   │   ├── user_add_process.php                  (was: user_add_process.php)
+│   │   ├── user_edit.php                         (was: user_edit.php)
+│   │   ├── user_edit_process.php                 (was: user_edit_process.php)
+│   │   └── user_delete.php                       (was: user_delete.php)
+│   │
+│   └── staff/                        # Staff Processing Files
+│       ├── register_process.php                  (was: staff_register_process.php)
+│       ├── request_review_process.php            (was: request_review_process.php)
+│       ├── request_edit_process.php              (was: request_edit_process.php) - NEW
+│       ├── edit_request_process.php              (was: edit_request_process.php) - LEGACY
+│       ├── request_delete.php                    (was: request_delete.php)
+│       ├── kewps8_approval_process.php           (was: kewps8_approval_process.php)
+│       ├── kewps8_form_process.php               (was: kewps8_form_process.php)
+│       └── kewps8_receipt_process.php            (was: kewps8_receipt_process.php)
+│
+├── shared/                           # SHARED BY BOTH ROLES
+│   ├── navbar.php                                (was: navbar.php)
+│   ├── print_request.php                         (was: print_request.php)
+│   ├── change_password.php                       (was: change_password.php)
+│   ├── change_password_process.php               (was: change_password_process.php)
+│   ├── profile_update_process.php                (was: profile_update_process.php)
+│   ├── profile_change_password_process.php       (was: profile_change_password_process.php)
+│   ├── delete_profile_picture.php                (was: delete_profile_picture.php)
+│   └── upload_profile_picture.php                (was: upload_profile_picture.php)
+│
+├── index.php                         # Landing page (keep in root)
+├── login.php                         # Login page (keep in root)
+├── logout.php                        # Logout handler (keep in root)
+├── auth_check.php                    # Generic auth check (keep in root)
+├── user_view.php                     # Public user view (keep in root if needed)
+├── seed_users.php                    # Database seeding script (keep in root)
+├── 404.php                           # Error page (keep in root)
+└── .htaccess                         # Apache config (keep in root)
