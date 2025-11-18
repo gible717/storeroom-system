@@ -38,8 +38,8 @@ function getInitials($name) {
         margin: 0 auto 1rem; /* Center the wrapper and add bottom margin */
 }
     .profile-avatar {
-        width: 100%; /* Will fill the wrapper */
-        height: 100%; /* Will fill the wrapper */
+        width: 100%;
+        height: 100%;
         border-radius: 50%;
         background-color: #e9ecef;
         color: #495057;
@@ -59,8 +59,8 @@ function getInitials($name) {
     /* This is the new camera button style */
     .upload-camera-button {
         position: absolute;
-        bottom: -5px;  /* Position it 10px bottom the wrapper */
-        right: -3px; /* Position it 10px outside the wrapper's right */
+        bottom: -5px;
+        right: -3px;
         background-color: #aeb1b4ff; 
         color: white;
         border-radius: 50%;
@@ -77,7 +77,40 @@ function getInitials($name) {
     }
     #profilePictureInput {
         display: none;
-}
+    }
+
+    /* Fix for edit picture modal size */
+    #editPictureModal .modal-dialog {
+        max-width: 450px !important;
+    }
+
+    #editPictureModal .modal-body {
+        padding: 2.5rem !important;
+    }
+
+    #editPictureModal .profile-avatar {
+        width: 200px !important;
+        height: 200px !important;
+        font-size: 5rem !important;
+        border-width: 4px !important;
+        margin: 0 auto 1.5rem !important;
+    }
+
+    #editPictureModal img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    #editPictureModal .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    #editPictureModal .d-grid {
+        gap: 1rem;
+    }
 </style>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
@@ -209,11 +242,6 @@ function getInitials($name) {
 </div>
 </div>
 
-<?php 
-$conn->close();
-require 'staff_footer.php'; // Use staff footer
-?>
-
 <script>
     // "Slay" (Vibe) 💄 all the "Steak" (Elements) 🥩
     const profilePictureInput = document.getElementById('profilePictureInput');
@@ -341,9 +369,14 @@ cropModalElement.addEventListener('shown.bs.modal', function () {
                 }
             })
             .catch(error => {
-                alert('Ralat besar telah berlaku: ' + error);
-                cropModal.hide();
-            })
+    Swal.fire({
+        icon: 'error',
+        title: 'Ralat Sambungan',
+        text: 'Gagal menghubungi pelayan: ' + error,
+        confirmButtonText: 'OK'
+    });
+    cropModal.hide();
+})
             .finally(() => {
                 cropButton.disabled = false;
                 cropButton.innerHTML = 'Potong & Muat Naik';
@@ -353,8 +386,7 @@ cropModalElement.addEventListener('shown.bs.modal', function () {
         // --- END OF "STEAK" (FIX) 3 ---
     });
 </script>
-</script>
 
 <?php 
-require '../staff/staff_footer.php'; // This is now the LAST line
+require 'staff_footer.php'; // This is now the LAST line
 ?>
