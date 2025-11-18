@@ -67,7 +67,7 @@ $conn->close();
         .page-container {
             width: 27.7cm; 
             min-height: 19cm; 
-            padding: 20px;
+            padding: 15px;
             margin: 20px auto;
             background: #FFF;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -89,15 +89,26 @@ $conn->close();
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px; 
+            font-size: 9px; 
             /* margin-bottom: 10px; <-- REMOVED this gap */
         }
         .report-table th, .report-table td {
             border: 2px solid #000;
-            padding: 5px;
+            padding: 3px;
             vertical-align: top;
-            height: 35px; 
+            height: 30px; 
             text-align: left;
+        }
+        /* Bold borders between main sections */
+        .report-table thead th:nth-child(4),
+        .report-table tbody td:nth-child(4),
+        .report-table tfoot td:nth-child(4) {
+            border-left: 4px solid #000 !important;  /* Bold border after Permohonan */
+        }
+        .report-table thead th:nth-child(7),
+        .report-table tbody td:nth-child(7),
+        .report-table tfoot td:nth-child(7) {
+            border-left: 4px solid #000 !important;  /* Bold border after Pegawai Pelulus */
         }
         .report-table .center { text-align: center; }
 
@@ -119,10 +130,10 @@ $conn->close();
         
         /* 1 & 3. UNIFIED TABLE: Styling for the new signature footer row */
         .report-table tfoot td {
-            height: 150px;
+            height: 120px;
             vertical-align: top;
-            padding: 10px;
-            font-size: 11px;
+            padding: 8px;
+            font-size: 10px;
         }
 
         .header-info {
@@ -137,15 +148,16 @@ $conn->close();
         }
 
         .signature-space {
-            height: 60px; 
+            height: 40px; 
             border-bottom: 1px dotted #000;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .footer-note {
             font-size: 11px;
             font-weight: bold;
             text-align: center;
-            padding-top: 10px; /* Give it space from the table */
+            padding-top: 5px; /* Give it space from the table */
+            margin-top: 5px; 
         }
 
         @media print {
@@ -163,105 +175,122 @@ $conn->close();
 </head>
 <body>
 
-    <div class="no-print text-center mb-3" style="padding-top: 20px;">
-        <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
-        <a href="manage_requests.php" class="btn btn-secondary">Kembali</a>
-    </div>
-
     <div class="page-container">
 
         <div class="row header-info">
-            <div class="col-6">
-                <span class="text-header-gray">Pekeliling Perbendaharaan Malaysia</span>
-            </div>
-            <div class="col-6 d-flex justify-content-end">
-                <div class="text-start"> <span class="text-header-gray">AM 6.5 Lampiran B</span><br>
-                    <strong style="font-size: 1.1em;">KEW.PS-8</strong><br>
-                    No. BPSI: <?php echo htmlspecialchars($header['ID_permohonan']); ?>
-                </div>
-            </div>
-            </div>
-
-        <div class="main-title">
+    <div class="col-6">
+        <span class="text-header-gray">Pekeliling Perbendaharaan Malaysia</span>
+    </div>
+    <div class="col-6">
+        <div style="text-align: right; padding-right: 80px;">
+            <span class="text-header-gray">AM 6.5 Lampiran B</span>
+        </div>
+        <div style="text-align: right; padding-right: 80px; margin-top: 10px;">
+            <strong style="font-size: 1.1em;">KEW.PS-8</strong>
+        </div>
+        <div style="text-align: left; padding-left: 288px; margin-top: 3px;">
+            <span style="font-weight: normal;">No. BPSI: <?php echo htmlspecialchars($header['ID_permohonan']); ?></span>
+        </div>
+    </div>
+</div>
+        <div class="main-title" style="margin-bottom: 10px; margin-top: 5px;">
             <strong>BORANG PERMOHONAN STOK<br>(INDIVIDU KEPADA STOR)</strong>
         </div>
 
-        <div class="header-info mb-2" style="padding-left: 40px;">
+        <div style="padding-left: 40px; margin-bottom: 0px; font-size: 11px; font-weight: normal;">
             Jabatan / Unit: <?php echo htmlspecialchars($header['jawatan_pemohon']); ?>
         </div>
 
         <table class="report-table">
             <thead class="header-row">
-                <tr class="header-row-main">
-                    <th colspan="4" class="header-main"><strong>Permohonan</strong></th>
-                    <th colspan="3" class="header-main"><strong>Pegawai Pelulus</strong></th>
-                    <th colspan="2" class="header-main"><strong>Perakuan Penerimaan</strong></th>
-                </tr>
-                <tr class="header-row-sub">
-                    <th class="header-sub" style="width: 5%;"><strong>No. Kod</strong></th>
-                    <th class="header-sub" style="width: 20%;"><strong>Perihal Stok</strong></th>
-                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Dimohon</strong></th>
-                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
-                    <th class="header-sub center" style="width: 7%;"><strong>Baki Sedia Ada</strong></th>
-                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Diluluskan</strong></th>
-                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
-                    <th class="header-sub center" style="width: 7%;"><strong>Kuantiti Diterima</strong></th>
-                    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $item_count = 0;
-                while($item = $items->fetch_assoc()): 
-                    $item_count++;
-                ?>
-                <tr>
-                    <td class="center"><?php echo htmlspecialchars($item['no_kod']); ?></td>
-                    <td><?php echo htmlspecialchars($item['perihal_stok']); ?></td>
-                    <td class="center"><?php echo htmlspecialchars($item['kuantiti_mohon']); ?></td>
-                    <td><?php echo $item_count == 1 ? htmlspecialchars($item['catatan_pemohon']) : ''; ?></td>
-                    <td class="center"><?php echo htmlspecialchars($item['baki_sedia_ada'] ?? '-'); ?></td>
-                    <td class="center"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
-                    <td></td> <td class="center" style="color: red; font-weight: bold;"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
-                    <td></td> </tr>
-                <?php endwhile; ?>
+                
+    <tr class="header-row-main">
+        <th colspan="3" class="header-main"><strong>Permohonan</strong></th>
+        <th colspan="3" class="header-main" style="border-left: 4px solid #000;"><strong>Pegawai Pelulus</strong></th>
+    <th colspan="2" class="header-main" style="border-left: 4px solid #000;"><strong>Perakuan Penerimaan</strong></th>
 
-                <?php 
-                for ($i = $item_count; $i < 8; $i++): 
-                ?>
-                <tr>
-                    <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td>
-                    <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td>
-                    <td>&nbsp;</td> <td>&nbsp;</td>
-                </tr>
-                <?php endfor; ?>
-            </tbody>
+    <tr class="header-row-sub">
+    <th class="header-sub" style="width: 6%;"><strong>No. Kod</strong></th>
+    <th class="header-sub" style="width: 17%;"><strong>Perihal Stok</strong></th>
+    <th class="header-sub center" style="width: 10%;"><strong>Kuantiti<br>Dimohon</strong></th>
+    <th class="header-sub center" style="width: 8%; border-left: 5px solid #000;"><strong>Baki Sedia<br>Ada</strong></th>
+    <th class="header-sub center" style="width: 10%;"><strong>Kuantiti<br>Diluluskan</strong></th>
+    <th class="header-sub" style="width: 15%;"><strong>Catatan</strong></th>
+    <th class="header-sub center" style="width: 11%; border-left: 5px solid #000;"><strong>Kuantiti<br>Diterima</strong></th>
+    <th class="header-sub" style="width: 23%;"><strong>Catatan</strong></th>
+</tr> 
+</thead>
+            <tbody>
+    <?php 
+    $item_count = 0;
+    while($item = $items->fetch_assoc()): 
+        $item_count++;
+    ?>
+    <tr>
+    <td class="center"><?php echo htmlspecialchars($item['no_kod']); ?></td>
+    <td><?php echo htmlspecialchars($item['perihal_stok']); ?></td>
+    <td class="center"><?php echo htmlspecialchars($item['kuantiti_mohon']); ?></td>
+    <td class="center"><?php echo htmlspecialchars($item['baki_sedia_ada'] ?? '-'); ?></td>
+    <td class="center" style="color: red; font-weight: bold;"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
+    <td></td>
+    <td class="center" style="color: red; font-weight: bold;"><?php echo htmlspecialchars($item['kuantiti_lulus']); ?></td>
+    <td></td>
+    </tr>
+    <?php endwhile; ?>
+
+    <?php 
+    for ($i = $item_count; $i < 7; $i++): 
+    ?>
+    <tr>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <?php endfor; ?>
+</tbody>
             
             <tfoot>
-                <tr>
-                    <td colspan="4">
-                        <strong>Pemohon:</strong> <div class="signature-space"></div>
-                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span> <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
-                        <span class="text-gray-label">Jawatan:</span> <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
-                        <span class="text-gray-label">Tarikh:</span> <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?><br>
-                    </td>
-                    <td colspan="3">
-                        <strong>Pegawai Pelulus:</strong> <div class="signature-space"></div>
-                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span> <?php echo htmlspecialchars($header['nama_pelulus'] ?? '-'); ?><br>
-                        <span class="text-gray-label">Jawatan:</span> <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? '-'); ?><br>
-                        <span class="text-gray-label">Tarikh:</span> <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : '-'; ?><br>
-                    </td>
-                    <td colspan="2">
-                        <strong>Pemohon/ Wakil:</strong> <div class="signature-space"></div>
-                        <span class="text-gray-label">(Tandatangan)</span><br> <span class="text-gray-label">Nama:</span><br>
-                        <span class="text-gray-label">Jawatan:</span><br>
-                        <span class="text-gray-label">Tarikh:</span><br>
-                    </td>
-                </tr>
-            </tfoot>
+    <tr>
+        <td colspan="3">
+            <strong>Pemohon:</strong>
+            <div class="signature-space"></div>
+            (Tandatangan)<br>
+            Nama : <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
+            Jawatan : <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
+            Tarikh : <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?>
+        </td>
+        <td colspan="3">
+            <strong>Pegawai Pelulus:</strong>
+            <div class="signature-space"></div>
+            (Tandatangan)<br>
+            Nama : <?php echo htmlspecialchars($header['nama_pelulus'] ?? '-'); ?><br>
+            Jawatan : <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? '-'); ?><br>
+            Tarikh : <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : '-'; ?>
+        </td>
+        <td colspan="2">
+            <strong>Pemohon/ Wakil:</strong>
+            <div class="signature-space"></div>
+            (Tandatangan)<br>
+            Nama :<br>
+            Jawatan :<br>
+            Tarikh :
+        </td>
+    </tr>
+</tfoot>
         </table>
 
         <div class="footer-note">M.S. 12/13</div>
 
-    </div> </body>
+    </div> 
+</body>
+    
+    <div class="no-print text-center mb-3" style="padding-top: 20px;">
+        <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
+        <a href="manage_requests.php" class="btn btn-secondary">Kembali</a>
+    </div>
 </html>
