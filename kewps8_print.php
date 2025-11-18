@@ -254,31 +254,31 @@ $conn->close();
     <?php endfor; ?>
 </tbody>
             
-            <tfoot>
+    <tfoot>
     <tr>
         <td colspan="3">
             <strong>Pemohon:</strong>
             <div class="signature-space"></div>
             (Tandatangan)<br>
-            Nama : <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
-            Jawatan : <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
-            Tarikh : <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?>
+            Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
+            Jawatan&nbsp;&nbsp;: <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
+            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?>
         </td>
-        <td colspan="3">
+        <td colspan="3" style="border-left: 4px solid #000 !important;">
             <strong>Pegawai Pelulus:</strong>
             <div class="signature-space"></div>
             (Tandatangan)<br>
-            Nama : <?php echo htmlspecialchars($header['nama_pelulus'] ?? '-'); ?><br>
-            Jawatan : <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? '-'); ?><br>
-            Tarikh : <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : '-'; ?>
+            Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pelulus'] ?? ''); ?><br>
+            Jawatan&nbsp;&nbsp;: <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? ''); ?><br>
+            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : ''; ?>
         </td>
-        <td colspan="2">
+        <td colspan="2" style="border-left: 4px solid #000 !important;">
             <strong>Pemohon/ Wakil:</strong>
             <div class="signature-space"></div>
             (Tandatangan)<br>
-            Nama :<br>
-            Jawatan :<br>
-            Tarikh :
+            Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<br>
+            Jawatan&nbsp;&nbsp;:<br>
+            Tarikh&nbsp;&nbsp;&nbsp;:
         </td>
     </tr>
 </tfoot>
