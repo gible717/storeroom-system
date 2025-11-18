@@ -1,6 +1,6 @@
 <?php
 // FILE: kewps8_print.php (v3.0 - Unified Table Structure)
-require 'auth_check.php'; 
+require 'auth_check.php';
 
 // 1. Get the Request ID
 $id_permohonan = $_GET['id'] ?? null;
