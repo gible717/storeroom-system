@@ -5,6 +5,7 @@ require_once 'db.php';
 require 'admin_header.php'; // This "slays" (includes) db.php and auth checks
 
 // "4x4" (Safe) Check: Ensure user is Admin
+$userRole = isset($_SESSION['userRole']) ? $_SESSION['userRole'] : null;
 if ($userRole !== 'Admin') {
     header("Location: staff_dashboard.php?error=Akses tidak dibenarkan.");
     exit;

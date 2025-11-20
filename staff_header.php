@@ -52,9 +52,6 @@ $header_user_initials = substr($initials, 0, 2);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <link href="/storeroom/css/cropper.min.css" rel="stylesheet">
-    <script src="/storeroom/js/cropper.min.js"></script>
-
     <style>
         body {
             background-color: #f8f9fa;

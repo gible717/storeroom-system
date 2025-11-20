@@ -78,39 +78,6 @@ function getInitials($name) {
     #profilePictureInput {
         display: none;
     }
-
-    /* Fix for edit picture modal size */
-    #editPictureModal .modal-dialog {
-        max-width: 450px !important;
-    }
-
-    #editPictureModal .modal-body {
-        padding: 2.5rem !important;
-    }
-
-    #editPictureModal .profile-avatar {
-        width: 200px !important;
-        height: 200px !important;
-        font-size: 5rem !important;
-        border-width: 4px !important;
-        margin: 0 auto 1.5rem !important;
-    }
-
-    #editPictureModal img {
-        width: 200px;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    #editPictureModal .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    #editPictureModal .d-grid {
-        gap: 1rem;
-    }
 </style>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
@@ -222,18 +189,18 @@ function getInitials($name) {
                 <?php if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])): ?>
                     <img src="<?php echo htmlspecialchars($user['gambar_profil']) . '?t=' . time(); ?>" alt="Gambar Profil" class="img-fluid rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
                 <?php else: ?>
-                    <div class="profile-avatar mx-auto mb-3" style="width: 200px; height: 200px; font-size: 4rem;">
+                    <div class="profile-avatar mx-auto mb-3" style="width: 200px; height: 200px; font-size: 5rem; border-width: 4px;">
                         <?php echo getInitials($user['nama']); ?>
                     </div>
                 <?php endif; ?>
 
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary" id="changePictureButton">
-                        <i class="bi bi-camera-fill me-2"></i>Tukar Gambar Profil
+                    <button type="button" class="btn btn-primary" id="triggerUploadButton">
+                        <i class="bi bi-upload-fill me-2"></i>Tukar Gambar Profil
                     </button>
 
                     <button type="button" class="btn btn-outline-danger" id="triggerDeleteButton" <?php echo empty($user['gambar_profil']) ? 'disabled' : ''; ?>>
-                        <i class="bi bi-trash-fill me-2"></i>Padam Gambar
+                        <i class="bi bi-trash me-2"></i>Padam Gambar
                     </button>
             </div>
 
@@ -258,7 +225,7 @@ function getInitials($name) {
     // --- ADDED: Selectors for the new modal and its buttons ---
     const editModalElement = document.getElementById('editPictureModal');
     const editModal = new bootstrap.Modal(editModalElement);
-    const triggerUploadButton = document.getElementById('changePictureButton');
+    const triggerUploadButton = document.getElementById('triggerUploadButton');
     const triggerDeleteButton = document.getElementById('triggerDeleteButton');
     // --- END OF ADDED CODE ---
 

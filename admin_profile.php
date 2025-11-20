@@ -226,7 +226,7 @@ require 'admin_footer.php'; // Use staff footer
     // --- ADDED: Selectors for the new modal and its buttons ---
     const editModalElement = document.getElementById('editPictureModal');
     const editModal = new bootstrap.Modal(editModalElement);
-    const triggerUploadButton = document.getElementById('changePictureButton');
+    const triggerUploadButton = document.getElementById('triggerUploadButton');
     const triggerDeleteButton = document.getElementById('triggerDeleteButton');
     // --- END OF ADDED CODE ---
 
@@ -288,6 +288,11 @@ require 'admin_footer.php'; // Use staff footer
             aspectRatio: 1 / 1,
             viewMode: 2,
             autoCropArea: 0.9,
+            zoomable: true,
+            scalable: true,
+            movable: true,
+            background: false,
+            guides: true,
         });
     });
 
@@ -332,7 +337,11 @@ require 'admin_footer.php'; // Use staff footer
                 }
             })
             .catch(error => {
-                alert('Ralat besar telah berlaku: ' + error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ralat Sambungan',
+                    text: 'Gagal memuat naik gambar. Sila cuba lagi.',
+                });
                 cropModal.hide();
             })
             .finally(() => {

@@ -15,3 +15,19 @@ Stack trace:
 [18-Nov-2025 08:24:31 Europe/Berlin] [UPLOAD DEBUG] Image saved successfully
 [18-Nov-2025 08:24:31 Europe/Berlin] [UPLOAD DEBUG] Database updated. Affected rows: 1
 [18-Nov-2025 08:24:31 Europe/Berlin] [UPLOAD DEBUG] Success response sent
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] Script started
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] DB connected successfully
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] User ID: S001
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] File received: profile_upload Size: 15431
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] Target path: uploads/profile_pictures/S001.jpeg
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] Image saved successfully
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] Database updated. Affected rows: 1
+[20-Nov-2025 02:51:08 Europe/Berlin] [UPLOAD DEBUG] Success response sent
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] Script started
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] DB connected successfully
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] User ID: A001
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] File received: profile_upload Size: 11118
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] Target path: uploads/profile_pictures/A001.jpeg
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] Image saved successfully
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] Database updated. Affected rows: 1
+[20-Nov-2025 02:52:19 Europe/Berlin] [UPLOAD DEBUG] Success response sent
