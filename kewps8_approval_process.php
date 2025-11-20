@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 nama_pelulus = ?,
                                 jawatan_pelulus = ?,
                                 tarikh_lulus = ?
-                           WHERE ID_permohonan = ?";
+                        WHERE ID_permohonan = ?";
             
             $stmt_reject = $conn->prepare($sql_reject);
             $stmt_reject->bind_param("ssssi", $id_pelulus, $nama_pelulus, $jawatan_pelulus, $tarikh_lulus, $id_permohonan);
@@ -61,15 +61,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql_update_stock = "UPDATE barang SET baki_semasa = baki_semasa - ? WHERE no_kod = ?";
             $stmt_update_stock = $conn->prepare($sql_update_stock);
 
-            // Step 3: Log the transaction in our new ledger
-            $sql_log_transaksi = "INSERT INTO transaksi_stok 
-                                  (tarikh_transaksi, no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, ID_rujukan_permohonan) 
-                                  VALUES (NOW(), ?, 'Keluar', ?, (SELECT baki_semasa FROM barang WHERE no_kod = ?), ?)";
+            // Step 3: Prepare transaction log statement (for KEW.PS-3 compliance)
+            // Get requester name from permohonan table
+            $stmt_get_requester = $conn->prepare("SELECT nama_pemohon FROM permohonan WHERE ID_permohonan = ?");
+            $stmt_get_requester->bind_param("i", $id_permohonan);
+            $stmt_get_requester->execute();
+            $requester_data = $stmt_get_requester->get_result()->fetch_assoc();
+            $requester_name = $requester_data['nama_pemohon'];
+            $stmt_get_requester->close();
+
+            $sql_log_transaksi = "INSERT INTO transaksi_stok
+                                (tarikh_transaksi, terima_dari_keluar_kepada, no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, ID_rujukan_permohonan, ID_pegawai)
+                                VALUES (NOW(), ?, ?, 'Keluar', ?, (SELECT baki_semasa FROM barang WHERE no_kod = ?), ?, ?)";
             $stmt_log_transaksi = $conn->prepare($sql_log_transaksi);
 
             foreach ($items as $id_item => $item_data) {
                 $kuantiti_lulus = (int)$item_data['kuantiti_lulus'];
-                
+
                 // We need to find the no_kod for this item
                 $stmt_get_nokod = $conn->prepare("SELECT no_kod FROM permohonan_barang WHERE ID_permohonan_barang = ?");
                 $stmt_get_nokod->bind_param("i", $id_item);
@@ -82,14 +90,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Update 'permohonan_barang' with approved quantity
                     $stmt_update_item->bind_param("ii", $kuantiti_lulus, $id_item);
                     $stmt_update_item->execute();
-                    
+
                     // Update 'barang' (stock-out)
-                    $stmt_update_stock->bind_param("ii", $kuantiti_lulus, $no_kod);
+                    $stmt_update_stock->bind_param("is", $kuantiti_lulus, $no_kod);
                     $stmt_update_stock->execute();
-                    
-                    // Log in 'transaksi_stok'
-                    // We re-use $no_kod (param 3) and $id_permohonan (param 4)
-                    $stmt_log_transaksi->bind_param("iiii", $no_kod, $kuantiti_lulus, $no_kod, $id_permohonan);
+
+                    // Log in 'transaksi_stok' (for KEW.PS-3)
+                    // Parameters: terima_dari_keluar_kepada, no_kod, kuantiti, no_kod (for SELECT), ID_rujukan_permohonan, ID_pegawai
+                    $stmt_log_transaksi->bind_param("ssiiss", $requester_name, $no_kod, $kuantiti_lulus, $no_kod, $id_permohonan, $id_pelulus);
                     $stmt_log_transaksi->execute();
                 } else {
                     // If admin approved 0, just update the item status

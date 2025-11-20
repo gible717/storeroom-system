@@ -11,12 +11,12 @@ require 'admin_header.php';
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100" style="border-radius: 1rem;">
             <div class="card-body text-center p-4">
-                <i class="bi bi-box-seam-fill text-primary" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-3 mb-2">Laporan Inventori</h5>
-                <p class="card-text text-muted">
-                    Laporan stok semasa dan pergerakan inventori.
+                <i class="bi bi-clipboard-data text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3 mb-2">Laporan Permohonan & Analisis</h5>
+                <p class="card-text text-muted small">
+                    Statistik permohonan staf, kadar kelulusan, dan analisis penggunaan mengikut tempoh.
                 </p>
-                <a href="report_inventory.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_requests.php" class="btn btn-outline-primary mt-2">Jana Laporan</a>
             </div>
         </div>
     </div>
@@ -24,12 +24,12 @@ require 'admin_header.php';
     <div class="col-md-4">
         <div class="card shadow-sm border-0 h-100" style="border-radius: 1rem;">
             <div class="card-body text-center p-4">
-                <i class="bi bi-journal-text text-warning" style="font-size: 3rem;"></i>
-                <h5 class="card-title mt-3 mb-2">Laporan Permohonan</h5>
-                <p class="card-text text-muted">
-                    Laporan permohonan staf mengikut tempoh.
+                <i class="bi bi-journal-text text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3 mb-2">Laporan KEW.PS-3 Bahagian B</h5>
+                <p class="card-text text-muted small">
+                    Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh (format rasmi kerajaan).
                 </p>
-                <a href="report_requests.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="kewps3_report.php" class="btn btn-outline-primary mt-2">Jana Laporan</a>
             </div>
         </div>
     </div>
@@ -39,10 +39,10 @@ require 'admin_header.php';
             <div class="card-body text-center p-4">
                 <i class="bi bi-arrow-down-up text-info" style="font-size: 3rem;"></i>
                 <h5 class="card-title mt-3 mb-2">Laporan Transaksi</h5>
-                <p class="card-text text-muted">
-                    Laporan transaksi stok masuk dan keluar.
+                <p class="card-text text-muted small">
+                    Ringkasan transaksi stok masuk dan keluar mengikut tempoh.
                 </p>
-                <a href="report_transactions.php" class="btn btn-outline-primary">Jana Laporan</a>
+                <a href="report_transactions.php" class="btn btn-outline-primary mt-2">Jana Laporan</a>
             </div>
         </div>
     </div>
