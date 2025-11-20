@@ -9,7 +9,7 @@ $is_admin = (isset($_SESSION['peranan']) && $_SESSION['peranan'] == 'Admin') ||
             (isset($_SESSION['is_superadmin']) && $_SESSION['is_superadmin'] == 1);
 
 if (!isset($_SESSION['ID_staf']) || !$is_admin) {
-    die("Akses ditolak. Sila log masuk sebagai pentadbir.");
+    die("Akses ditolak. Sila log masuk sebagai admin.");
 }
 
 // Get parameters
@@ -73,196 +73,252 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KEW.PS-3 Bahagian B - <?php echo htmlspecialchars($barang['perihal_stok']); ?></title>
+    <title>KEW.PS-3_<?php echo htmlspecialchars($barang['perihal_stok']) . '_' . date('d-m-Y', strtotime($tarikh_mula)) . '_hingga_' . date('d-m-Y', strtotime($tarikh_akhir)); ?></title>
     <style>
         @page {
             size: A4 portrait;
-            margin: 15mm;
+            margin: 10mm 15mm 10mm 15mm;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             font-size: 10pt;
             line-height: 1.3;
             color: #000;
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #e9ecef;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
+
+        .document-container {
+            background-color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
         }
-        
-        .header-top {
+
+        .page-header {
             display: flex;
             justify-content: space-between;
-            font-size: 9pt;
-            margin-bottom: 10px;
+            font-size: 8.5pt;
+            margin-bottom: 8px;
+            color: #000;
         }
-        
+
+        .header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
         .header h1 {
-            font-size: 12pt;
+            font-size: 16pt;
             font-weight: bold;
             margin: 5px 0;
-        }
-        
-        .item-info {
-            margin: 15px 0;
-            font-size: 10pt;
-        }
-        
-        .item-info table {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        
-        .item-info td {
-            padding: 3px 0;
-        }
-        
-        .item-info td:first-child {
-            width: 150px;
-            font-weight: bold;
+            letter-spacing: 2px;
         }
         
         table.transactions {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 0;
+            margin-bottom: 0;
         }
-        
+
         table.transactions th,
         table.transactions td {
             border: 1px solid #000;
-            padding: 4px 3px;
+            padding: 6px 4px;
             text-align: center;
             font-size: 9pt;
+            line-height: 1.3;
+            height: 28px;
         }
-        
+
         table.transactions th {
-            background-color: #f0f0f0;
             font-weight: bold;
             vertical-align: middle;
+            padding: 8px 4px;
+            background-color: #f5f5f5;
         }
-        
+
         table.transactions td {
             vertical-align: middle;
         }
-        
+
         table.transactions td.left {
             text-align: left;
             padding-left: 5px;
         }
-        
+
         table.transactions td.right {
             text-align: right;
             padding-right: 5px;
         }
-        
+
         .opening-balance {
-            background-color: #fffacd;
-            font-weight: bold;
+            font-weight: normal;
         }
-        
-        .footer {
-            margin-top: 20px;
-            font-size: 8pt;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+
+        .opening-balance td {
+            padding: 6px 6px;
         }
-        
-        .footer p {
+
+        .page-footer {
+            margin-top: 8px;
+            padding-top: 8px;
+            padding-left: 0;
+            font-size: 8.5pt;
+            color: #000;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .page-footer p {
             margin: 2px 0;
+            text-align: left;
+        }
+
+        .page-footer p:first-child {
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .page-footer p:not(:first-child) {
+            font-style: italic;
         }
         
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
         @media print {
             .no-print {
                 display: none;
             }
-            
+
             body {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                max-width: 100%;
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+            }
+
+            .document-container {
+                box-shadow: none;
+                padding: 10px 15px;
+                margin: 0;
+            }
+
+            .page-header {
+                margin-bottom: 8px;
+            }
+
+            .header {
+                margin-bottom: 5px;
+            }
+
+            table.transactions th,
+            table.transactions td {
+                padding: 6px 4px;
+                font-size: 9pt;
+                height: 28px;
+            }
+
+            table.transactions th {
+                padding: 8px 4px;
+            }
+
+            .page-footer {
+                margin-top: 8px;
+                padding-top: 8px;
             }
         }
-        
-        .print-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
+
+        .btn {
             padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            z-index: 1000;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
         }
-        
-        .print-button:hover {
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
             background-color: #0056b3;
         }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .print-controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+        }
     </style>
+    <script>
+        // Generate filename for print/save
+        window.onload = function() {
+            const filename = "KEW.PS-3_<?php echo htmlspecialchars($barang['perihal_stok']) . '_' . date('d-m-Y', strtotime($tarikh_mula)) . '_hingga_' . date('d-m-Y', strtotime($tarikh_akhir)); ?>";
+            document.title = filename;
+        };
+    </script>
 </head>
 <body>
-    <button onclick="window.print()" class="print-button no-print">
-        🖨️ Cetak Laporan
-    </button>
+    <!-- Page Header (repeats on each page) -->
+    <div class="document-container">
+    <div class="page-header">
+        <span>Pekeiling Perbendaharaan Malaysia</span>
+        <span>AM 6.3 Lampiran A</span>
+    </div>
 
+    <!-- Main Header (first page only) -->
     <div class="header">
-        <div class="header-top">
-            <span>Pekeiling Perbendaharaan Malaysia</span>
-            <span>AM 6.3 Lampiran A</span>
-        </div>
-        <h1>BAHAGIAN B</h1>
-        <div style="margin-top: 5px; font-size: 11pt;">Transaksi Stok</div>
+        <h3>BAHAGIAN B</h3>
     </div>
 
-    <div class="item-info">
-        <table>
-            <tr>
-                <td>Nama Barang:</td>
-                <td><?php echo htmlspecialchars($barang['perihal_stok']); ?></td>
-            </tr>
-            <tr>
-                <td>No. Kod:</td>
-                <td><?php echo $barang['no_kod']; ?></td>
-            </tr>
-            <tr>
-                <td>Unit Pengukuran:</td>
-                <td><?php echo htmlspecialchars($barang['unit_pengukuran'] ?? 'Unit'); ?></td>
-            </tr>
-            <tr>
-                <td>Harga Seunit:</td>
-                <td>RM <?php echo number_format($barang['harga_seunit'], 2); ?></td>
-            </tr>
-            <tr>
-                <td>Tempoh Laporan:</td>
-                <td><?php echo date('d/m/Y', strtotime($tarikh_mula)); ?> hingga <?php echo date('d/m/Y', strtotime($tarikh_akhir)); ?></td>
-            </tr>
-        </table>
-    </div>
+    <div style="text-align: left; margin-bottom: 8px; font-size: 10pt; font-weight: 600;">Transaksi Stok</div>
 
     <table class="transactions">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 60px;">Tarikh</th>
-                <th rowspan="2" style="width: 80px;">No PK/<br>BTB/<br>BPSS/<br>BPSI/<br>BPIN</th>
-                <th rowspan="2" style="width: 100px;">Terima<br>Daripada/<br>Keluar<br>Kepada</th>
-                <th colspan="3">TERIMAAN</th>
-                <th colspan="2">KELUARAN</th>
-                <th colspan="2">BAKI</th>
-                <th rowspan="2" style="width: 80px;">Nama<br>Pegawai</th>
+                <th rowspan="2" style="width: 50px;">Tarikh</th>
+                <th rowspan="2" style="width: 55px;">No.PK/<br>BTB/<br>BPSS/<br>BPSI/<br>BPIN</th>
+                <th rowspan="2" style="width: 90px;">Terima<br>Daripada/<br>Keluar<br>Kepada</th>
+                <th colspan="3" style="border-bottom: 1px solid #000;">TERIMAAN</th>
+                <th colspan="2" style="border-bottom: 1px solid #000;">KELUARAN</th>
+                <th colspan="2" style="border-bottom: 1px solid #000;">BAKI</th>
+                <th rowspan="2" style="width: 75px;">Nama<br>Pegawai</th>
             </tr>
             <tr>
                 <th style="width: 40px;">Kuantiti</th>
-                <th style="width: 50px;">Seunit<br>(RM)</th>
+                <th style="width: 45px;">Seunit<br>(RM)</th>
                 <th style="width: 50px;">Jumlah<br>(RM)</th>
                 <th style="width: 40px;">Kuantiti</th>
                 <th style="width: 50px;">Jumlah<br>(RM)</th>
@@ -273,77 +329,96 @@ $conn->close();
         <tbody>
             <!-- Opening Balance Row -->
             <tr class="opening-balance">
-                <td colspan="8" class="left">Baki dibawa ke hadapan</td>
-                <td class="right"><?php echo number_format($opening_balance); ?></td>
-                <td class="right">
-                    <?php echo number_format($opening_balance * $barang['harga_seunit'], 2); ?>
-                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="5" class="left" style="font-weight: normal; padding-left: 5px;">Baki dibawa ke hadapan................................ <span style="letter-spacing: 2px;"></span></td>
+                <td class="right" style="font-weight: normal;"><?php echo number_format($opening_balance); ?></td>
+                <td class="right" style="font-weight: normal;"><?php echo number_format($opening_balance * $barang['harga_seunit'], 2); ?></td>
                 <td></td>
             </tr>
 
-            <?php 
+            <?php
             $running_balance = $opening_balance;
+            $row_count = 0;
+            $max_rows_per_page = 25; // Approximate number of rows that fit on one page
+
             if ($transactions->num_rows > 0):
-                while ($txn = $transactions->fetch_assoc()): 
+                while ($txn = $transactions->fetch_assoc()):
                     $is_in = ($txn['jenis_transaksi'] == 'Masuk');
                     $kuantiti = $txn['kuantiti'];
                     $harga = $barang['harga_seunit'];
                     $jumlah = $kuantiti * $harga;
-                    
+
                     // Use actual balance from database
                     $running_balance = $txn['baki_selepas_transaksi'];
                     $balance_value = $running_balance * $harga;
+                    $row_count++;
             ?>
             <tr>
                 <td><?php echo date('d/m/Y', strtotime($txn['tarikh_transaksi'])); ?></td>
-                <td></td> <!-- Document number left blank for security -->
+                <td></td>
                 <td class="left"><?php echo htmlspecialchars($txn['terima_dari_keluar_kepada'] ?? '-'); ?></td>
-                
+
                 <!-- TERIMAAN (Received) -->
                 <td class="right"><?php echo $is_in ? number_format($kuantiti) : ''; ?></td>
                 <td class="right"><?php echo $is_in ? number_format($harga, 2) : ''; ?></td>
                 <td class="right"><?php echo $is_in ? number_format($jumlah, 2) : ''; ?></td>
-                
+
                 <!-- KELUARAN (Issued) -->
                 <td class="right"><?php echo !$is_in ? number_format($kuantiti) : ''; ?></td>
                 <td class="right"><?php echo !$is_in ? number_format($jumlah, 2) : ''; ?></td>
-                
+
                 <!-- BAKI (Balance) -->
                 <td class="right"><?php echo number_format($running_balance); ?></td>
                 <td class="right"><?php echo number_format($balance_value, 2); ?></td>
-                
-                <td class="left" style="font-size: 8pt;">
+
+                <td class="left" style="font-size: 7.5pt;">
                     <?php echo htmlspecialchars($txn['nama_pegawai'] ?? '-'); ?>
                 </td>
             </tr>
-            <?php 
+            <?php
                 endwhile;
-            else:
+            endif;
+
+            // Fill remaining rows with empty cells to match official format
+            for ($i = $row_count; $i < $max_rows_per_page; $i++):
             ?>
             <tr>
-                <td colspan="11" class="left" style="padding: 20px; text-align: center; color: #666;">
-                    Tiada transaksi dalam tempoh yang dipilih
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <?php endfor; ?>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="11" style="border: none; padding: 0;">
+                    <div class="page-footer">
+                        <p style="font-style: italic; margin-bottom: 3px;">Nota:</p>
+                        <p style="font-style: italic;">PK = Pesanan Kerajaan</p>
+                        <p style="font-style: italic;">BTB = Borang Terimaan Barang-barang</p>
+                        <p style="font-style: italic;">BPSS = Borang Permohonan Stok (KEW.PS-7)</p>
+                        <p style="font-style: italic;">BPSI = Borang Permohonan Stok (KEW.PS-8)</p>
+                        <p style="font-style: italic;">BPIN = Borang Pindahan Stok (KEW.PS-17)</p>
+                    </div>
                 </td>
             </tr>
-            <?php endif; ?>
-        </tbody>
+        </tfoot>
     </table>
-
-    <div class="footer">
-        <p><strong>Nota:</strong></p>
-        <p>PK = Pesanan Kerajaan</p>
-        <p>BTB = Borang Terimaan Barang-barang</p>
-        <p>BPSS = Borang Permohonan Stok (KEW.PS-7)</p>
-        <p>BPSI = Borang Permohonan Stok (KEW.PS-8)</p>
-        <p>BPIN = Borang Pindahan Stok (KEW.PS-17)</p>
-        <p style="margin-top: 10px; font-style: italic; color: #666;">
-            Laporan dijana pada: <?php echo date('d/m/Y H:i:s'); ?>
-        </p>
     </div>
 
-    <script>
-        // Auto print on load (optional)
-        // window.onload = function() { window.print(); }
-    </script>
+    <div class="print-controls no-print">
+        <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
+        <button onclick="window.close()" class="btn btn-secondary">Kembali</button>
+    </div>
 </body>
 </html>
