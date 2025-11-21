@@ -10,7 +10,10 @@ $barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY 
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800 fw-bold">
-            <i class="bi bi-file-earmark-text me-2"></i>Laporan KEW.PS-3 Bahagian B - Transaksi Stok
+            <a href="admin_reports.php" class="text-decoration-none text-secondary me-2">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            Laporan KEW.PS-3 Bahagian B - Transaksi Stok
         </h1>
     </div>
 
@@ -45,45 +48,12 @@ $barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY 
                     </div>
                 </div>
 
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Nota:</strong> Laporan akan dijana dalam format KEW.PS-3 Bahagian B yang boleh dicetak. 
-                    Nombor dokumen rujukan tidak akan dipaparkan atas sebab keselamatan.
-                </div>
-
                 <div class="text-end">
-                    <a href="admin_reports.php" class="btn btn-secondary me-2">
-                        <i class="bi bi-arrow-left me-2"></i>Kembali
-                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-printer me-2"></i>Jana & Cetak Laporan
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Example Preview Section -->
-    <div class="card shadow">
-        <div class="card-header py-3 bg-light">
-            <h6 class="m-0 font-weight-bold text-secondary">
-                <i class="bi bi-eye me-2"></i>Contoh Format Laporan
-            </h6>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-2">Laporan akan mengandungi maklumat berikut:</p>
-            <ul class="text-muted">
-                <li>Tarikh transaksi</li>
-                <li>Nama penerima/pengeluar barang</li>
-                <li>Kuantiti dan jumlah (RM) untuk terimaan</li>
-                <li>Kuantiti dan jumlah (RM) untuk keluaran</li>
-                <li>Baki stok dan nilai semasa</li>
-                <li>Nama pegawai yang meluluskan</li>
-            </ul>
-            <p class="text-muted mb-0">
-                <i class="bi bi-shield-lock me-2"></i>
-                Nombor rujukan dokumen (PK/BTB/BPSS/BPSI/BPIN) tidak akan dipaparkan untuk keselamatan.
-            </p>
         </div>
     </div>
 </div>

@@ -77,7 +77,7 @@ $conn->close();
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 15mm 10mm 15mm;
+            margin: 0.5in;
         }
 
         * {
@@ -91,36 +91,35 @@ $conn->close();
             font-size: 10pt;
             line-height: 1.3;
             color: #000;
-            max-width: 750px;
-            margin: 0 auto;
-            padding: 10px;
-            background-color: #e9ecef;
+            background-color: #F8F8F8;
         }
 
         .document-container {
-            background-color: #fff;
-            padding: 15px 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 19cm;
+            min-height: 27cm;
+            padding: 15px;
             margin: 20px auto;
+            background: #FFF;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .page-header {
             display: flex;
             justify-content: space-between;
             font-size: 8.5pt;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #000;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .header h1 {
             font-size: 16pt;
             font-weight: bold;
-            margin: 5px 0;
+            margin: 3px 0;
             letter-spacing: 2px;
         }
         
@@ -134,17 +133,17 @@ $conn->close();
         table.transactions th,
         table.transactions td {
             border: 1px solid #000;
-            padding: 6px 4px;
+            padding: 5px 3px;
             text-align: center;
-            font-size: 9pt;
+            font-size: 8.5pt;
             line-height: 1.3;
-            height: 28px;
+            height: 26px;
         }
 
         table.transactions th {
             font-weight: bold;
             vertical-align: middle;
-            padding: 8px 4px;
+            padding: 6px 3px;
             background-color: #f5f5f5;
         }
 
@@ -167,21 +166,21 @@ $conn->close();
         }
 
         .opening-balance td {
-            padding: 6px 6px;
+            padding: 5px 5px;
         }
 
         .page-footer {
-            margin-top: 8px;
-            padding-top: 8px;
+            margin-top: 5px;
+            padding-top: 5px;
             padding-left: 0;
             font-size: 8.5pt;
             color: #000;
-            line-height: 1.4;
+            line-height: 1.3;
             text-align: left;
         }
 
         .page-footer p {
-            margin: 2px 0;
+            margin: 1px 0;
             text-align: left;
         }
 
@@ -204,46 +203,16 @@ $conn->close();
 
         @media print {
             .no-print {
-                display: none;
+                display: none !important;
             }
 
             body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                max-width: 100%;
-                background-color: #fff;
-                padding: 0;
-                margin: 0;
+                background-color: #fff !important;
             }
 
             .document-container {
-                box-shadow: none;
-                padding: 10px 15px;
-                margin: 0;
-            }
-
-            .page-header {
-                margin-bottom: 8px;
-            }
-
-            .header {
-                margin-bottom: 5px;
-            }
-
-            table.transactions th,
-            table.transactions td {
-                padding: 6px 4px;
-                font-size: 9pt;
-                height: 28px;
-            }
-
-            table.transactions th {
-                padding: 8px 4px;
-            }
-
-            .page-footer {
-                margin-top: 8px;
-                padding-top: 8px;
+                box-shadow: none !important;
+                margin: 0 !important;
             }
         }
 
@@ -294,7 +263,7 @@ $conn->close();
     <!-- Page Header (repeats on each page) -->
     <div class="document-container">
     <div class="page-header">
-        <span>Pekeiling Perbendaharaan Malaysia</span>
+        <span>Pekeliling Perbendaharaan Malaysia</span>
         <span>AM 6.3 Lampiran A</span>
     </div>
 
@@ -303,7 +272,7 @@ $conn->close();
         <h3>BAHAGIAN B</h3>
     </div>
 
-    <div style="text-align: left; margin-bottom: 8px; font-size: 10pt; font-weight: 600;">Transaksi Stok</div>
+    <div style="text-align: left; margin-bottom: 5px; font-size: 10pt; font-weight: 600;">Transaksi Stok</div>
 
     <table class="transactions">
         <thead>
@@ -341,7 +310,7 @@ $conn->close();
             <?php
             $running_balance = $opening_balance;
             $row_count = 0;
-            $max_rows_per_page = 25; // Approximate number of rows that fit on one page
+            $max_rows_per_page = 28; // 28 empty rows after opening balance row
 
             if ($transactions->num_rows > 0):
                 while ($txn = $transactions->fetch_assoc()):
@@ -400,15 +369,15 @@ $conn->close();
             <?php endfor; ?>
         </tbody>
         <tfoot>
-            <tr>
-                <td colspan="11" style="border: none; padding: 0;">
+            <tr style="border: none;">
+                <td colspan="11" style="border: none !important; padding: 0;">
                     <div class="page-footer">
-                        <p style="font-style: italic; margin-bottom: 3px;">Nota:</p>
-                        <p style="font-style: italic;">PK = Pesanan Kerajaan</p>
-                        <p style="font-style: italic;">BTB = Borang Terimaan Barang-barang</p>
-                        <p style="font-style: italic;">BPSS = Borang Permohonan Stok (KEW.PS-7)</p>
-                        <p style="font-style: italic;">BPSI = Borang Permohonan Stok (KEW.PS-8)</p>
-                        <p style="font-style: italic;">BPIN = Borang Pindahan Stok (KEW.PS-17)</p>
+                        <p style="font-style: italic; font-weight: bold; margin-bottom: 3px;">Nota:</p>
+                        <p style="font-style: italic; font-weight: bold;">PK = Pesanan Kerajaan</p>
+                        <p style="font-style: italic; font-weight: bold;">BTB = Borang Terimaan Barang-barang</p>
+                        <p style="font-style: italic; font-weight: bold;">BPSS = Borang Permohonan Stok (KEW.PS-7)</p>
+                        <p style="font-style: italic; font-weight: bold;">BPSI = Borang Permohonan Stok (KEW.PS-8)</p>
+                        <p style="font-style: italic; font-weight: bold;">BPIN = Borang Pindahan Stok (KEW.PS-17)</p>
                     </div>
                 </td>
             </tr>

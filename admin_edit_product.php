@@ -14,7 +14,7 @@ if (!$product_id) {
 
 // "SLAY" (FIX) 2: "Slay" (fix) the "Fatal Error" query.
 // We now "vibe" (get) the "smart" (logic) ID_kategori.
-$sql = "SELECT ID_produk, nama_produk, ID_kategori, harga, stok_semasa FROM PRODUK WHERE ID_produk = ?";
+$sql = "SELECT ID_produk, nama_produk, ID_kategori, harga, nama_pembekal, stok_semasa FROM PRODUK WHERE ID_produk = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $product_id);
 $stmt->execute();
@@ -58,7 +58,7 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                         <input type="text" class="form-control" id="id_produk_display" value="<?php echo htmlspecialchars($product['ID_produk']); ?>" disabled>
                         <div class="form-text">ID Produk tidak boleh diubah.</div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <label for="ID_kategori" class="form-label">Kategori</label>
                         <select class="form-select" id="ID_kategori" name="ID_kategori" required>
@@ -77,7 +77,13 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                             ?>
                         </select>
                     </div>
-                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="nama_pembekal" class="form-label">Nama Pembekal</label>
+                    <input type="text" class="form-control" id="nama_pembekal" name="nama_pembekal" value="<?php echo htmlspecialchars($product['nama_pembekal'] ?? ''); ?>" placeholder="Contoh: Syarikat ABC Sdn Bhd">
+                    <div class="form-text">Nama pembekal untuk tujuan rekod sahaja (pilihan)</div>
+                </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">

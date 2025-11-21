@@ -34,7 +34,7 @@ $kategori_result = $conn->query($kategori_sql);
                         <input type="text" class="form-control" id="id_produk" name="id_produk" required>
                         <div class="form-text">Kod unik untuk produk ini. Contoh: A4-PAPER-001</div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <label for="ID_kategori" class="form-label">Kategori</label>
                         <select class="form-select" id="ID_kategori" name="ID_kategori" required>
@@ -50,7 +50,13 @@ $kategori_result = $conn->query($kategori_sql);
                             ?>
                         </select>
                     </div>
-                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="nama_pembekal" class="form-label">Nama Pembekal</label>
+                    <input type="text" class="form-control" id="nama_pembekal" name="nama_pembekal" placeholder="Contoh: Syarikat ABC Sdn Bhd">
+                    <div class="form-text">Nama pembekal untuk tujuan rekod sahaja (pilihan)</div>
+                </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">

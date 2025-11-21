@@ -13,6 +13,9 @@ if ($conn === null || $conn->connect_error) {
 // This now "vibes" (gets) from your NEW KATEGORI table.
 $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
 
+// Get unique suppliers for filter dropdown
+$supplier_result = $conn->query("SELECT DISTINCT nama_pembekal FROM PRODUK WHERE nama_pembekal IS NOT NULL AND nama_pembekal != '' ORDER BY nama_pembekal ASC");
+
 // --- Filter Logic Starts Here ---
 $where_clauses = [];
 $params = [];
@@ -35,6 +38,14 @@ if (!empty($category_filter)) {
     $where_clauses[] = "p.ID_kategori = ?"; // 'p.' is the "vibe" (alias) for PRODUK
     $params[] = $category_filter;
     $types .= 'i'; // 'i' for Integer (it's an ID, not text)
+}
+
+// Supplier Filter
+$supplier_filter = $_GET['pembekal'] ?? '';
+if (!empty($supplier_filter)) {
+    $where_clauses[] = "p.nama_pembekal = ?";
+    $params[] = $supplier_filter;
+    $types .= 's'; // 's' for String
 }
 
 // --- START: PAGINATION LOGIC ---
@@ -78,8 +89,8 @@ if (!empty($base_url)) {
 
 // --- "SLAY" (STRATEGIST) FIX 4: NEW "STEAK" (JOIN) QUERY ---
 // This "slays" the "Fatal Error".
-$sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.stok_semasa,
-            k.nama_kategori 
+$sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.nama_pembekal, p.stok_semasa,
+            k.nama_kategori
         FROM PRODUK p
         LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori"; // This is the "smart" (UX) JOIN
 
@@ -145,26 +156,40 @@ $result = $stmt->get_result();
     <form action="admin_products.php" method="GET" id="filterForm">
         <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
             <div class="d-flex align-items-center">
-                
+
                 <select name="kategori" class="form-select form-select-sm me-2" onchange="this.form.submit()" style="width: auto;">
                     <option value="">Semua Kategori</option>
-                    <?php 
+                    <?php
                     if ($kategori_result && $kategori_result->num_rows > 0):
                         // We must "rewind" this result to use it
-                        $kategori_result->data_seek(0); 
+                        $kategori_result->data_seek(0);
                         while($kategori_row = $kategori_result->fetch_assoc()): ?>
                             <option value="<?php echo htmlspecialchars($kategori_row['ID_kategori']); ?>" <?php if ($category_filter == $kategori_row['ID_kategori']) echo 'selected'; ?>>
                                 <?php echo htmlspecialchars($kategori_row['nama_kategori']); ?>
                             </option>
-                        <?php endwhile; 
+                        <?php endwhile;
                     endif;
                     ?>
                 </select>
+
+                <select name="pembekal" class="form-select form-select-sm me-2" onchange="this.form.submit()" style="width: auto;">
+                    <option value="">Semua Pembekal</option>
+                    <?php
+                    if ($supplier_result && $supplier_result->num_rows > 0):
+                        while($supplier_row = $supplier_result->fetch_assoc()): ?>
+                            <option value="<?php echo htmlspecialchars($supplier_row['nama_pembekal']); ?>" <?php if ($supplier_filter == $supplier_row['nama_pembekal']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($supplier_row['nama_pembekal']); ?>
+                            </option>
+                        <?php endwhile;
+                    endif;
+                    ?>
+                </select>
+
                 <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
                     <option value="">Status</option>
-                    <option value="in_stock" <?php if ($status_filter === 'in_stock') echo 'selected'; ?>>In Stock</option>
-                    <option value="low_stock" <?php if ($status_filter === 'low_stock') echo 'selected'; ?>>Low Stock</option>
-                    <option value="out_of_stock" <?php if ($status_filter === 'out_of_stock') echo 'selected'; ?>>Out of Stock</option>
+                    <option value="in_stock" <?php if ($status_filter === 'in_stock') echo 'selected'; ?>>Stok Mencukupi</option>
+                    <option value="low_stock" <?php if ($status_filter === 'low_stock') echo 'selected'; ?>>Stok Rendah</option>
+                    <option value="out_of_stock" <?php if ($status_filter === 'out_of_stock') echo 'selected'; ?>>Kehabisan Stok</option>
                 </select>
             </div>
             </div>
@@ -179,6 +204,7 @@ $result = $stmt->get_result();
                             <th>Kod Item</th>
                             <th>Nama Produk</th>
                             <th>Kategori</th>
+                            <th>Nama Pembekal</th>
                             <th>Harga (RM)</th>
                             <th>Stok</th>
                             <th>Status</th>
@@ -191,20 +217,21 @@ $result = $stmt->get_result();
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['ID_produk']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
-                                    
+
                                     <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
-                                    
+                                    <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
+
                                     <td><?php echo htmlspecialchars(number_format((float)$row['harga'], 2)); ?></td>
                                     <td><?php echo htmlspecialchars($row['stok_semasa']); ?> unit</td>
                                     <td>
                                         <?php
                                             $stok = (int)$row['stok_semasa'];
                                             if ($stok > 10) {
-                                                echo '<span class="badge bg-success">In Stock</span>';
+                                                echo '<span class="badge bg-success">Stok Mencukupi</span>';
                                             } elseif ($stok > 0) {
-                                                echo '<span class="badge bg-warning">Low Stock</span>';
+                                                echo '<span class="badge bg-warning">Stok Rendah</span>';
                                             } else {
-                                                echo '<span class="badge bg-danger">Out of Stock</span>';
+                                                echo '<span class="badge bg-danger">Kehabisan Stok</span>';
                                             }
                                         ?>
                                     </td>
@@ -221,7 +248,7 @@ $result = $stmt->get_result();
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="7" class="text-center">Tiada produk ditemui yang sepadan.</td></tr>
+                            <tr><td colspan="8" class="text-center">Tiada produk ditemui yang sepadan.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

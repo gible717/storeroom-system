@@ -24,6 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_produk = trim($_POST['id_produk'] ?? '');
     $nama_produk = trim($_POST['nama_produk'] ?? '');
     $ID_kategori = (int)($_POST['ID_kategori'] ?? 0);
+    $nama_pembekal = trim($_POST['nama_pembekal'] ?? '');
     $harga = !empty($_POST['harga']) ? (float)$_POST['harga'] : null;
     $stok_semasa = (int)($_POST['stok_semasa'] ?? 0);
 
@@ -39,15 +40,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // --- 2. "Slay" (Prepare) Database Update ---
-    $sql = "UPDATE PRODUK SET 
-                nama_produk = ?, 
-                ID_kategori = ?, 
-                harga = ?, 
-                stok_semasa = ? 
+    $sql = "UPDATE PRODUK SET
+                nama_produk = ?,
+                ID_kategori = ?,
+                harga = ?,
+                nama_pembekal = ?,
+                stok_semasa = ?
             WHERE ID_produk = ?";
-            
+
     $stmt = $conn->prepare($sql);
-    
+
     if ($stmt === false) {
         $response['message'] = 'Ralat pangkalan data: ' . $conn->error;
         echo json_encode($response);
@@ -55,11 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // --- 3. "Slay" (Bind) Parameters ---
-    // The "vibe" (types) is "sidis" (string, int, double, int, string)
-    $stmt->bind_param("sidis", 
+    // The "vibe" (types) is "sidsis" (string, int, double, string, int, string)
+    $stmt->bind_param("sidsis",
         $nama_produk,
         $ID_kategori,
         $harga,
+        $nama_pembekal,
         $stok_semasa,
         $id_produk
     );

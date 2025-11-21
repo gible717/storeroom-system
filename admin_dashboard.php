@@ -1,6 +1,31 @@
 <?php
 require 'admin_header.php';
+?>
 
+<style>
+/* Glowing animation for "Baru" status badge */
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+        transform: scale(1);
+    }
+}
+
+.badge-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+    font-weight: 600;
+}
+</style>
+
+<?php
 // --- NEW, SIMPLER, AND BUG-FREE time_ago FUNCTION ---
 function time_ago($datetime) {
     $timestamp = strtotime($datetime);
@@ -119,11 +144,15 @@ $recent_requests = $conn->query($sql_requests);
                     <?php
                         $status = htmlspecialchars($req['status']);
                         $badge_class = 'bg-secondary';
+                        $glow_class = '';
                         if ($status === 'Diluluskan') $badge_class = 'bg-success';
-                        elseif ($status === 'Baru') $badge_class = 'bg-warning text-dark';
+                        elseif ($status === 'Baru') {
+                            $badge_class = 'bg-warning text-dark';
+                            $glow_class = 'badge-glow';
+                        }
                         elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
                     ?>
-                    <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
+                    <span class="badge <?php echo $badge_class . ' ' . $glow_class; ?>"><?php echo $status; ?></span>
                 </div>
                 <?php endwhile; ?>
             <?php else: ?>

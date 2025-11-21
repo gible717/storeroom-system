@@ -62,13 +62,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_update_stock = $conn->prepare($sql_update_stock);
 
             // Step 3: Prepare transaction log statement (for KEW.PS-3 compliance)
-            // Get requester name from permohonan table
-            $stmt_get_requester = $conn->prepare("SELECT nama_pemohon FROM permohonan WHERE ID_permohonan = ?");
-            $stmt_get_requester->bind_param("i", $id_permohonan);
-            $stmt_get_requester->execute();
-            $requester_data = $stmt_get_requester->get_result()->fetch_assoc();
-            $requester_name = $requester_data['nama_pemohon'];
-            $stmt_get_requester->close();
+            // Get department/unit name from permohonan table (for Terima Daripada/Keluar Kepada column)
+            $stmt_get_dept = $conn->prepare("SELECT j.nama_jabatan FROM permohonan p JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan WHERE p.ID_permohonan = ?");
+            $stmt_get_dept->bind_param("i", $id_permohonan);
+            $stmt_get_dept->execute();
+            $dept_data = $stmt_get_dept->get_result()->fetch_assoc();
+            $dept_name = $dept_data['nama_jabatan'] ?? '-';
+            $stmt_get_dept->close();
 
             $sql_log_transaksi = "INSERT INTO transaksi_stok
                                 (tarikh_transaksi, terima_dari_keluar_kepada, no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, ID_rujukan_permohonan, ID_pegawai)
@@ -96,8 +96,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt_update_stock->execute();
 
                     // Log in 'transaksi_stok' (for KEW.PS-3)
-                    // Parameters: terima_dari_keluar_kepada, no_kod, kuantiti, no_kod (for SELECT), ID_rujukan_permohonan, ID_pegawai
-                    $stmt_log_transaksi->bind_param("ssiiss", $requester_name, $no_kod, $kuantiti_lulus, $no_kod, $id_permohonan, $id_pelulus);
+                    // Parameters: terima_dari_keluar_kepada (department/unit name), no_kod, kuantiti, no_kod (for SELECT), ID_rujukan_permohonan, ID_pegawai (approver)
+                    $stmt_log_transaksi->bind_param("ssiiss", $dept_name, $no_kod, $kuantiti_lulus, $no_kod, $id_permohonan, $id_pelulus);
                     $stmt_log_transaksi->execute();
                 } else {
                     // If admin approved 0, just update the item status
