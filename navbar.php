@@ -1,7 +1,7 @@
+// navbar.php - Top navigation bar component
 <?php
-// FILE: navbar.php (Updated to match the new design)
 
-// These variables should be available from auth_check.php
+// Get user info from session
 $userName = $_SESSION['nama'] ?? 'Pengguna';
 $userInitials = strtoupper(substr($userName, 0, 2));
 

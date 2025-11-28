@@ -1,12 +1,12 @@
+// report_inventory_view.php - Detailed inventory report view
 <?php
-// FILE: report_inventory_view.php
 $pageTitle = "Laporan Inventori";
 require 'admin_header.php';
 
-// --- "STEAK" (FIX): "Slay" (get) all categories for the "steak" (dropdown) ---
+// Get all categories for dropdown
 $kategori_sql = "SELECT DISTINCT nama_kategori FROM kategori ORDER BY nama_kategori ASC";
 $kategori_result = $conn->query($kategori_sql);
-// --- END OF "STEAK" (FIX) ---
+//
 
 // --- Filter Logic ---
 $kategori_filter = $_GET['kategori'] ?? 'Semua';

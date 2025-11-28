@@ -1,9 +1,10 @@
 <?php
-// FILE: request_edit.php (NEW - v4.0 "Cart" compatible)
-$pageTitle = "Kemaskini Permohonan";
-require 'staff_header.php'; // This file MUST have session_start() at the top
+// request_edit.php - Edit existing request form
 
-// --- 1. Get Request ID & Security Check ---
+$pageTitle = "Kemaskini Permohonan";
+require 'staff_header.php';
+
+// Get request ID and validate
 $id_permohonan = $_GET['id'] ?? null;
 $id_staf = $_SESSION['ID_staf'];
 
@@ -13,7 +14,7 @@ if (!$id_permohonan) {
     exit;
 }
 
-// Security Check: Fetch header and ensure it belongs to this user AND is still 'Baru'
+// Security check: verify ownership and status
 $stmt = $conn->prepare("SELECT * FROM permohonan WHERE ID_permohonan = ? AND ID_pemohon = ? AND status = 'Baru'");
 $stmt->bind_param("is", $id_permohonan, $id_staf);
 $stmt->execute();
@@ -26,21 +27,21 @@ if (!$request_header) {
     exit;
 }
 
-// --- 2. Get All Items for THIS request ---
+// Get items for this request
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok 
-                            FROM permohonan_barang pb 
-                            JOIN barang b ON pb.no_kod = b.no_kod 
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok
+                            FROM permohonan_barang pb
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
 $result_items = $stmt_items->get_result();
 while ($row = $result_items->fetch_assoc()) {
-    $items_in_request[$row['no_kod']] = $row; // Use no_kod as key
+    $items_in_request[$row['no_kod']] = $row;
 }
 $stmt_items->close();
 
-// --- 3. Get All 'Barang' (Items) from Database (for the "Add New" dropdown) ---
+// Get available items for dropdown
 $barang_list = [];
 $result_all_barang = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran FROM barang WHERE baki_semasa > 0 ORDER BY perihal_stok ASC");
 while ($row = $result_all_barang->fetch_assoc()) {
@@ -157,35 +158,31 @@ $conn->close();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. Get all elements ---
     const editForm = document.getElementById('edit-form');
     const updateBtn = document.getElementById('update_btn');
     const tableBody = document.getElementById('item-edit-list');
     const itemSelect = document.getElementById('item_select');
     const addItemBtn = document.getElementById('add_item_btn');
-    
-    // --- 2. "Smart" Button Logic: Store the form's initial state ---
+
+    // Store initial form state
     let initialFormState = getFormState();
 
-    // Function to serialize all form data into a simple string
     function getFormState() {
         return new URLSearchParams(new FormData(editForm)).toString();
     }
 
-    // --- 3. AJAX Submit Logic ---
+    // AJAX submit handler
     editForm.addEventListener('submit', function(e) {
-        // Stop the form from doing a normal reload
         e.preventDefault();
 
         const currentState = getFormState();
 
-        // ### YOUR REQUESTED FIX: Check if data has changed ###
+        // Check if form data changed
         if (currentState === initialFormState) {
-            // Data is the same, do nothing.
-            return; 
+            return;
         }
 
-        // Data IS different, so proceed with submit
+        // Submit form data
         updateBtn.disabled = true;
         updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengemaskini...';
 
@@ -196,7 +193,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Show success popup, then redirect
                 Swal.fire({
                     title: 'Berjaya!',
                     text: data.message,
@@ -206,7 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = 'request_list.php';
                 });
             } else {
-                // Show error popup
                 Swal.fire('Ralat', data.message, 'error');
                 updateBtn.disabled = false;
                 updateBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Kemaskini Permohonan';
@@ -219,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- 4. "Add Item" button logic (from your previous file) ---
+    // Add item button handler
     addItemBtn.addEventListener('click', function() {
         const selectedOption = itemSelect.options[itemSelect.selectedIndex];
         const no_kod = selectedOption.value;
@@ -253,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         itemSelect.value = '';
     });
 
-    // --- 5. "Delete Row" logic (from your previous file) ---
+    // Delete row handler
     window.deleteRow = function(no_kod) {
         Swal.fire({
             title: 'Adakah anda pasti?',

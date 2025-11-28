@@ -1,30 +1,30 @@
 <?php
-// FILE: print_request.php (Corrected and "SLAIN" 🥹)
+// print_request.php - Print request document
+
 require 'db.php';
 session_start();
 
-// 1. "STEAK" (FIX) 1: "Slay" (fix) the "ghost" (buggy) auth
+// Check login
 if (!isset($_SESSION['ID_staf'])) {
     die("Akses tidak dibenarkan. Sila log masuk.");
 }
 $userID = $_SESSION['ID_staf'];
-$isAdmin = $_SESSION['is_admin'] ?? 0; // <-- "SLAYED" (FIXED)
+$isAdmin = $_SESSION['is_admin'] ?? 0;
 $userName = $_SESSION['nama'];
-// --- END OF "STEAK" (FIX) ---
 
-// 2. GET REQUEST ID
+// Get request ID
 $request_id = $_GET['id'] ?? null;
 if (!$request_id) {
     die("ID Permohonan tidak dijumpai.");
 }
 
-// 3. FETCH DATA (This SQL is "steak" 🥩)
-$sql = "SELECT 
-            pr.*, 
+// Fetch request data
+$sql = "SELECT
+            pr.*,
             s_pemohon.nama AS nama_pemohon,
-            pr.jabatan_unit, 
+            pr.jabatan_unit,
             p.nama_produk,
-            p.ID_produk 
+            p.ID_produk
         FROM permohonan pr
         JOIN staf s_pemohon ON pr.ID_staf = s_pemohon.ID_staf
         JOIN produk p ON pr.ID_produk = p.ID_produk

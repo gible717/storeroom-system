@@ -1,13 +1,12 @@
 <?php
-// FILE: kewps8_form_process.php (VERSI 4.1 - "Modal" AJAX)
+// kewps8_form_process.php - Handle KEW.PS-8 form submission (AJAX)
+
 session_start();
 require_once __DIR__ . '/db.php';
 
-// Set header to JSON for AJAX responses
 header('Content-Type: application/json');
 
-// --- 0. Security Checks ---
-// We only check for ID_staf, since the 'peranan' key is not set in your session.
+// Security checks
 if (!isset($_SESSION['ID_staf'])) {
     echo json_encode(['success' => false, 'message' => 'Sesi anda telah tamat. Sila log masuk semula.']);
     exit;
@@ -18,21 +17,19 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     exit;
 }
 
-// --- 1. Get Data from SESSION (v4.1 "Modal" Workflow) ---
-$staff_id = $_SESSION['ID_staf']; // The user's ID
-
-// Get the cart and catatan from the SESSION
+// Get data from session
+$staff_id = $_SESSION['ID_staf'];
 $items = $_SESSION['cart'] ?? [];
 $catatan = $_SESSION['request_catatan'] ?? null;
-$jawatan_pemohon_session = $_SESSION['request_jawatan'] ?? null; // <-- ADD THIS
+$jawatan_pemohon_session = $_SESSION['request_jawatan'] ?? null;
 
-// Validation: Check if the cart is empty
+// Validate cart
 if (empty($items)) {
     echo json_encode(['success' => false, 'message' => 'Tiada item dalam senarai permohonan anda. Sila tambah item.']);
     exit;
 }
 
-// --- 2. Get Full Staff Details (We need name, jawatan, ID_jabatan) ---
+// Get staff details
 $stmt = $conn->prepare("SELECT nama, jawatan, ID_jabatan FROM staf WHERE ID_staf = ?");
 $stmt->bind_param("s", $staff_id);
 $stmt->execute();
@@ -45,9 +42,8 @@ if (!$user) {
 }
 
 $nama_pemohon = $user['nama'];
-// Use the Jawatan from the form (session). If empty, use the one from their profile.
 $jawatan_pemohon = $jawatan_pemohon_session ?? ($user['jawatan'] ?? '');
-$id_jabatan = (int)$user['ID_jabatan']; // Cast to integer
+$id_jabatan = (int)$user['ID_jabatan'];
 $tarikh_mohon = date('Y-m-d'); // Current date
 
 // --- 3. Database Transaction ---

@@ -1,5 +1,5 @@
 <?php
-// This script will generate the 100% correct hash for your password
+// hash_generator.php - Generate password hash for testing
 
 $password_to_hash = 'NewPass456';
 

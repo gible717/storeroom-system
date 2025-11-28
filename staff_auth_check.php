@@ -1,10 +1,10 @@
 <?php
-// FILE: staff_auth_check.php (FIXED)
-require_once 'auth_check.php'; // Includes the core file
+// staff_auth_check.php - Staff-only access check
 
-// This is the main Staff security check
+require_once 'auth_check.php';
+
+// Redirect admins to admin dashboard
 if ($isAdmin == 1) {
-    // If user IS an Admin, kick them to the admin dashboard
     header("Location: admin_dashboard.php");
     exit;
 }

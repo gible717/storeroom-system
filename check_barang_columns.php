@@ -1,5 +1,5 @@
+// check_barang_columns.php - Debug barang table structure
 <?php
-// Quick check for barang table columns
 require 'db.php';
 
 echo "<h2>barang Table Structure</h2>";

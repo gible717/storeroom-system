@@ -1,17 +1,18 @@
 <?php
-// FILE: auth_check.php (FIXED)
+// auth_check.php - Core authentication check for all pages
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once 'db.php';
 
-// 1. Check if user is logged in at all
+// Check if user is logged in
 if (!isset($_SESSION['ID_staf'])) {
     header("Location: index.php?error=Sila log masuk dahulu");
     exit;
 }
 
-// 2. Load all session variables into local variables
+// Load session variables
 $userID = $_SESSION['ID_staf'];
 $userName = $_SESSION['nama'];
 $isAdmin = $_SESSION['is_admin'] ?? 0;

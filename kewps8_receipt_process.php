@@ -1,5 +1,5 @@
 <?php
-// FILE: kewps8_receipt_process.php
+// kewps8_receipt_process.php - Handle receipt acknowledgment
 session_start();
 require_once __DIR__ . '/db.php';
 
@@ -12,11 +12,11 @@ if (!isset($_SESSION['ID_staf']) || $_SESSION['peranan'] != 'Staf') {
 // Check if the form was submitted via POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // --- 1. Get Data from Form & Session ---
+    // Get data from form & session
     $id_permohonan = (int)$_POST['id_permohonan'];
     $items = $_POST['items'] ?? []; // The array of received quantities
     $id_staf = $_SESSION['ID_staf'];
-    $tarikh_terima = date('Y-m-d'); // Current date
+    $tarikh_terima = date('Y-m-d');
 
     // Validation: Check if items were submitted
     if (empty($items)) {
@@ -25,12 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // --- 2. Begin Database Transaction ---
+    // Begin database transaction
     $conn->begin_transaction();
 
     try {
-        // --- 3. Loop and Update 'permohonan_barang' ---
-        // We update each item with the 'kuantiti_diterima'
+        // Update each item with received quantity
         $sql_update_item = "UPDATE permohonan_barang SET kuantiti_diterima = ? WHERE ID_permohonan_barang = ? AND ID_permohonan = ?";
         $stmt_update_item = $conn->prepare($sql_update_item);
 
@@ -41,25 +40,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt_update_item->close();
 
-        // --- 4. Update 'permohonan' Header ---
-        // We mark the whole request as 'Diterima' and set the date
+        // Update request header status to 'Diterima'
         $sql_update_header = "UPDATE permohonan SET status = 'Diterima', tarikh_terima = ? WHERE ID_permohonan = ? AND ID_pemohon = ?";
         $stmt_update_header = $conn->prepare($sql_update_header);
         $stmt_update_header->bind_param("sis", $tarikh_terima, $id_permohonan, $id_staf);
         $stmt_update_header->execute();
         $stmt_update_header->close();
 
-        // --- 5. Commit the Transaction ---
+        // Commit the transaction
         $conn->commit();
         $_SESSION['success_msg'] = "Permohonan ID #$id_permohonan telah berjaya disahkan dan ditutup.";
 
     } catch (Exception $e) {
-        // --- 6. Something failed. Roll back! ---
+        // Something failed, roll back
         $conn->rollback();
         $_SESSION['error_msg'] = "Gagal mengesahkan penerimaan. Ralat: " . $e->getMessage();
     }
 
-    // --- 7. Redirect back to the list ---
+    // Redirect back to the list
     header('Location: request_list.php');
     exit;
 }

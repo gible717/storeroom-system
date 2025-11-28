@@ -1,38 +1,25 @@
 <?php
+// admin_dashboard.php - Admin main dashboard with stats & recent requests
+
 require 'admin_header.php';
 ?>
 
 <style>
 /* Glowing animation for "Baru" status badge */
 @keyframes pulse-glow {
-    0% {
-        box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6);
-        transform: scale(1.05);
-    }
-    100% {
-        box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
-        transform: scale(1);
-    }
+    0% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6); transform: scale(1.05); }
+    100% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); transform: scale(1); }
 }
-
-.badge-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-    font-weight: 600;
-}
+.badge-glow { animation: pulse-glow 2s ease-in-out infinite; font-weight: 600; }
 </style>
 
 <?php
-// --- NEW, SIMPLER, AND BUG-FREE time_ago FUNCTION ---
+// Helper function - convert datetime to "X minit yang lalu" format
 function time_ago($datetime) {
     $timestamp = strtotime($datetime);
-    if ($timestamp === false) {
-        return "tarikh tidak sah";
-    }
-    
+    if ($timestamp === false) return "tarikh tidak sah";
+
     $strTime = array("saat", "minit", "jam", "hari", "bulan", "tahun");
     $length = array("60", "60", "24", "30", "12", "10");
 
@@ -42,23 +29,24 @@ function time_ago($datetime) {
         for ($i = 0; $diff >= $length[$i] && $i < count($length) - 1; $i++) {
             $diff = $diff / $length[$i];
         }
-
         $diff = round($diff);
         return $diff . " " . $strTime[$i] . " yang lalu";
     }
     return "sebentar tadi";
 }
 
-// --- PHP LOGIC FOR DASHBOARD ---
+// Get dashboard stats
 $jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM barang");
 $jumlahProduk = $jumlahProduk_result ? $jumlahProduk_result->fetch_assoc()['total'] : 0;
 
 $tertunda_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Baru'");
 $tertunda = $tertunda_result ? $tertunda_result->fetch_assoc()['total'] : 0;
 
+// TODO: Calculate these from actual data
 $stokRendah = 8;
 $pesananBulanIni = 24;
 
+// Get recent requests
 $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
                     COUNT(pb.ID_permohonan_barang) AS bilangan_item,
                     GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
@@ -71,12 +59,14 @@ $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
                 LIMIT 4";
 $recent_requests = $conn->query($sql_requests);
 ?>
+
 <title>Dashboard Admin - Sistem Pengurusan Stor</title>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0">Dashboard Admin</h3>
 </div>
 
+<!-- Stats Cards -->
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card shadow-sm h-100">
@@ -124,6 +114,7 @@ $recent_requests = $conn->query($sql_requests);
     </div>
 </div>
 
+<!-- Recent Requests -->
 <div class="card shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Permohonan Terkini</h5>
@@ -146,10 +137,7 @@ $recent_requests = $conn->query($sql_requests);
                         $badge_class = 'bg-secondary';
                         $glow_class = '';
                         if ($status === 'Diluluskan') $badge_class = 'bg-success';
-                        elseif ($status === 'Baru') {
-                            $badge_class = 'bg-warning text-dark';
-                            $glow_class = 'badge-glow';
-                        }
+                        elseif ($status === 'Baru') { $badge_class = 'bg-warning text-dark'; $glow_class = 'badge-glow'; }
                         elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
                     ?>
                     <span class="badge <?php echo $badge_class . ' ' . $glow_class; ?>"><?php echo $status; ?></span>

@@ -1,3 +1,4 @@
+// seed_users.php - Reset and seed default users for testing
 <?php
 require 'db.php';
 

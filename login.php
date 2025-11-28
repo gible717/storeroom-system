@@ -1,7 +1,9 @@
 <?php
-// FILE: login.php
+// login.php - User login page
+
 session_start();
 
+// Redirect if already logged in
 if (isset($_SESSION['ID_staf'])) {
     if ($_SESSION['peranan'] === 'Admin') {
         header('Location: admin_dashboard.php');
@@ -31,7 +33,6 @@ if (isset($_SESSION['ID_staf'])) {
         }
         .image-section {
             flex: 1;
-            /* UPDATED PATH: Added /storeroom/ at the beginning */
             background-image: url('/storeroom/assets/img/login-bg.jpg');
             background-size: cover;
             background-position: center;
@@ -95,7 +96,10 @@ if (isset($_SESSION['ID_staf'])) {
 </head>
 <body>
     <div class="main-container">
+        <!-- Left side - Background image (hidden on mobile) -->
         <div class="image-section d-none d-lg-block"></div>
+
+        <!-- Right side - Login form -->
         <div class="form-section">
             <div class="login-card">
                 <div class="form-header">
@@ -135,6 +139,7 @@ if (isset($_SESSION['ID_staf'])) {
     </div>
 
     <script>
+        // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
             const password = document.getElementById('katalaluan');
             const icon = this.querySelector('i');
@@ -146,6 +151,3 @@ if (isset($_SESSION['ID_staf'])) {
     </script>
 </body>
 </html>
-
-
-

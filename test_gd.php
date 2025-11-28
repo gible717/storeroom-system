@@ -1,3 +1,4 @@
+// test_gd.php - Check GD extension support
 <?php
 if (extension_loaded('gd')) {
     echo "GD extension is enabled! ✅<br>";

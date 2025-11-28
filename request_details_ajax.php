@@ -1,8 +1,8 @@
 <?php
-// FILE: request_details_ajax.php
-require 'staff_auth_check.php'; // Ensures the user is logged in
+// request_details_ajax.php - Get request details (AJAX)
 
-// We will return JSON
+require 'staff_auth_check.php';
+
 header('Content-Type: application/json');
 
 $id_staf = $_SESSION['ID_staf'];
@@ -13,9 +13,8 @@ if (!$id_permohonan) {
     exit;
 }
 
-// --- 1. Security Check & Get Header Info ---
-// Make sure this user owns this request
-$stmt = $conn->prepare("SELECT * FROM permohonan 
+// Security check and get request header
+$stmt = $conn->prepare("SELECT * FROM permohonan
                         WHERE ID_permohonan = ? AND ID_pemohon = ?");
 $stmt->bind_param("is", $id_permohonan, $id_staf);
 $stmt->execute();
@@ -27,11 +26,11 @@ if (!$request_header) {
     exit;
 }
 
-// --- 2. Get Item List for this Request ---
+// Get items for this request
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok 
-                            FROM permohonan_barang pb 
-                            JOIN barang b ON pb.no_kod = b.no_kod 
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok
+                            FROM permohonan_barang pb
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
@@ -41,7 +40,7 @@ while ($row = $result_items->fetch_assoc()) {
 }
 $stmt_items->close();
 
-// --- 3. Send the Data as JSON ---
+// Return JSON response
 echo json_encode([
     'success' => true,
     'header' => $request_header,

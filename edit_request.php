@@ -1,19 +1,19 @@
+// edit_request.php - Edit existing stock request form
 <?php
-// FILE: edit_request.php (Corrected and Final Version)
 $pageTitle = "Kemaskini Permohonan";
-require 'staff_header.php'; // FIX 1: Use the correct, stable staff header. This fixes the layout.
+require 'staff_header.php';
 
-// 1. Get the ID of the request from the URL
+// Get request ID from URL
 $request_id = $_GET['id'] ?? null;
 if (!$request_id) {
     header("Location: request_list.php");
     exit;
 }
 
-// FIX 2: Get the staff ID correctly from the session.
+// Get staff ID from session
 $id_staf = $_SESSION['ID_staf'];
 
-// 2. Security Check: Fetch the request details, ensuring it belongs to the logged-in user and is still pending.
+// Security check: fetch request and verify ownership
 $sql = "SELECT p.*, pr.nama_produk, pr.stok_semasa 
         FROM permohonan p
         JOIN produk pr ON p.ID_produk = pr.ID_produk
@@ -25,7 +25,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $request = $result->fetch_assoc();
 
-// 3. If the request doesn't exist (or doesn't meet the criteria), redirect with an error.
+// Redirect if request not found or already processed
 if (!$request) {
     header("Location: request_list.php?error=" . urlencode("Permohonan tidak dijumpai atau telah diproses."));
     exit;

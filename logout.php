@@ -1,10 +1,10 @@
 <?php
-// FILE: logout.php
+// logout.php - Destroy session and redirect to login
+
 session_start();
 session_unset();
 session_destroy();
 
-// Corrected: Redirect to login.php, NOT index.php
-header("Location: login.php"); 
+header("Location: login.php");
 exit;
 ?>

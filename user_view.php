@@ -1,21 +1,22 @@
 <?php
-// FILE: user_view.php
-$pageTitle = "Maklumat Pengguna";
-require 'admin_header.php'; // This includes auth_check.php and db.php
+// user_view.php - View user details
 
-// 1. Get the ID from the URL
+$pageTitle = "Maklumat Pengguna";
+require 'admin_header.php';
+
+// Get user ID from URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: admin_users.php?error=ID pengguna tidak dinyatakan.");
     exit();
 }
 $id_staf_to_view = $_GET['id'];
 
-// 2. Fetch the user's data AND their department name using a JOIN
-$sql = "SELECT s.*, j.nama_jabatan 
-        FROM staf s 
-        LEFT JOIN jabatan j ON s.ID_jabatan = j.ID_jabatan 
+// Fetch user data with department name
+$sql = "SELECT s.*, j.nama_jabatan
+        FROM staf s
+        LEFT JOIN jabatan j ON s.ID_jabatan = j.ID_jabatan
         WHERE s.ID_staf = ?";
-        
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $id_staf_to_view);
 $stmt->execute();
@@ -28,7 +29,6 @@ if (!$user) {
     exit();
 }
 
-// Handle if department is not set (NULL)
 $nama_jabatan = $user['nama_jabatan'] ?? '<em>Tidak Ditetapkan</em>';
 ?>
 

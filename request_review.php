@@ -1,11 +1,12 @@
 <?php
-// FILE: request_review.php (NEW - v4.0 Admin Approval Screen)
-$pageTitle = "Semak Permohonan";
-require 'admin_header.php'; // Use the admin header
+// request_review.php - Admin approval screen for requests
 
-// --- 1. Get Request ID & Security Check ---
+$pageTitle = "Semak Permohonan";
+require 'admin_header.php';
+
+// Get request ID and validate
 $id_permohonan = $_GET['id'] ?? null;
-$id_admin = $_SESSION['ID_staf']; // Admin's ID
+$id_admin = $_SESSION['ID_staf'];
 
 if (!$id_permohonan) {
     $_SESSION['error_msg'] = "ID Permohonan tidak sah.";
@@ -13,10 +14,9 @@ if (!$id_permohonan) {
     exit;
 }
 
-// --- 2. Fetch the Request Header (and check status) ---
-// We join with 'staf' to get the applicant's name
+// Fetch request header with applicant info
 $stmt = $conn->prepare("SELECT p.*, s.nama AS nama_pemohon, s.jawatan AS jawatan_pemohon
-                        FROM permohonan p 
+                        FROM permohonan p
                         JOIN staf s ON p.ID_pemohon = s.ID_staf
                         WHERE p.ID_permohonan = ? AND p.status = 'Baru'");
 $stmt->bind_param("i", $id_permohonan);
@@ -30,12 +30,11 @@ if (!$request_header) {
     exit;
 }
 
-// --- 3. Get All Items for THIS request ---
-// We join with 'barang' to get the current stock level
+// Get items for this request with current stock
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok, b.baki_semasa 
-                            FROM permohonan_barang pb 
-                            JOIN barang b ON pb.no_kod = b.no_kod 
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok, b.baki_semasa
+                            FROM permohonan_barang pb
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
@@ -81,9 +80,8 @@ $conn->close();
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($items_in_request as $item): 
+                                <?php foreach ($items_in_request as $item):
                                     $no_kod = $item['no_kod'];
-                                    // Pre-fill "Kuantiti Lulus" with the requested amount, but not more than current stock
                                     $kuantiti_lulus = min($item['kuantiti_mohon'], $item['baki_semasa']);
                                 ?>
                                     <tr>

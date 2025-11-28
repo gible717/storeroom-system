@@ -1,16 +1,17 @@
 <?php
-// FILE: user_edit.php
+// user_edit.php - Edit user form
+
 $pageTitle = "Kemaskini Pengguna";
 require 'admin_header.php';
 
-// 1. Get User ID from URL
+// Get user ID from URL
 if (!isset($_GET['id'])) {
     header("Location: admin_users.php?error=Tiada ID pengguna.");
     exit;
 }
 $id_staf = $_GET['id'];
 
-// 2. Fetch this user's data
+// Fetch user data
 $stmt = $conn->prepare("SELECT * FROM staf WHERE ID_staf = ?");
 $stmt->bind_param("s", $id_staf);
 $stmt->execute();
@@ -22,7 +23,7 @@ if (!$user) {
     exit;
 }
 
-// 3. Fetch all departments for the dropdown
+// Fetch departments for dropdown
 $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC");
 ?>
 

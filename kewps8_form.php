@@ -1,13 +1,14 @@
 <?php
-// FILE: kewps8_form.php (VERSI 4.0 - "Modal" Design)
-$pageTitle = "Borang Permohonan Stok";
-require 'staff_header.php'; // This file MUST have session_start() at the top
+// kewps8_form.php - KEW.PS-8 stock request form
 
-// --- 1. Get Logged-in Staff Details ---
+$pageTitle = "Borang Permohonan Stok";
+require 'staff_header.php';
+
+// Get logged-in staff details
 $staff_id = $_SESSION['ID_staf'];
-$stmt = $conn->prepare("SELECT staf.nama, staf.jawatan, staf.ID_jabatan, jabatan.nama_jabatan 
-                        FROM staf 
-                        LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan 
+$stmt = $conn->prepare("SELECT staf.nama, staf.jawatan, staf.ID_jabatan, jabatan.nama_jabatan
+                        FROM staf
+                        LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan
                         WHERE staf.ID_staf = ?");
 $stmt->bind_param("s", $staff_id);
 $stmt->execute();
@@ -18,7 +19,7 @@ $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $user['jawatan'];
 $nama_jabatan = $user['nama_jabatan'];
 
-// --- 2. Get All 'Barang' (Items) from Database ---
+// Get available items
 $barang_list = [];
 $result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran FROM barang WHERE baki_semasa > 0 ORDER BY perihal_stok ASC");
 while ($row = $result->fetch_assoc()) {
@@ -26,9 +27,7 @@ while ($row = $result->fetch_assoc()) {
 }
 $conn->close();
 
-// --- 3. NEW CART LOGIC ---
-// We check if this is a "new" visit by checking for a URL parameter
-// If it's a new visit, we clear the cart.
+// Initialize cart session
 if (!isset($_GET['action'])) {
     unset($_SESSION['cart']);
     unset($_SESSION['request_catatan']);

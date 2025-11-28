@@ -1,13 +1,14 @@
 <?php
-// FILE: admin_header.php
+// admin_header.php - Admin layout header with sidebar and navbar
+
 require_once 'db.php';
 require_once 'admin_auth_check.php';
-$current_page = basename($_SERVER['PHP_SELF']); 
+$current_page = basename($_SERVER['PHP_SELF']);
 
-// Fetch user's name and picture from database
+// Fetch user profile for navbar
 $header_user_id = $_SESSION['ID_staf'];
-$header_user_name = 'Admin'; // Default
-$header_user_pic = null; // Default
+$header_user_name = 'Admin';
+$header_user_pic = null;
 
 $stmt_header = $conn->prepare("SELECT nama, gambar_profil FROM staf WHERE ID_staf = ?");
 $stmt_header->bind_param("s", $header_user_id);
@@ -15,8 +16,6 @@ if ($stmt_header->execute()) {
     $result = $stmt_header->get_result();
     if ($user = $result->fetch_assoc()) {
         $header_user_name = $user['nama'];
-
-        // Check if the picture exists on the server
         if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])) {
             $header_user_pic = $user['gambar_profil'];
         }
@@ -24,7 +23,7 @@ if ($stmt_header->execute()) {
 }
 $stmt_header->close();
 
-// Get initials as fallback
+// Get initials for avatar fallback
 $words = explode(" ", $header_user_name);
 $initials = "";
 foreach ($words as $w) {
@@ -41,15 +40,14 @@ $header_user_initials = substr($initials, 0, 2);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <style>
         :root { --sidebar-width: 280px; }
         body { background-color: #f8f9fa; font-family: sans-serif; margin: 0; padding: 0; }
         .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background-color: #1f2937; padding-top: 1rem; overflow-y: auto; }
-        
+
         .sidebar-nav { padding: 1rem; }
-        
-        /* Sidebar Header Styles */
+
         .sidebar-header {
             padding: 1.5rem 1rem;
             display: flex;
@@ -93,36 +91,35 @@ $header_user_initials = substr($initials, 0, 2);
             font-weight: 600;
         }
 
-        .main-content-wrapper { 
-            margin-left: var(--sidebar-width); 
-            width: calc(100% - var(--sidebar-width)); 
-            padding: 0; 
+        .main-content-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 0;
         }
-        .top-navbar { 
-            background: #fff; 
-            padding: 1rem 2.5rem; 
-            border-bottom: 1px solid #e5e7eb; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .top-navbar {
+            background: #fff;
+            padding: 1rem 2.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .page-content { padding: 2.5rem; }
 
-        .user-initials-badge { 
-            width: 32px; 
-            height: 32px; 
-            border-radius: 50%; 
-            background-color: #6c757d; 
-            color: #ffffff; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 700; 
-            font-size: 0.8rem; 
-            object-fit: cover; 
+        .user-initials-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            object-fit: cover;
         }
-    
-        /* Logout Button */
+
         .btn-logout {
             background-color: #ffe5e5;
             color: #dc3545;
@@ -135,7 +132,6 @@ $header_user_initials = substr($initials, 0, 2);
             color: #842029;
         }
 
-        /* Skip Link for accessibility */
         .skip-link {
             position: absolute;
             top: -40px;
@@ -152,14 +148,13 @@ $header_user_initials = substr($initials, 0, 2);
             top: 10px;
         }
 
-        /* Toast/Alert positioning */
         .toast-container {
             position: fixed;
             top: 1.5rem;
             right: 1.5rem;
             z-index: 1090;
         }
-        
+
         .floating-alert {
             position: fixed;
             top: 80px;
@@ -183,7 +178,7 @@ $header_user_initials = substr($initials, 0, 2);
     </script>
 
     <a href="#main-content" class="skip-link">Langkau ke Kandungan Utama (Skip to Main Content)</a>
-    
+
     <div class="d-flex">
         <?php require 'admin_sidebar.php'; ?>
         <div class="main-content-wrapper">

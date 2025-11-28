@@ -1,8 +1,8 @@
+// kewps8_print.php - Print KEW.PS-8 stock request document
 <?php
-// FILE: kewps8_print.php (v3.0 - Unified Table Structure)
 require 'auth_check.php';
 
-// 1. Get the Request ID
+// Get request ID from URL
 $id_permohonan = $_GET['id'] ?? null;
 if (!$id_permohonan) {
     die("ID Permohonan tidak sah.");

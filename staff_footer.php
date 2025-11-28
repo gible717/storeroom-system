@@ -1,25 +1,17 @@
 <?php
-// FILE: staff_footer.php
+// staff_footer.php - Staff layout footer with scripts
 ?>
-</div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // TEST LINE: This will print to your console no matter what.
-    console.log("Staff footer script is running!");
-
+// Handle success/error messages from URL params
 document.addEventListener('DOMContentLoaded', function() {
-    
-    console.log("DOM content loaded. Looking for URL parameters...");
-
     const params = new URLSearchParams(window.location.search);
     const success = params.get('success');
     const error = params.get('error');
 
-    console.log("Success param:", success);
-    console.log("Error param:", error);
-
     if (success) {
-        console.log("SUCCESS detected! Firing SweetAlert.");
         Swal.fire({
             icon: 'success',
             title: 'Berjaya!',
@@ -27,9 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
             timer: 2500,
             showConfirmButton: false
         });
-    } 
+    }
     else if (error) {
-        console.log("ERROR detected! Firing SweetAlert.");
         Swal.fire({
             icon: 'error',
             title: 'Ralat!',
@@ -37,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Clean the URL
+    // Clean URL after showing message
     if (success || error) {
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);

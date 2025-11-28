@@ -1,5 +1,5 @@
+// kewps3_print.php - Print KEW.PS-3 Bahagian B stock transaction ledger
 <?php
-// FILE: kewps3_print.php
 session_start();
 require 'db.php';
 

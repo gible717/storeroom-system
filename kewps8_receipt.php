@@ -1,9 +1,9 @@
 <?php
-// FILE: kewps8_receipt.php
+// kewps8_receipt.php - Receipt acknowledgment form
 $pageTitle = "Perakuan Penerimaan (KEW.PS-8)";
-require 'staff_header.php'; // Use staff header
+require 'staff_header.php';
 
-// --- 1. Get Request ID & Validate ---
+// Get Request ID & validate
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     $_SESSION['error_msg'] = "Ralat: ID Permohonan tidak sah.";
     header('Location: request_list.php');
@@ -12,8 +12,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id_permohonan = (int)$_GET['id'];
 $id_staf = $_SESSION['ID_staf'];
 
-// --- 2. Fetch 'permohonan' (Header) Data ---
-// We check that the ID exists AND that it belongs to the logged-in staff
+// Fetch request header data
 $stmt_header = $conn->prepare("SELECT * FROM permohonan WHERE ID_permohonan = ? AND ID_pemohon = ?");
 $stmt_header->bind_param("is", $id_permohonan, $id_staf);
 $stmt_header->execute();
@@ -21,22 +20,19 @@ $permohonan = $stmt_header->get_result()->fetch_assoc();
 $stmt_header->close();
 
 if (!$permohonan) {
-    // ID not found OR it doesn't belong to this user
     $_SESSION['error_msg'] = "Ralat: Permohonan (ID: $id_permohonan) tidak dijumpai.";
     header('Location: request_list.php');
     exit;
 }
 
-// --- 3. Check Status ---
-// Staff can only "receive" items that are 'Diluluskan'
+// Check status (only approved items can be received)
 if ($permohonan['status'] != 'Diluluskan') {
     $_SESSION['error_msg'] = "Ralat: Permohonan ini belum diluluskan atau telah diterima.";
     header('Location: request_list.php');
     exit;
 }
 
-// --- 4. Fetch 'permohonan_barang' (Items) Data ---
-// We only fetch items that were approved (kuantiti_lulus > 0)
+// Fetch approved items data
 $stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran 
                             FROM permohonan_barang pb
                             LEFT JOIN barang b ON pb.no_kod = b.no_kod

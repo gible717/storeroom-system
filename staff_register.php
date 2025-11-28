@@ -1,8 +1,9 @@
 <?php
-// FILE: staff_register.php
-require 'db.php'; // Your database connection file
+// staff_register.php - Staff registration form
 
-// Fetch all departments to populate the dropdown
+require 'db.php';
+
+// Fetch departments for dropdown
 $sql = "SELECT ID_jabatan, nama_jabatan FROM jabatan ORDER BY nama_jabatan ASC";
 $jabatan_result = $conn->query($sql);
 ?>
@@ -36,7 +37,7 @@ $jabatan_result = $conn->query($sql);
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            margin-bottom: 1.5rem; /* We keep the 1.5rem margin */
+            margin-bottom: 1.5rem;
             text-align: center;
         }
         .logo {

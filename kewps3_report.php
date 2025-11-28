@@ -1,5 +1,5 @@
+// kewps3_report.php - KEW.PS-3 report generation form
 <?php
-// FILE: kewps3_report.php
 $pageTitle = "Laporan KEW.PS-3 - Transaksi Stok";
 require 'admin_header.php';
 

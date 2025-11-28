@@ -1,3 +1,4 @@
+// check_session.php - Debug session and user data
 <?php
 session_start();
 require 'db.php';

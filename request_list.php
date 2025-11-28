@@ -1,41 +1,39 @@
 <?php
-// FILE: request_list.php (VERSI 2.2 - ALL BUGS FIXED)
+// request_list.php - Staff request listing page
+
 require 'staff_auth_check.php';
 
-// Get the logged-in staff's ID from the session
 $id_staf = $_SESSION['ID_staf'];
 
-// 1. --- GET DATA ---
-// We still need 'senarai_barang' for the search function,
-// but we will hide it from the table.
-$sql = "SELECT 
-            p.ID_permohonan, 
-            p.tarikh_mohon, 
-            p.status, 
+// Get all requests for this staff
+$sql = "SELECT
+            p.ID_permohonan,
+            p.tarikh_mohon,
+            p.status,
             COUNT(pb.ID_permohonan_barang) AS bilangan_item,
             GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
-        FROM 
+        FROM
             permohonan p
-        LEFT JOIN 
+        LEFT JOIN
             permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-        LEFT JOIN 
+        LEFT JOIN
             barang b ON pb.no_kod = b.no_kod
-        WHERE 
+        WHERE
             p.ID_pemohon = ?
-        GROUP BY 
+        GROUP BY
             p.ID_permohonan
-        ORDER BY 
+        ORDER BY
             p.tarikh_mohon DESC, p.ID_permohonan ASC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('s', $id_staf);
 $stmt->execute();
 $requests_result = $stmt->get_result();
-$total_rows = $requests_result->num_rows; // Get the total number of rows
+$total_rows = $requests_result->num_rows;
 ?>
 <?php
 $pageTitle = "Permohonan Saya";
-require 'staff_header.php'; 
+require 'staff_header.php';
 ?>
 
 <style>
@@ -190,57 +188,46 @@ require 'staff_header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // --- 1. Get all elements ---
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const tableBody = document.querySelector('#requestTable tbody');
         const noResultsRow = document.getElementById('no-results-row');
         const originalNoResultsRow = document.getElementById('original-no-results');
         const paginationInfo = document.getElementById('pagination-info');
-        
-        // --- 2. Get all data rows (this is the key fix) ---
-        // We get ALL rows that are not the "template" rows
+
+        // Get all data rows
         const tableRows = tableBody.querySelectorAll('tr:not(#no-results-row):not(#original-no-results)');
-        const totalRows = tableRows.length; // Get the count from the rows we just found
-        
-        // --- 3. The Highlight Function (v2.5 - Smart Target) ---
-        // This version targets the button *inside* the cell to avoid
-        // breaking HTML attributes.
+        const totalRows = tableRows.length;
+
+        // Highlight search text in cells
         function highlightText(cell, text) {
             if (!cell) return;
-            
-             // ### THE FIX: Find the button *inside* the cell ###
+
             const button = cell.querySelector('button.btn-view-details');
-            
-             // If this cell doesn't have our button, just return.
-            if (!button) { 
-                // We clear any old highlights on non-button cells just in case
+
+            if (!button) {
                 if (cell.dataset.originalHtml) {
                     cell.innerHTML = cell.dataset.originalHtml;
                 }
-                return; 
+                return;
             }
 
-             // --- Smart logic for the button ---
-             // Store the button's original text (e.g., "#10")
+            // Store original text
             if (!button.dataset.originalHtml) {
-                button.dataset.originalHtml = button.innerHTML; 
+                button.dataset.originalHtml = button.innerHTML;
             }
-             let html = button.dataset.originalHtml; // Start from original text
+            let html = button.dataset.originalHtml;
 
             if (text) {
                 const safeText = text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                 const regex = new RegExp(`(${safeText})`, 'gi');
-                
-                 // This now *only* replaces the text inside the button
                 html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
             }
-            
-             // Apply the new HTML *only* to the button's content
-            button.innerHTML = html; 
+
+            button.innerHTML = html;
         }
 
-        // --- 4. The Main Filter Function ---
+        // Filter table by search and status
         function filterTable() {
             const searchText = searchInput.value.toLowerCase().replace('#', '');
             const statusText = statusFilter.value.toLowerCase();
@@ -248,10 +235,9 @@ require 'staff_header.php';
 
             for (let i = 0; i < tableRows.length; i++) {
                 const row = tableRows[i];
-                
-                const requestIdCell = row.querySelector('.request-id'); // The <td>
+                const requestIdCell = row.querySelector('.request-id');
                 const requestId = requestIdCell?.textContent.toLowerCase().replace('#', '') || '';
-                const itemList = row.dataset.itemList || ''; 
+                const itemList = row.dataset.itemList || '';
                 const status = row.querySelector('.status-cell')?.textContent.toLowerCase().trim() || '';
 
                 const matchesSearch = searchText === '' || requestId.includes(searchText) || itemList.includes(searchText);
@@ -260,64 +246,54 @@ require 'staff_header.php';
                 if (matchesSearch && matchesStatus) {
                     row.style.display = '';
                     visibleRows++;
-                    // Apply highlight
                     highlightText(requestIdCell, searchText);
                 } else {
                     row.style.display = 'none';
-                    // Clear highlight
-                    highlightText(requestIdCell, ''); 
+                    highlightText(requestIdCell, '');
                 }
             }
-            
-            // --- 5. Show/Hide "No Results" Rows ---
+
+            // Show/hide no results messages
             const hasData = totalRows > 0;
             const hasVisibleRows = visibleRows > 0;
 
-            // Show "Tiada padanan" if we have data, but filter hides it
             if (noResultsRow) {
                 noResultsRow.style.display = (hasData && !hasVisibleRows) ? '' : 'none';
             }
-            
-            // Show "Tiada permohonan" only if the table is completely empty
+
             if (originalNoResultsRow) {
                 originalNoResultsRow.style.display = (!hasData) ? '' : 'none';
             }
-            
-            // --- 6. Update Pagination Text ---
+
+            // Update pagination text
             if (paginationInfo) {
                 paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
             }
         }
 
-        // --- 7. Attach Event Listeners ---
+        // Attach event listeners
         searchInput.addEventListener('keyup', filterTable);
         statusFilter.addEventListener('change', filterTable);
-        
-        // --- 8. Run filter on page load (to fix 0-of-0 bug) ---
-        filterTable(); 
+        filterTable();
 
-        // --- 10. NEW (v2.4): "Quick View" Modal Logic ---
+        // Quick view modal logic
         const detailsModal = document.getElementById('detailsModal');
         const detailsModalTitle = document.getElementById('detailsModalLabel');
         const detailsModalBody = document.getElementById('detailsModalBody');
-
-        // Get all the new "view" buttons
         const viewButtons = document.querySelectorAll('.btn-view-details');
 
         viewButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const requestId = this.dataset.id;
-                
-                // 1. Set the title and "loading" state
+
                 detailsModalTitle.textContent = 'Maklumat Permohonan #' + requestId;
                 detailsModalBody.innerHTML = '<div class="text-center p-4"><span class="spinner-border spinner-border-sm" role="status"></span> Loading...</div>';
 
-                // 2. Fetch the data from our new AJAX file
+                // Fetch request details
                 fetch('request_details_ajax.php?id=' + requestId)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // 3. Build the HTML to show in the modal
                             let html = `
                                 <h6 class="fw-bold">Maklumat Am</h6>
                                 <p class_="">
@@ -335,8 +311,7 @@ require 'staff_header.php';
                                     </thead>
                                     <tbody>
                             `;
-                            
-                            // Add each item to the table
+
                             data.items.forEach(item => {
                                 html += `
                                     <tr>
@@ -350,8 +325,7 @@ require 'staff_header.php';
                                     </tbody>
                                 </table>
                             `;
-                            
-                            // 4. Set the modal body
+
                             detailsModalBody.innerHTML = html;
 
                         } else {

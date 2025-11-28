@@ -1,27 +1,26 @@
 <?php
-// FILE: request_edit_process.php (NEW - v4.0 AJAX Version)
+// request_edit_process.php - Handle request edit (AJAX)
+
 require 'staff_auth_check.php';
 
-// Set header to JSON for AJAX responses
 header('Content-Type: application/json');
-
-// Start with a default error response
 $response = ['success' => false, 'message' => 'Ralat tidak diketahui.'];
 
-// 1. Get Data from POST
+// Check POST request
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     $response['message'] = 'Kaedah penghantaran tidak sah.';
     echo json_encode($response);
     exit;
 }
 
+// Get form data
 $id_permohonan = $_POST['id_permohonan'] ?? null;
 $id_staf = $_SESSION['ID_staf'];
 $items = $_POST['items'] ?? [];
 $jawatan = $_POST['jawatan'] ?? '';
 $catatan = $_POST['catatan'] ?? null;
 
-// 2. Validation
+// Validate data
 if (!$id_permohonan) {
     $response['message'] = 'ID Permohonan tidak sah.';
     echo json_encode($response);
@@ -33,8 +32,8 @@ if (empty($items)) {
     exit;
 }
 
-// 3. Security Check: Verify user still owns this request and it's still 'Baru'
-$stmt = $conn->prepare("SELECT ID_permohonan FROM permohonan 
+// Security check: verify ownership and status
+$stmt = $conn->prepare("SELECT ID_permohonan FROM permohonan
                         WHERE ID_permohonan = ? AND ID_pemohon = ? AND status = 'Baru'");
 $stmt->bind_param("is", $id_permohonan, $id_staf);
 $stmt->execute();
@@ -46,27 +45,27 @@ if ($result->num_rows != 1) {
 }
 $stmt->close();
 
-// 4. Database Transaction
+// Update request with transaction
 $conn->begin_transaction();
 try {
-    // 4a. Update the main 'permohonan' header
-    $stmt_header = $conn->prepare("UPDATE permohonan SET jawatan_pemohon = ?, catatan = ? 
+    // Update request header
+    $stmt_header = $conn->prepare("UPDATE permohonan SET jawatan_pemohon = ?, catatan = ?
                                     WHERE ID_permohonan = ?");
     $stmt_header->bind_param("ssi", $jawatan, $catatan, $id_permohonan);
     $stmt_header->execute();
     $stmt_header->close();
 
-    // 4b. Delete ALL old items from 'permohonan_barang'
+    // Delete old items
     $stmt_delete = $conn->prepare("DELETE FROM permohonan_barang WHERE ID_permohonan = ?");
     $stmt_delete->bind_param("i", $id_permohonan);
     $stmt_delete->execute();
     $stmt_delete->close();
-    
-    // 4c. Insert ALL new items from the form
-    $sql_insert = "INSERT INTO permohonan_barang (ID_permohonan, no_kod, kuantiti_mohon) 
+
+    // Insert new items
+    $sql_insert = "INSERT INTO permohonan_barang (ID_permohonan, no_kod, kuantiti_mohon)
                 VALUES (?, ?, ?)";
     $stmt_insert = $conn->prepare($sql_insert);
-    
+
     foreach ($items as $item) {
         $no_kod = $item['no_kod'];
         $kuantiti = (int)$item['kuantiti'];
@@ -77,21 +76,16 @@ try {
     }
     $stmt_insert->close();
 
-    // 4d. If everything is OK, commit
+    // Commit transaction
     $conn->commit();
-    
-    // --- Send SUCCESS JSON Response ---
     $response['success'] = true;
     $response['message'] = "Permohonan anda telah berjaya dikemaskini.";
 
 } catch (Exception $e) {
-    // 4e. If anything fails, roll back
     $conn->rollback();
-    // --- Send ERROR JSON Response ---
     $response['message'] = "Gagal mengemaskini permohonan. Ralat: " . $e->getMessage();
 }
 
-// 5. Echo final JSON response
 echo json_encode($response);
 exit;
 ?>

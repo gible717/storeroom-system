@@ -1,19 +1,17 @@
 <?php
-// FILE: kewps8_approval.php
+// kewps8_approval.php - Stock request approval form
 $pageTitle = "Kelulusan Permohonan Stok (KEW.PS-8)";
-require 'admin_header.php'; // Use admin header
+require 'admin_header.php';
 
-// --- 1. Get Request ID & Validate ---
+// Get Request ID & validate
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    // No ID was passed, redirect back
     $_SESSION['error_msg'] = "Ralat: ID Permohonan tidak sah.";
     header('Location: admin_request_list.php');
     exit;
 }
 $id_permohonan = (int)$_GET['id'];
 
-// --- 2. Fetch 'permohonan' (Header) Data ---
-// We join with 'jabatan' to get the department name
+// Fetch request header data
 $stmt_header = $conn->prepare("SELECT p.*, j.nama_jabatan 
                                FROM permohonan p
                                LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
@@ -24,14 +22,12 @@ $permohonan = $stmt_header->get_result()->fetch_assoc();
 $stmt_header->close();
 
 if (!$permohonan) {
-    // ID was not found in the database
     $_SESSION['error_msg'] = "Ralat: Permohonan (ID: $id_permohonan) tidak dijumpai.";
     header('Location: admin_request_list.php');
     exit;
 }
 
-// --- 3. Fetch 'permohonan_barang' (Items) Data ---
-// We join with 'barang' to get item details (perihal_stok, baki_semasa)
+// Fetch request items data
 $stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran, b.baki_semasa 
                              FROM permohonan_barang pb
                              LEFT JOIN barang b ON pb.no_kod = b.no_kod

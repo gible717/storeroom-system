@@ -1,15 +1,12 @@
 <?php
-// FILE: admin_add_product.php (NOW 100% "SLAYED")
+// admin_add_product.php - Form to add new product
+
 $pageTitle = "Tambah Produk";
-require 'admin_header.php'; // This "slays" (includes) db.php
+require 'admin_header.php';
 
-// "GHOST" (BUG) 1: "KILLED" (DELETED) the extra 'require db.php'.
-
-// START: "SLAY" (STRATEGIST) FIX
-// We now "vibe" (get) the list from your NEW KATEGORI table
+// Get categories for dropdown
 $kategori_sql = "SELECT * FROM KATEGORI ORDER BY nama_kategori ASC";
 $kategori_result = $conn->query($kategori_sql);
-// END: "SLAY" FIX
 ?>
 
 <div class="container-fluid">
@@ -23,11 +20,14 @@ $kategori_result = $conn->query($kategori_sql);
     <div class="card shadow mb-4 border-0" style="border-radius: 1rem;">
         <div class="card-body p-4 p-md-5">
             <form action="admin_add_product_process.php" method="POST">
+
+                <!-- Product Name -->
                 <div class="mb-3">
                     <label for="nama_produk" class="form-label">Nama Produk</label>
                     <input type="text" class="form-control" id="nama_produk" name="nama_produk" required>
                 </div>
 
+                <!-- Product ID & Category -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="id_produk" class="form-label">ID Produk / SKU</label>
@@ -52,12 +52,14 @@ $kategori_result = $conn->query($kategori_sql);
                     </div>
                 </div>
 
+                <!-- Supplier Name (optional, for record only) -->
                 <div class="mb-3">
                     <label for="nama_pembekal" class="form-label">Nama Pembekal</label>
                     <input type="text" class="form-control" id="nama_pembekal" name="nama_pembekal" placeholder="Contoh: Syarikat ABC Sdn Bhd">
                     <div class="form-text">Nama pembekal untuk tujuan rekod sahaja (pilihan)</div>
                 </div>
 
+                <!-- Price & Stock -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="harga" class="form-label">Harga Seunit (RM)</label>
@@ -72,6 +74,7 @@ $kategori_result = $conn->query($kategori_sql);
                     </div>
                 </div>
 
+                <!-- Action Buttons -->
                 <div class="d-flex justify-content-end pt-3 mt-4 border-top">
                     <a href="admin_products.php" class="btn btn-secondary me-2">Batal</a>
                     <button type="submit" class="btn btn-primary">Simpan Produk</button>
@@ -81,7 +84,4 @@ $kategori_result = $conn->query($kategori_sql);
     </div>
 </div>
 
-<?php
-// "GHOST" (BUG) 3: "KILLED" (DELETED) the extra '$conn->close();'
-require 'admin_footer.php';
-?>
+<?php require 'admin_footer.php'; ?>

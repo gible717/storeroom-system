@@ -1,9 +1,9 @@
+// report_inventory.php - Inventory report dashboard
 <?php
-// FILE: report_inventory.php
 $pageTitle = "Laporan Inventori";
 require 'admin_header.php';
 
-// --- Filter Logic ---
+// Filter logic
 // Dates are for the "Trend" chart
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
@@ -11,8 +11,8 @@ $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Fetch product categories for the filter dropdown
-// THIS IS THE "SLAY" (THE FIX)
-// We now "vibe" (get) the list from the new "KATEGORI" table
+// Get categories from KATEGORI table
+//
 $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
 
 // --- SQL Queries for Summary Cards (Based on CURRENT stock) ---

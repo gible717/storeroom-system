@@ -1,9 +1,8 @@
 <?php
-// FILE: kewps8_cart_ajax.php (VERSI 4.0 - "Modal" Design)
-// This file is now a "smart" processor for the session cart
+// kewps8_cart_ajax.php - Handle cart operations (AJAX)
 session_start();
 
-// --- 1. Initialize cart & catatan if they don't exist ---
+// Initialize cart & catatan if they don't exist
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
@@ -11,7 +10,7 @@ if (!isset($_SESSION['request_catatan'])) {
     $_SESSION['request_catatan'] = '';
 }
 
-// --- 2. Get the data from the AJAX (it's sent as JSON) ---
+// Get data from AJAX request (JSON)
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data || !isset($data['action'])) {
@@ -20,18 +19,18 @@ if (!$data || !isset($data['action'])) {
 }
 
 $action = $data['action'];
-$response = ['success' => false]; // Start with a pessimistic response
+$response = ['success' => false];
 
-// --- 3. Handle the requested action ---
+// Handle the requested action
 switch ($action) {
-    
-    // --- ACTION: 'add' (from the "Tambah Item" button) ---
+
+    // Add item to cart
     case 'add':
         $no_kod = $data['no_kod'] ?? null;
         $kuantiti = (int)($data['kuantiti'] ?? 0);
         $perihal_stok = $data['perihal_stok'] ?? 'Unknown';
         $catatan = $data['catatan'] ?? '';
-        $jawatan = $data['jawatan'] ?? ''; // <-- ADD THIS
+        $jawatan = $data['jawatan'] ?? '';
 
         if ($kuantiti <= 0) {
             $response['message'] = 'Kuantiti mestilah 1 atau lebih.';
@@ -44,29 +43,28 @@ switch ($action) {
                 'kuantiti' => $kuantiti,
                 'perihal_stok' => $perihal_stok
             ];
-            // Always update the catatan
             $_SESSION['request_catatan'] = $catatan;
-            $_SESSION['request_jawatan'] = $jawatan; // <-- ADD THIS
+            $_SESSION['request_jawatan'] = $jawatan;
             
             $response['success'] = true;
             $response['message'] = 'Item berjaya ditambah!';
         }
         break;
 
-    // --- ACTION: 'get' (from the "Sahkan" modal opening) ---
+    // Get cart contents
     case 'get':
         $response['success'] = true;
         $response['cart'] = $_SESSION['cart'];
         $response['catatan'] = $_SESSION['request_catatan'];
         break;
 
-    // --- ACTION: 'get_count' (for checking the "Sahkan" button) ---
+    // Get cart item count
     case 'get_count':
         $response['success'] = true;
         $response['count'] = count($_SESSION['cart']);
         break;
 
-    // --- ACTION: 'update' (from the modal quantity change) ---
+    // Update item quantity
     case 'update':
         $no_kod = $data['no_kod'] ?? null;
         $kuantiti = (int)($data['kuantiti'] ?? 0);
@@ -79,7 +77,7 @@ switch ($action) {
         }
         break;
 
-    // --- ACTION: 'delete' (from the modal trash icon) ---
+    // Delete item from cart
     case 'delete':
         $no_kod = $data['no_kod'] ?? null;
 
@@ -95,7 +93,7 @@ switch ($action) {
         $response['message'] = 'Tindakan tidak sah.';
 }
 
-// --- 4. Send the JSON response back to the JavaScript ---
+// Send JSON response
 header('Content-Type: application/json');
 echo json_encode($response);
 exit;

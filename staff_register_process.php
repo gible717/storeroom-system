@@ -1,11 +1,11 @@
 <?php
-// FILE: staff_register_process.php
-require 'db.php'; // Your database connection file
+// staff_register_process.php - Handle staff registration
 
-// Only process POST requests
+require 'db.php';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // 1. Get all form data
+    // Get form data
     $id_staf = $_POST['id_staf'];
     $nama = $_POST['nama'];
     $emel = $_POST['emel'];
@@ -13,15 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $kata_laluan = $_POST['kata_laluan'];
     $sahkan_kata_laluan = $_POST['sahkan_kata_laluan'];
 
-    // 2. Server-side Validation
-    // Check if passwords match
+    // Validate passwords match
     if ($kata_laluan !== $sahkan_kata_laluan) {
         $error = "Kata laluan tidak sepadan.";
         header("Location: staff_register.php?error=" . urlencode($error));
         exit();
     }
 
-    // Check for duplicate ID Staf
+    // Check duplicate ID
     $stmt = $conn->prepare("SELECT ID_staf FROM staf WHERE ID_staf = ?");
     $stmt->bind_param("s", $id_staf);
     $stmt->execute();
@@ -35,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Check for duplicate Emel
+    // Check duplicate email
     $stmt = $conn->prepare("SELECT emel FROM staf WHERE emel = ?");
     $stmt->bind_param("s", $emel);
     $stmt->execute();

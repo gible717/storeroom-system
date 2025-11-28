@@ -1,5 +1,5 @@
+// kewps8_approval_process.php - Handle stock request approval/rejection
 <?php
-// FILE: kewps8_approval_process.php
 session_start();
 require_once __DIR__ . '/db.php';
 

@@ -1,5 +1,5 @@
+// check_table_structure.php - Debug transaksi_stok table structure
 <?php
-// Quick script to check transaksi_stok table structure
 require 'db.php';
 
 echo "<h2>transaksi_stok Table Structure</h2>";

@@ -1,30 +1,22 @@
 <?php
-// FILE: staff_header.php
-require_once 'staff_auth_check.php'; // Use the dedicated staff security check
-require_once 'db.php'; // We need the database connection
+// staff_header.php - Staff layout header with navbar
 
-// --- NEW ROBUST HEADER LOGIC ---
-// Fetch user's name AND picture path directly from the DB on every page load.
-// This fixes the "disappearing name" bug and allows us to show the real picture.
+require_once 'staff_auth_check.php';
+require_once 'db.php';
 
+// Fetch user profile for navbar
 $header_user_id = $_SESSION['ID_staf'];
-$header_user_name = 'Staf'; // Default
-$header_user_pic = null; // Default
+$header_user_name = 'Staf';
+$header_user_pic = null;
 
 $stmt_header = $conn->prepare("SELECT nama, gambar_profil FROM staf WHERE ID_staf = ?");
 $stmt_header->bind_param("s", $header_user_id);
 if ($stmt_header->execute()) {
     $result = $stmt_header->get_result();
-
     if ($user = $result->fetch_assoc()) {
- // --- THIS IS THE FIX ---
-// Only update the name if the database value is NOT empty
         if (!empty($user['nama'])) {
             $header_user_name = $user['nama'];
         }
-// --- END OF FIX ---
-
-// Check if the picture exists on the server
         if (!empty($user['gambar_profil']) && file_exists($user['gambar_profil'])) {
             $header_user_pic = $user['gambar_profil'];
         }
@@ -32,10 +24,12 @@ if ($stmt_header->execute()) {
 }
 $stmt_header->close();
 
-// We still need the initials as a fallback (using the "smart" logic)
+// Get initials for avatar fallback
 $words = explode(" ", $header_user_name);
 $initials = "";
-foreach ($words as $w) {$initials .= strtoupper(substr($w, 0, 1));}
+foreach ($words as $w) {
+    $initials .= strtoupper(substr($w, 0, 1));
+}
 $header_user_initials = substr($initials, 0, 2);
 ?>
 
@@ -57,7 +51,6 @@ $header_user_initials = substr($initials, 0, 2);
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
         }
-        /* Styles for the new navbar from navbar.php */
         .top-navbar {
             background-color: #ffffff;
             border-bottom: 1px solid #dee2e6;
@@ -101,8 +94,6 @@ $header_user_initials = substr($initials, 0, 2);
             background-color: #f8d7da;
             color: #842029;
         }
-
-        /* Styles for the main content */
         .main-content {
             padding: 2.5rem;
         }
@@ -128,8 +119,8 @@ $header_user_initials = substr($initials, 0, 2);
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: #e7f3ff; /* Light Blue */
-            color: #0d6efd; /* Primary Blue */
+            background-color: #e7f3ff;
+            color: #0d6efd;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -146,20 +137,18 @@ $header_user_initials = substr($initials, 0, 2);
             color: #6c757d;
             font-size: 0.9rem;
         }
-        .alert-top { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            z-index: 1050; 
-            min-width: 300px; 
+        .alert-top {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
         }
-
-        /* --- WCAG "Skip Link" Easter Egg --- */
         .skip-link {
             position: absolute;
             top: -40px;
             left: 0;
-            background: #0d6efd; /* A strong blue */
+            background: #0d6efd;
             color: white;
             padding: 8px 12px;
             z-index: 9999;
@@ -168,7 +157,7 @@ $header_user_initials = substr($initials, 0, 2);
             transition: top 0.3s;
         }
         .skip-link:focus {
-            top: 10px; /* "Pops" into view */
+            top: 10px;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -176,39 +165,33 @@ $header_user_initials = substr($initials, 0, 2);
 <body>
 
     <a href="#main-content" class="skip-link">Langkau ke Kandungan Utama (Skip to Main Content)</a>
-<nav class="navbar navbar-expand-lg staff-navbar">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="staff_dashboard.php">
-            <img src="assets/img/logo.png" alt="Logo" style="height: 40px;">
-            <span class="ms-2">Sistem Pengurusan Bilik Stor dan Inventori</span>
-        </a>
 
-        <div class="d-flex align-items-center ms-auto">
-            <a href="staff_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">
-
-                <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($header_user_name); ?></span>
-
-                <?php if ($header_user_pic): ?>
-                    
-                    <img src="<?php echo htmlspecialchars($header_user_pic) . '?t=' . time(); ?>" 
-                    class="user-initials-badge" 
-                    alt="Gambar Profil">
-                
-                <?php else: ?>
-                    
-                    <div class="user-initials-badge">
-                        <?php echo htmlspecialchars($header_user_initials); ?>
-                    </div>
-                
-                <?php endif; ?>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg staff-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="staff_dashboard.php">
+                <img src="assets/img/logo.png" alt="Logo" style="height: 40px;">
+                <span class="ms-2">Sistem Pengurusan Bilik Stor dan Inventori</span>
             </a>
-            <a href="logout.php" class="btn btn-logout btn-sm">
 
-                <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
-            </a>
+            <div class="d-flex align-items-center ms-auto">
+                <a href="staff_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">
+                    <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($header_user_name); ?></span>
+                    <?php if ($header_user_pic): ?>
+                        <img src="<?php echo htmlspecialchars($header_user_pic) . '?t=' . time(); ?>"
+                             class="user-initials-badge"
+                             alt="Gambar Profil">
+                    <?php else: ?>
+                        <div class="user-initials-badge">
+                            <?php echo htmlspecialchars($header_user_initials); ?>
+                        </div>
+                    <?php endif; ?>
+                </a>
+                <a href="logout.php" class="btn btn-logout btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i> Log Keluar
+                </a>
+            </div>
         </div>
+    </nav>
 
-    </div>
-</nav>
-
-<div class="main-content container" id="main-content">
+    <div class="main-content container" id="main-content">

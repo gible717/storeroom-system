@@ -1,19 +1,20 @@
 <?php
-// FILE: department_process.php
+// department_process.php - Handle department add/edit/delete
+
 require 'admin_auth_check.php';
 
-// --- ADD ACTION ---
+// Add department
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {
-    
+
     $nama_jabatan = $_POST['nama_jabatan'];
     if (empty($nama_jabatan)) {
         header("Location: admin_department.php?error=" . urlencode("Nama jabatan diperlukan."));
         exit;
     }
-    
+
     $stmt = $conn->prepare("INSERT INTO jabatan (nama_jabatan) VALUES (?)");
     $stmt->bind_param("s", $nama_jabatan);
-    
+
     if ($stmt->execute()) {
         header("Location: admin_department.php?success=" . urlencode("Jabatan baru berjaya ditambah."));
     } else {
@@ -21,20 +22,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
     $stmt->close();
 
-// --- EDIT ACTION ---
+// Edit department
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'edit') {
 
     $nama_jabatan = $_POST['nama_jabatan'];
     $id_jabatan = $_POST['id_jabatan'];
-    
+
     if (empty($nama_jabatan) || empty($id_jabatan)) {
         header("Location: admin_department.php?error=" . urlencode("Maklumat tidak lengkap."));
         exit;
     }
-    
+
     $stmt = $conn->prepare("UPDATE jabatan SET nama_jabatan = ? WHERE ID_jabatan = ?");
     $stmt->bind_param("si", $nama_jabatan, $id_jabatan);
-    
+
     if ($stmt->execute()) {
         header("Location: admin_department.php?success=" . urlencode("Jabatan berjaya dikemaskini."));
     } else {
@@ -42,12 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
     $stmt->close();
 
-// --- DELETE ACTION ---
+// Delete department
 } elseif (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-    
+
     $id_jabatan = $_GET['id'];
-    
-    // --- START CRITICAL CHECK ---
+
     // Check if any staff are in this department
     $check_sql = "SELECT COUNT(*) as count FROM staf WHERE id_jabatan = ?";
     $check_stmt = $conn->prepare($check_sql);
@@ -59,26 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $check_stmt->close();
 
     if ($staff_count > 0) {
-        // If staff exist, REJECT the delete and send an error pop-up
         header("Location: admin_department.php?error=" . urlencode("Tidak boleh padam! Jabatan ini masih mempunyai ($staff_count) orang staf."));
         exit;
     }
-    // --- END CRITICAL CHECK ---
 
-    // If count is 0, proceed with deletion
+    // Delete department
     $stmt = $conn->prepare("DELETE FROM jabatan WHERE ID_jabatan = ?");
     $stmt->bind_param("i", $id_jabatan);
 
     if ($stmt->execute()) {
         header("Location: admin_department.php?success=" . urlencode("Jabatan berjaya dipadam."));
     } else {
-        // This 'else' was missing its brackets
         header("Location: admin_department.php?error=" . urlencode("Gagal memadam jabatan."));
     }
-    $stmt->close(); // This was missing
+    $stmt->close();
 
 } else {
-    // No valid action
     header("Location: admin_department.php");
 }
 

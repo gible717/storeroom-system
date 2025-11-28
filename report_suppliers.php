@@ -1,9 +1,9 @@
+// report_suppliers.php - Suppliers report dashboard
 <?php
-// FILE: report_suppliers.php
 $pageTitle = "Laporan Pembekal";
 require 'admin_header.php';
 
-// --- Filter Logic ---
+// Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $pembekal_filter = $_GET['pembekal'] ?? 'Semua';

@@ -1,9 +1,9 @@
+// report_requests.php - Requests report dashboard
 <?php
-// FILE: report_requests.php
 $pageTitle = "Laporan Permohonan";
 require 'admin_header.php';
 
-// --- Filter Logic ---
+// Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $status_filter = $_GET['status'] ?? 'Semua';
