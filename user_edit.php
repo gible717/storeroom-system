@@ -69,21 +69,12 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
             </div>
 
             <div class="mb-3">
-                <label for="is_admin" class="form-label">Peranan *</label>
-                
-                <?php if ($user['is_superadmin'] == 1): ?>
-                    <input type="text" class="form-control" value="Super Admin" disabled>
-                    <input type="hidden" name="is_admin" value="1"> <div class="form-text">Peranan Super Admin tidak boleh diubah melalui borang ini.</div>
-
-                <?php else: ?>
-                    <select class="form-select" id="is_admin" name="is_admin" required>
-                        <option value="0" <?php if ($user['is_admin'] == 0) echo 'selected'; ?>>Staf</option>
-                        <option value="1" <?php if ($user['is_admin'] == 1) echo 'selected'; ?>>Admin</option>
-                    </select>
-                    <div class="form-text">Super Admin only can be assigned manually in the database.</div>
-                
-                <?php endif; ?>
-
+                <label for="is_admin" class="form-label">Peranan <span class="text-danger">*</span></label>
+                <select class="form-select" id="is_admin" name="is_admin" required>
+                    <option value="0" <?php if ($user['is_admin'] == 0) echo 'selected'; ?>>Staf</option>
+                    <option value="1" <?php if ($user['is_admin'] == 1) echo 'selected'; ?>>Admin</option>
+                </select>
+                <div class="form-text">Pilih peranan untuk pengguna.</div>
             </div>
             
             <div class="form-text mb-3">

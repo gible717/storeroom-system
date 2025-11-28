@@ -13,9 +13,9 @@ $id_permohonan = (int)$_GET['id'];
 
 // Fetch request header data
 $stmt_header = $conn->prepare("SELECT p.*, j.nama_jabatan 
-                               FROM permohonan p
-                               LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
-                               WHERE p.ID_permohonan = ?");
+                            FROM permohonan p
+                            LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
+                            WHERE p.ID_permohonan = ?");
 $stmt_header->bind_param("i", $id_permohonan);
 $stmt_header->execute();
 $permohonan = $stmt_header->get_result()->fetch_assoc();
@@ -29,9 +29,9 @@ if (!$permohonan) {
 
 // Fetch request items data
 $stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran, b.baki_semasa 
-                             FROM permohonan_barang pb
-                             LEFT JOIN barang b ON pb.no_kod = b.no_kod
-                             WHERE pb.ID_permohonan = ?");
+                            FROM permohonan_barang pb
+                            LEFT JOIN barang b ON pb.no_kod = b.no_kod
+                            WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
 $items_result = $stmt_items->get_result();
@@ -99,12 +99,12 @@ $conn->close();
                                         </td>
                                         <td class="text-center">
                                             <input type="number" 
-                                                   class="form-control input-kuantiti mx-auto" 
-                                                   name="items[<?php echo $item['ID_permohonan_barang']; ?>][kuantiti_lulus]"
+                                                class="form-control input-kuantiti mx-auto" 
+                                                name="items[<?php echo $item['ID_permohonan_barang']; ?>][kuantiti_lulus]"
                                                    value="<?php echo $item['kuantiti_mohon']; // Default to the quantity requested ?>"
-                                                   min="0"
+                                                min="0"
                                                    max="<?php echo $item['baki_semasa']; // Admin cannot approve more than available stock ?>"
-                                                   required>
+                                                required>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>

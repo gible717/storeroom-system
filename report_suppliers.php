@@ -35,8 +35,8 @@ $total_pesanan = $stmt_orders->get_result()->fetch_assoc()['total'] ?? 0;
 
 // 3. Jumlah Item Dipesan (Total Units)
 $sql_items = "SELECT SUM(pi.kuantiti_dipesan) AS total 
-              FROM pesanan_item pi
-              JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan" . $where_clause;
+            FROM pesanan_item pi
+            JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan" . $where_clause;
 $stmt_items = $conn->prepare($sql_items);
 $stmt_items->bind_param($types, ...$params);
 $stmt_items->execute();
@@ -44,9 +44,9 @@ $total_item = $stmt_items->get_result()->fetch_assoc()['total'] ?? 0;
 
 // 4. Jumlah Kos (RM)
 $sql_cost = "SELECT SUM(pi.kuantiti_dipesan * prod.harga) AS total
-             FROM pesanan_item pi
-             JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan
-             JOIN produk prod ON pi.ID_produk = prod.ID_produk" . $where_clause;
+            FROM pesanan_item pi
+            JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan
+            JOIN produk prod ON pi.ID_produk = prod.ID_produk" . $where_clause;
 $stmt_cost = $conn->prepare($sql_cost);
 $stmt_cost->bind_param($types, ...$params);
 $stmt_cost->execute();
@@ -55,12 +55,12 @@ $total_kos = $stmt_cost->get_result()->fetch_assoc()['total'] ?? 0;
 
 // --- SQL for Chart 1: Top 5 Suppliers (Bar Chart) ---
 $sql_sup_chart = "SELECT pem.nama_pembekal, COUNT(p.ID_pesanan) AS total_orders
-                  FROM pesanan p
-                  JOIN pembekal pem ON p.ID_pembekal = pem.ID_pembekal
-                  $where_clause
-                  GROUP BY p.ID_pembekal, pem.nama_pembekal
-                  ORDER BY total_orders DESC
-                  LIMIT 5";
+                FROM pesanan p
+                JOIN pembekal pem ON p.ID_pembekal = pem.ID_pembekal
+                $where_clause
+                GROUP BY p.ID_pembekal, pem.nama_pembekal
+                ORDER BY total_orders DESC
+                LIMIT 5";
 $stmt_sup_chart = $conn->prepare($sql_sup_chart);
 $stmt_sup_chart->bind_param($types, ...$params);
 $stmt_sup_chart->execute();
@@ -74,13 +74,13 @@ while ($row = $sup_chart_result->fetch_assoc()) {
 
 // --- SQL for Chart 2: Top 5 Products Ordered (Pie Chart) ---
 $sql_prod_chart = "SELECT prod.nama_produk, SUM(pi.kuantiti_dipesan) AS total_diminta
-                   FROM pesanan_item pi
-                   JOIN produk prod ON pi.ID_produk = prod.ID_produk
-                   JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan
-                   $where_clause
-                   GROUP BY pi.ID_produk, prod.nama_produk
-                   ORDER BY total_diminta DESC
-                   LIMIT 5";
+                FROM pesanan_item pi
+                JOIN produk prod ON pi.ID_produk = prod.ID_produk
+                JOIN pesanan p ON pi.ID_pesanan = p.ID_pesanan
+                $where_clause
+                GROUP BY pi.ID_produk, prod.nama_produk
+                ORDER BY total_diminta DESC
+                LIMIT 5";
 $stmt_prod_chart = $conn->prepare($sql_prod_chart);
 $stmt_prod_chart->bind_param($types, ...$params);
 $stmt_prod_chart->execute();

@@ -147,9 +147,7 @@ $users = $stmt->get_result();
                                 <td><?php echo htmlspecialchars($user['nama_jabatan']); ?></td>
                                 <td>
                                     <?php
-                                    if ($user['is_superadmin'] == 1) {
-                                        echo '<span class="badge bg-danger">Super Admin</span>';
-                                    } elseif ($user['is_admin'] == 1) {
+                                    if ($user['is_admin'] == 1) {
                                         echo '<span class="badge bg-primary">Admin</span>';
                                     } else {
                                         echo '<span class="badge bg-secondary">Staf</span>';
@@ -162,13 +160,8 @@ $users = $stmt->get_result();
                                     </a>
 
                                     <?php
-                                    // Check permission to edit/delete
-                                    $show_buttons = false;
-                                    if ($is_superadmin) {
-                                        $show_buttons = true;
-                                    } elseif ($user['is_admin'] == 0) {
-                                        $show_buttons = true;
-                                    }
+                                    // Admins can manage all users except themselves
+                                    $show_buttons = ($user['ID_staf'] != $userID);
                                     ?>
 
                                     <?php if ($show_buttons): ?>
@@ -176,13 +169,11 @@ $users = $stmt->get_result();
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
 
-                                        <?php if ($_SESSION['ID_staf'] !== $user['ID_staf']): ?>
-                                            <a href="user_delete.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>"
-                                               class="btn btn-sm btn-outline-danger" title="Padam"
-                                               onclick="return confirm('Adakah anda pasti mahu memadam pengguna ini?');">
-                                                <i class="bi bi-trash3-fill"></i>
-                                            </a>
-                                        <?php endif; ?>
+                                        <a href="user_delete.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>"
+                                        class="btn btn-sm btn-outline-danger" title="Padam"
+                                        onclick="return confirm('Adakah anda pasti mahu memadam pengguna ini?');">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

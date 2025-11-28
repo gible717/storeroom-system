@@ -12,7 +12,6 @@ $products_result = $conn->query($products_sql);
 <div class="main-content">
     <div class="d-sm-flex align-items-center mb-4">
         <a href="admin_dashboard.php" class="btn btn-link nav-link p-0 me-3" title="Kembali">
-            <i class="bi bi-arrow-left" style="font-size: 1.5rem; color: #858796;"></i>
         </a>
         <h1 class="h3 mb-0 text-gray-800 fw-bold">Kemaskini Stok</h1>
     </div>

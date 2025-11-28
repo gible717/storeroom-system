@@ -16,5 +16,4 @@ if (!isset($_SESSION['ID_staf'])) {
 $userID = $_SESSION['ID_staf'];
 $userName = $_SESSION['nama'];
 $isAdmin = $_SESSION['is_admin'] ?? 0;
-$isSuperAdmin = $_SESSION['is_superadmin'] ?? 0;
 ?>

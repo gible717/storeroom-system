@@ -257,15 +257,17 @@ require 'staff_header.php';
             const hasData = totalRows > 0;
             const hasVisibleRows = visibleRows > 0;
 
+            // Show "Tiada padanan ditemui" when search has no matches
             if (noResultsRow) {
                 noResultsRow.style.display = (hasData && !hasVisibleRows) ? '' : 'none';
             }
 
+            // Show "Tiada permohonan dijumpai" when database is empty
             if (originalNoResultsRow) {
                 originalNoResultsRow.style.display = (!hasData) ? '' : 'none';
             }
 
-            // Update pagination text
+            // Update pagination info
             if (paginationInfo) {
                 paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
             }

@@ -6,21 +6,21 @@ require 'admin_header.php';
 
 // Get all requests with item details
 $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
-               COUNT(pb.ID_permohonan_barang) AS bilangan_item,
-               GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
+            COUNT(pb.ID_permohonan_barang) AS bilangan_item,
+            GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
         FROM permohonan p
         JOIN staf s ON p.ID_pemohon = s.ID_staf
         LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
         LEFT JOIN barang b ON pb.no_kod = b.no_kod
         GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, s.nama
         ORDER BY
-           CASE p.status
-               WHEN 'Baru' THEN 1
-               WHEN 'Diluluskan' THEN 2
-               WHEN 'Selesai' THEN 3
-               WHEN 'Ditolak' THEN 4
-               ELSE 5
-           END, p.tarikh_mohon DESC";
+        CASE p.status
+            WHEN 'Baru' THEN 1
+            WHEN 'Diluluskan' THEN 2
+            WHEN 'Selesai' THEN 3
+            WHEN 'Ditolak' THEN 4
+            ELSE 5
+        END, p.tarikh_mohon DESC";
 $requests_result = $conn->query($sql);
 $total_rows = $requests_result ? $requests_result->num_rows : 0;
 ?>
@@ -140,6 +140,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const paginationInfo = document.getElementById('pagination-info');
     const totalRows = <?php echo $total_rows; ?>;
 
+    // Debug: Check if elements are found
+    console.log('Search functionality initialized');
+    console.log('Total rows found:', tableRows.length);
+    console.log('Total rows from PHP:', totalRows);
+
+    // Highlight search text
+    function highlightText(cell, searchText) {
+        if (!cell) return;
+
+        // Store original HTML if not stored
+        if (!cell.dataset.originalHtml) {
+            cell.dataset.originalHtml = cell.innerHTML;
+        }
+
+        let html = cell.dataset.originalHtml;
+
+        if (searchText && searchText.length > 0) {
+            const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const regex = new RegExp(`(${safeText})`, 'gi');
+            html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
+        }
+
+        cell.innerHTML = html;
+    }
+
     function filterTable() {
         const searchText = searchInput.value.toLowerCase().replace('#', '');
         const statusText = statusFilter.value.toLowerCase();
@@ -148,40 +173,69 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 0; i < tableRows.length; i++) {
             const row = tableRows[i];
 
-            const requestId = row.querySelector('.request-id')?.textContent.toLowerCase().replace('#', '') || '';
+            const requestIdCell = row.querySelector('.request-id');
+            const stafNameCell = row.querySelector('.staf-name');
+            const itemListCell = row.querySelector('.item-list');
+
+            const requestId = requestIdCell?.textContent.toLowerCase().replace('#', '') || '';
             const stafName = row.dataset.staf || '';
             const itemList = row.dataset.itemList || '';
             const status = row.querySelector('.status-cell')?.textContent.toLowerCase().trim() || '';
 
             const matchesSearch = searchText === '' ||
-                                  requestId.includes(searchText) ||
-                                  stafName.includes(searchText) ||
-                                  itemList.includes(searchText);
+                                requestId.includes(searchText) ||
+                                stafName.includes(searchText) ||
+                                itemList.includes(searchText);
 
             const matchesStatus = statusText === '' || status === statusText;
 
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleRows++;
+
+                // Highlight matching text
+                if (searchText) {
+                    highlightText(requestIdCell, searchText);
+                    highlightText(stafNameCell, searchText);
+                    highlightText(itemListCell, searchText);
+                }
             } else {
                 row.style.display = 'none';
+
+                // Remove highlights
+                highlightText(requestIdCell, '');
+                highlightText(stafNameCell, '');
+                highlightText(itemListCell, '');
             }
         }
 
-        // Show/hide no results message
-        if (totalRows > 0) {
-            noResultsRow.style.display = visibleRows === 0 ? '' : 'none';
-            if (originalNoResultsRow) originalNoResultsRow.style.display = 'none';
-        } else {
-            noResultsRow.style.display = 'none';
-            if (originalNoResultsRow) originalNoResultsRow.style.display = '';
+        // Show/hide no results messages
+        const hasData = totalRows > 0;
+        const hasVisibleRows = visibleRows > 0;
+
+        // Show "Tiada padanan ditemui" when search has no matches
+        if (noResultsRow) {
+            noResultsRow.style.display = (hasData && !hasVisibleRows) ? '' : 'none';
         }
 
-        paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
+        // Show "Tiada permohonan ditemui" when database is empty
+        if (originalNoResultsRow) {
+            originalNoResultsRow.style.display = (!hasData) ? '' : 'none';
+        }
+
+        // Update pagination info
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
+        }
     }
 
+    // Attach event listeners
     searchInput.addEventListener('keyup', filterTable);
+    searchInput.addEventListener('input', filterTable);
     statusFilter.addEventListener('change', filterTable);
+
+    // Run filter on page load to set initial state
+    filterTable();
 });
 </script>
 

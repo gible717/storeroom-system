@@ -8,6 +8,4 @@ if ($isAdmin != 1) {
     header("Location: login.php?error=Akses ditolak.");
     exit;
 }
-
-$is_superadmin = $isSuperAdmin;
 ?>

@@ -57,10 +57,8 @@ $nama_jabatan = $user['nama_jabatan'] ?? '<em>Tidak Ditetapkan</em>';
 
             <dt class="col-sm-4">Peranan</dt>
             <dd class="col-sm-8">
-            <?php 
-            if ($user['is_superadmin'] == 1) {
-                echo '<span class="badge bg-danger">Super Admin</span>';
-            } elseif ($user['is_admin'] == 1) {
+            <?php
+            if ($user['is_admin'] == 1) {
                 echo '<span class="badge bg-primary">Admin</span>';
             } else {
                 echo '<span class="badge bg-secondary">Staf</span>';

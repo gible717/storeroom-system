@@ -96,10 +96,10 @@ while ($row = $top_items_result->fetch_assoc()) {
 .stat-card { background: #fff; border: 1px solid #e9ecef; border-radius: 0.75rem; padding: 1.5rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .stat-card-icon { font-size: 2.5rem; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; margin-right: 1.25rem; }
-.stat-card-icon.bg-primary-light { background: #e0e7ff; color: #4f46e5; }
-.stat-card-icon.bg-success-light { background: #d1fae5; color: #10b981; }
-.stat-card-icon.bg-danger-light { background: #fee2e2; color: #ef4444; }
-.stat-card-icon.bg-warning-light { background: #fef3c7; color: #f59e0b; }
+.stat-card-icon.bg-primary-light {color: #4f46e5; }
+.stat-card-icon.bg-success-light {color: #10b981; }
+.stat-card-icon.bg-danger-light {color: #ef4444; }
+.stat-card-icon.bg-warning-light {color: #f59e0b; }
 .stat-card-info h6 { color: #6c757d; font-size: 0.875rem; margin-bottom: 0.25rem; }
 .stat-card-info h4 { margin-bottom: 0; font-weight: 700; font-size: 2rem; color: #1f2937; }
 
@@ -119,13 +119,13 @@ while ($row = $top_items_result->fetch_assoc()) {
 .custom-date-btn:hover { border-color: #9ca3af; background: #f9fafb; }
 </style>
 
-<h3 class="mb-4 fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Dashboard & Laporan Sistem</h3>
+<h3 class="mb-4 fw-bold"></i>Dashboard & Laporan Sistem</h3>
 
 <!-- Summary Section with Filters -->
 <div class="mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold mb-0">
-            <i class="bi bi-calendar3 me-2"></i>Ringkasan
+            Ringkasan
             <small class="text-muted fs-6">(<?php echo getDisplayLabel($filter_preset, $current_month_start, $current_month_end); ?>)</small>
         </h5>
         <div class="d-flex align-items-center gap-3">
@@ -198,7 +198,7 @@ while ($row = $top_items_result->fetch_assoc()) {
             <i class="bi bi-file-earmark-ruled text-success"></i>
             <h5>KEW.PS-3 Bahagian B</h5>
             <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh (format rasmi kerajaan untuk audit)</p>
-            <a href="kewps3_report.php" class="btn btn-success"><i class="bi bi-printer me-2"></i>Jana KEW.PS-3</a>
+            <a href="kewps3_report.php" class="btn btn-success btn-sm"></i>Jana KEW.PS-3</a>
         </div>
     </div>
     <div class="col-md-6">
@@ -206,7 +206,7 @@ while ($row = $top_items_result->fetch_assoc()) {
             <i class="bi bi-graph-up text-primary"></i>
             <h5>Laporan Analisis Terperinci</h5>
             <p>Statistik permohonan staf, kadar kelulusan, trend bulanan, dan analisis penggunaan mengikut tempoh</p>
-            <a href="report_requests.php" class="btn btn-primary"><i class="bi bi-bar-chart-line me-2"></i>Lihat Analisis</a>
+            <a href="report_requests.php" class="btn btn-primary btn-sm"></i>Lihat Analisis</a>
         </div>
     </div>
 </div>
@@ -299,7 +299,21 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(topItemsCtx.getContext('2d'), {
             type: 'bar',
             data: { labels: topItemsLabels, datasets: [{ label: 'Jumlah Diminta', data: topItemsData, backgroundColor: '#4f46e5' }] },
-            options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
         });
     }
 });

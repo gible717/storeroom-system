@@ -8,7 +8,6 @@ session_start();
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     die("Akses ditolak.");
 }
-$is_superadmin = $_SESSION['is_superadmin'] ?? 0;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -18,13 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $emel = $_POST['emel'];
     $id_jabatan = $_POST['id_jabatan'];
     $is_admin = $_POST['is_admin'];
-
-    // Force staff role if not super admin
-    if (!$is_superadmin) {
-        $is_admin = 0;
-    }
-
-    $is_superadmin_new = 0; // New users are never Super Admins
     $kata_laluan_sementara = $_POST['kata_laluan_sementara'];
 
     // Validate required fields
@@ -38,11 +30,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $is_first_login = 1;
 
     // Insert into database
-    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, is_first_login, is_admin, is_superadmin)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, is_first_login, is_admin)
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssissii", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $is_first_login, $is_admin, $is_superadmin_new);
+    $stmt->bind_param("sssissi", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $is_first_login, $is_admin);
 
     if ($stmt->execute()) {
         header("Location: admin_users.php?success=Pengguna baru berjaya dicipta.");

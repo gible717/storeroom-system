@@ -21,7 +21,7 @@ if ($ID_staf === '' || $kata_laluan_dimasukkan === '') {
 }
 
 // Query user from database
-$stmt = $conn->prepare('SELECT ID_staf, nama, kata_laluan, is_first_login, is_admin, is_superadmin FROM staf WHERE ID_staf = ? LIMIT 1');
+$stmt = $conn->prepare('SELECT ID_staf, nama, kata_laluan, is_first_login, is_admin FROM staf WHERE ID_staf = ? LIMIT 1');
 $stmt->bind_param('s', $ID_staf);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -38,7 +38,6 @@ if ($result && $result->num_rows === 1) {
         $_SESSION['ID_staf'] = $user['ID_staf'];
         $_SESSION['nama'] = $user['nama'];
         $_SESSION['is_admin'] = $user['is_admin'];
-        $_SESSION['is_superadmin'] = $user['is_superadmin'];
         $_SESSION['is_first_login'] = $user['is_first_login'];
 
         // Force password change on first login

@@ -1,5 +1,5 @@
 <?php
-// user_add.php - Add new user form
+// user_add.php - Add new user form (Admin can create Admin or Staff)
 
 $pageTitle = "Tambah Pengguna Baru";
 require 'admin_header.php';
@@ -56,24 +56,15 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
                 </select>
             </div>
 
-            <!-- Role selection based on permission -->
-            <?php if ($is_superadmin): ?>
-                <div class="mb-3">
-                    <label for="is_admin" class="form-label">Peranan *</label>
-                    <select class="form-select" id="is_admin" name="is_admin" required>
-                        <option value="0">Staf</option>
-                        <option value="1">Admin</option>
-                    </select>
-                    <div class="form-text">Super Admin boleh mendaftar Staf atau Admin.</div>
-                </div>
-            <?php else: ?>
-                <div class="mb-3">
-                    <label class="form-label">Peranan</label>
-                    <p class="form-control-plaintext"><strong>Staf</strong></p>
-                    <input type="hidden" name="is_admin" value="0">
-                    <div class="form-text">Sebagai Admin, anda hanya boleh mendaftar pengguna Staf.</div>
-                </div>
-            <?php endif; ?>
+            <!-- Role selection -->
+            <div class="mb-3">
+                <label for="is_admin" class="form-label">Peranan <span class="text-danger">*</span></label>
+                <select class="form-select" id="is_admin" name="is_admin" required>
+                    <option value="0">Staf</option>
+                    <option value="1">Admin</option>
+                </select>
+                <div class="form-text">Pilih peranan untuk pengguna baru.</div>
+            </div>
 
             <div class="mb-3">
                 <label class="form-label">Kata Laluan Sementara</label>

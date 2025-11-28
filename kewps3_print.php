@@ -1,12 +1,11 @@
-// kewps3_print.php - Print KEW.PS-3 Bahagian B stock transaction ledger
+// kewps3_print.php - Print KEW.PS-3 Bahagian B report (Admin access only)
 <?php
 session_start();
 require 'db.php';
 
-// Verify admin access (support both old and new auth system)
+// Verify admin access
 $is_admin = (isset($_SESSION['peranan']) && $_SESSION['peranan'] == 'Admin') ||
-            (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) ||
-            (isset($_SESSION['is_superadmin']) && $_SESSION['is_superadmin'] == 1);
+            (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1);
 
 if (!isset($_SESSION['ID_staf']) || !$is_admin) {
     die("Akses ditolak. Sila log masuk sebagai admin.");

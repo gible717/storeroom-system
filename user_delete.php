@@ -2,11 +2,11 @@
 // user_delete.php - Handle user deletion
 
 require 'db.php';
-require 'auth_check.php';
+session_start();
 
-// Admin only
-if ($userRole !== 'Admin') {
-    header("Location: staff_dashboard.php?error=Akses tidak dibenarkan");
+// Check admin access
+if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+    header("Location: login.php?error=Akses ditolak.");
     exit;
 }
 
@@ -17,7 +17,7 @@ if (!isset($_GET['id'])) {
 }
 
 $id_staf_to_delete = $_GET['id'];
-$current_admin_id = $_SESSION['user_id'];
+$current_admin_id = $_SESSION['ID_staf'];
 
 // Prevent self-deletion
 if ($id_staf_to_delete == $current_admin_id) {
@@ -26,7 +26,7 @@ if ($id_staf_to_delete == $current_admin_id) {
 }
 
 // Delete user
-$sql = "DELETE FROM staf WHERE id_staf = ?";
+$sql = "DELETE FROM staf WHERE ID_staf = ?";
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {

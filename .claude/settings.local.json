@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l admin_auth_check.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l login_process.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l user_add.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l user_add_process.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l admin_users.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l user_edit.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l user_view.php)",
+      "Bash(tee -a TEST_BEFORE_MIGRATION.md php -l kewps3_print.php)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
