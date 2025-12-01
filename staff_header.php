@@ -179,8 +179,8 @@ $header_user_initials = substr($initials, 0, 2);
                     <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($header_user_name); ?></span>
                     <?php if ($header_user_pic): ?>
                         <img src="<?php echo htmlspecialchars($header_user_pic) . '?t=' . time(); ?>"
-                             class="user-initials-badge"
-                             alt="Gambar Profil">
+                            class="user-initials-badge"
+                            alt="Gambar Profil">
                     <?php else: ?>
                         <div class="user-initials-badge">
                             <?php echo htmlspecialchars($header_user_initials); ?>

@@ -57,8 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql_update_item = "UPDATE permohonan_barang SET kuantiti_lulus = ? WHERE ID_permohonan_barang = ?";
             $stmt_update_item = $conn->prepare($sql_update_item);
 
-            // Step 2: Update the main stock (baki_semasa)
-            $sql_update_stock = "UPDATE barang SET baki_semasa = baki_semasa - ? WHERE no_kod = ?";
+            // Step 2: Update the main stock (stok_semasa)
+            $sql_update_stock = "UPDATE PRODUK SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?";
             $stmt_update_stock = $conn->prepare($sql_update_stock);
 
             // Step 3: Prepare transaction log statement (for KEW.PS-3 compliance)
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $sql_log_transaksi = "INSERT INTO transaksi_stok
                                 (tarikh_transaksi, terima_dari_keluar_kepada, no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, ID_rujukan_permohonan, ID_pegawai)
-                                VALUES (NOW(), ?, ?, 'Keluar', ?, (SELECT baki_semasa FROM barang WHERE no_kod = ?), ?, ?)";
+                                VALUES (NOW(), ?, ?, 'Keluar', ?, (SELECT stok_semasa FROM PRODUK WHERE ID_produk = ?), ?, ?)";
             $stmt_log_transaksi = $conn->prepare($sql_log_transaksi);
 
             foreach ($items as $id_item => $item_data) {

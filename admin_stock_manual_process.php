@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Insert transaction record
         $sql_insert_transaksi = "INSERT INTO transaksi_inventori
                                 (ID_produk, ID_staf, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga, no_dokumen)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt_insert = $conn->prepare($sql_insert_transaksi);
         $stmt_insert->bind_param("sssissds",

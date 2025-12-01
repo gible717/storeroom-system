@@ -43,7 +43,7 @@ $stmt_items->close();
 
 // Get available items for dropdown
 $barang_list = [];
-$result_all_barang = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran FROM barang WHERE baki_semasa > 0 ORDER BY perihal_stok ASC");
+$result_all_barang = $conn->query("SELECT ID_produk AS no_kod, nama_produk AS perihal_stok, unit_pengukuran FROM PRODUK WHERE stok_semasa > 0 ORDER BY nama_produk ASC");
 while ($row = $result_all_barang->fetch_assoc()) {
     $barang_list[] = $row;
 }

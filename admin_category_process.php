@@ -34,6 +34,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt->close();
     }
 
+    // Edit/Update category
+    else if ($action == 'edit' && !empty($_POST['ID_kategori']) && !empty($_POST['nama_kategori'])) {
+        $ID_kategori = (int)$_POST['ID_kategori'];
+        $nama_kategori = trim($_POST['nama_kategori']);
+
+        $stmt = $conn->prepare("UPDATE KATEGORI SET nama_kategori = ? WHERE ID_kategori = ?");
+        $stmt->bind_param("si", $nama_kategori, $ID_kategori);
+
+        if ($stmt->execute()) {
+            header("Location: admin_category.php?success=Kategori berjaya dikemaskini!");
+        } else {
+            if ($conn->errno == 1062) {
+                header("Location: admin_category.php?error=Nama kategori ini sudah wujud.");
+            } else {
+                header("Location: admin_category.php?error=Ralat pangkalan data: " . $conn->error);
+            }
+        }
+        $stmt->close();
+    }
+
     // Delete category
     else if ($action == 'delete' && !empty($_POST['ID_kategori'])) {
         $ID_kategori = (int)$_POST['ID_kategori'];

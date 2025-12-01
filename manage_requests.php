@@ -7,11 +7,11 @@ require 'admin_header.php';
 // Get all requests with item details
 $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
             COUNT(pb.ID_permohonan_barang) AS bilangan_item,
-            GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
+            GROUP_CONCAT(prod.nama_produk SEPARATOR ', ') AS senarai_barang
         FROM permohonan p
         JOIN staf s ON p.ID_pemohon = s.ID_staf
         LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-        LEFT JOIN barang b ON pb.no_kod = b.no_kod
+        LEFT JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
         GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, s.nama
         ORDER BY
         CASE p.status

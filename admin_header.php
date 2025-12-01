@@ -79,16 +79,26 @@ $header_user_initials = substr($initials, 0, 2);
             text-decoration: none;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            transform: translateX(0);
+            position: relative;
         }
         .sidebar-link:hover {
             background-color: #374151;
             color: #ffffff;
+            transform: translateX(20px);
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
         }
         .sidebar-link.active {
             background-color: #4f46e5;
             color: #ffffff;
             font-weight: 600;
+            transform: translateX(20px);
+            box-shadow: 4px 0 12px rgba(79, 70, 229, 0.3);
+        }
+        .sidebar-link.active:hover {
+            transform: translateX(20px);
+            box-shadow: 4px 0 16px rgba(79, 70, 229, 0.4);
         }
 
         .main-content-wrapper {

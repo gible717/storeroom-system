@@ -72,12 +72,12 @@ while ($row = $status_chart_result->fetch_assoc()) {
 }
 
 // Get top 5 requested items
-$sql_top_items = "SELECT b.perihal_stok, SUM(pb.kuantiti_mohon) AS total_diminta
+$sql_top_items = "SELECT prod.nama_produk AS perihal_stok, SUM(pb.kuantiti_mohon) AS total_diminta
     FROM permohonan_barang pb
-    JOIN barang b ON pb.no_kod = b.no_kod
+    JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
     JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
     WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ?
-    GROUP BY b.perihal_stok ORDER BY total_diminta DESC LIMIT 5";
+    GROUP BY prod.nama_produk ORDER BY total_diminta DESC LIMIT 5";
 $stmt_top_items = $conn->prepare($sql_top_items);
 $stmt_top_items->bind_param("ss", $current_month_start, $current_month_end);
 $stmt_top_items->execute();
@@ -191,7 +191,9 @@ while ($row = $top_items_result->fetch_assoc()) {
 </div>
 
 <!-- Report Action Cards -->
-<h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Jana Laporan</h5>
+<div class="text-center mb-4">
+    <h3 class="fw-bold d-inline-block" style="border-bottom: 3px solid #dee2e6; padding-bottom: 0.5rem; padding-left: 2rem; padding-right: 2rem;">Jana Laporan</h3>
+</div>
 <div class="row g-4">
     <div class="col-md-6">
         <div class="report-action-card">

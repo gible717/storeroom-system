@@ -27,15 +27,15 @@ if (!$header) {
 }
 
 // 3. Fetch Request Items
-$stmt_items = $conn->prepare("SELECT 
-                                pb.no_kod, 
-                                b.perihal_stok, 
-                                pb.kuantiti_mohon, 
+$stmt_items = $conn->prepare("SELECT
+                                pb.no_kod,
+                                prod.nama_produk AS perihal_stok,
+                                pb.kuantiti_mohon,
                                 pb.kuantiti_lulus,
                                 (t.baki_selepas_transaksi + t.kuantiti) AS baki_sedia_ada,
                                 p.catatan AS catatan_pemohon
                             FROM permohonan_barang pb
-                            JOIN barang b ON pb.no_kod = b.no_kod
+                            JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
                             JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
                             LEFT JOIN transaksi_stok t ON pb.ID_permohonan = t.ID_rujukan_permohonan AND pb.no_kod = t.no_kod
                             WHERE pb.ID_permohonan = ?

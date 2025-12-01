@@ -21,8 +21,8 @@ if (!$no_kod || !$tarikh_mula || !$tarikh_akhir) {
 }
 
 // Get item details
-$stmt_barang = $conn->prepare("SELECT * FROM barang WHERE no_kod = ?");
-$stmt_barang->bind_param("i", $no_kod);
+$stmt_barang = $conn->prepare("SELECT ID_produk AS no_kod, nama_produk AS perihal_stok, unit_pengukuran, harga AS harga_seunit, stok_semasa AS baki_semasa FROM PRODUK WHERE ID_produk = ?");
+$stmt_barang->bind_param("s", $no_kod);
 $stmt_barang->execute();
 $barang = $stmt_barang->get_result()->fetch_assoc();
 $stmt_barang->close();

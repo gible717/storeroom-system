@@ -39,6 +39,10 @@ $kategori_list_result = $conn->query($kategori_list_sql);
                                     <tr>
                                         <td class="align-middle ps-4"><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
                                         <td class="text-end pe-4">
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                                    onclick="editCategory(<?php echo $row['ID_kategori']; ?>, '<?php echo addslashes($row['nama_kategori']); ?>')">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
                                             <form action="admin_category_process.php" method="POST" class="d-inline" onsubmit="return confirm('Anda pasti mahu padam kategori ini?');">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="ID_kategori" value="<?php echo $row['ID_kategori']; ?>">
@@ -59,21 +63,25 @@ $kategori_list_result = $conn->query($kategori_list_sql);
             </div>
         </div>
 
-        <!-- Add Category Form -->
+        <!-- Add/Edit Category Form -->
         <div class="col-lg-4 col-md-5 mb-4">
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-primary text-white" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                    Tambah Kategori Baru
+                    <span id="form-title">Tambah Kategori Baru</span>
                 </div>
                 <div class="card-body p-4">
-                    <form action="admin_category_process.php" method="POST">
-                        <input type="hidden" name="action" value="add">
+                    <form action="admin_category_process.php" method="POST" id="categoryForm">
+                        <input type="hidden" name="action" id="form-action" value="add">
+                        <input type="hidden" name="ID_kategori" id="form-id" value="">
                         <div class="mb-3">
                             <label for="nama_kategori" class="form-label fw-bold">Nama Kategori</label>
                             <input type="text" class="form-control" id="nama_kategori" name="nama_kategori" placeholder="Cth: Toner" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-plus-circle-fill"></i> Tambah
+                        <button type="submit" class="btn btn-primary w-100" id="form-btn">
+                            <i class="bi bi-plus-circle-fill" id="form-icon"></i> <span id="form-btn-text">Tambah</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-btn" onclick="resetForm()">
+                            Batal
                         </button>
                     </form>
                 </div>
@@ -81,5 +89,32 @@ $kategori_list_result = $conn->query($kategori_list_sql);
         </div>
     </div>
 </div>
+
+<script>
+// Edit category function
+function editCategory(id, nama) {
+    document.getElementById('form-action').value = 'edit';
+    document.getElementById('form-id').value = id;
+    document.getElementById('nama_kategori').value = nama;
+    document.getElementById('form-title').textContent = 'Edit Kategori';
+    document.getElementById('form-icon').className = 'bi bi-check-circle-fill';
+    document.getElementById('form-btn-text').textContent = 'Kemaskini';
+    document.getElementById('cancel-btn').classList.remove('d-none');
+
+    // Scroll to form
+    document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Reset form to add mode
+function resetForm() {
+    document.getElementById('form-action').value = 'add';
+    document.getElementById('form-id').value = '';
+    document.getElementById('nama_kategori').value = '';
+    document.getElementById('form-title').textContent = 'Tambah Kategori Baru';
+    document.getElementById('form-icon').className = 'bi bi-plus-circle-fill';
+    document.getElementById('form-btn-text').textContent = 'Tambah';
+    document.getElementById('cancel-btn').classList.add('d-none');
+}
+</script>
 
 <?php require 'admin_footer.php'; ?>

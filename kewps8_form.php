@@ -19,9 +19,9 @@ $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $user['jawatan'];
 $nama_jabatan = $user['nama_jabatan'];
 
-// Get available items
+// Get all items (including out of stock)
 $barang_list = [];
-$result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran FROM barang WHERE baki_semasa > 0 ORDER BY perihal_stok ASC");
+$result = $conn->query("SELECT ID_produk AS no_kod, nama_produk AS perihal_stok, unit_pengukuran, stok_semasa FROM PRODUK ORDER BY nama_produk ASC");
 while ($row = $result->fetch_assoc()) {
     $barang_list[] = $row;
 }
@@ -78,7 +78,9 @@ if (!isset($_SESSION['cart'])) {
                             <select class="form-select" id="item_select">
                                 <option value="" selected disabled>--- Pilih Barang ---</option>
                                 <?php foreach ($barang_list as $item): ?>
-                                    <option value="<?php echo $item['no_kod']; ?>" data-text="<?php echo htmlspecialchars($item['perihal_stok']); ?>">
+                                    <option value="<?php echo $item['no_kod']; ?>"
+                                            data-text="<?php echo htmlspecialchars($item['perihal_stok']); ?>"
+                                            data-stock="<?php echo $item['stok_semasa']; ?>">
                                         <?php echo htmlspecialchars($item['perihal_stok']); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -88,6 +90,12 @@ if (!isset($_SESSION['cart'])) {
                             <label for="item_quantity" class="form-label">*Kuantiti Dimohon</label>
                             <input type="number" class="form-control" id="item_quantity" value="1" min="1">
                         </div>
+                    </div>
+
+                    <!-- Stock Alert Box -->
+                    <div class="alert alert-warning d-none" id="stock_alert" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Stok habis untuk item ini.</strong> Sila hubungi <strong>Unit Teknologi Maklumat</strong> untuk maklumat lanjut.
                     </div>
 
                     <div class="mb-3">
@@ -153,22 +161,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemSelect = document.getElementById('item_select');
     const itemQuantity = document.getElementById('item_quantity');
     const itemCatatan = document.getElementById('item_catatan');
-    const jawatanInput = document.getElementById('jawatan_input'); // <-- ADD THIS
+    const jawatanInput = document.getElementById('jawatan_input');
     const modalItemList = document.getElementById('modal_item_list');
-    
-    // NOTE: We get these *after* the modal element
+    const stockAlert = document.getElementById('stock_alert');
+
     const confirmModalEl = document.getElementById('confirmModal');
     const confirmModal = new bootstrap.Modal(confirmModalEl);
-    let isSubmitting = false; // This is our new "flag"
-    const hantarBtn = document.getElementById('hantar_btn'); // <-- This is the Hantar button
+    let isSubmitting = false;
+    const hantarBtn = document.getElementById('hantar_btn');
+    let currentStock = 0;
 
     // --- 2. Check if cart has items (to enable Sahkan) ---
     checkCartStatus();
 
-    // --- 3. Enable "Sahkan" if user fills the form ---
+    // --- 3. Handle item selection and stock validation ---
     itemSelect.addEventListener('change', function() {
-        if (itemSelect.value !== "") {
-            sahkanBtn.disabled = false;
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+        currentStock = parseInt(selectedOption.dataset.stock) || 0;
+
+        // Only show alert and disable if stock is 0
+        if (currentStock === 0) {
+            stockAlert.classList.remove('d-none');
+            itemQuantity.disabled = true;
+            itemQuantity.value = 0;
+            itemQuantity.classList.add('bg-light');
+            addItemBtn.disabled = true;
+        } else {
+            stockAlert.classList.add('d-none');
+            itemQuantity.disabled = false;
+            itemQuantity.value = 1;
+            itemQuantity.classList.remove('bg-light');
+            addItemBtn.disabled = false;
+        }
+
+        // Enable Sahkan button only if cart has items
+        checkCartStatus();
+    });
+
+    // --- 4. Smart quantity validation ---
+    itemQuantity.addEventListener('input', function() {
+        const requestedQty = parseInt(itemQuantity.value) || 0;
+
+        if (requestedQty > currentStock) {
+            itemQuantity.value = currentStock;
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Kuantiti Melebihi Stok',
+                text: 'Kuantiti dimohon melebihi stok tersedia.',
+                showConfirmButton: false,
+                showCloseButton: true,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        if (requestedQty < 1) {
+            itemQuantity.value = 1;
+        }
+    });
+
+    // Also validate on blur (when user leaves the field)
+    itemQuantity.addEventListener('blur', function() {
+        const requestedQty = parseInt(itemQuantity.value) || 0;
+
+        if (requestedQty > currentStock && currentStock > 0) {
+            itemQuantity.value = currentStock;
+        } else if (requestedQty < 1) {
+            itemQuantity.value = 1;
         }
     });
 

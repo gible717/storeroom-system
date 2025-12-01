@@ -57,8 +57,8 @@ if ($action === 'approve') {
         $at_least_one_item_approved = false;
 
         // Prepare statements
-        $stmt_check_stock = $conn->prepare("SELECT baki_semasa, harga_seunit FROM barang WHERE no_kod = ? FOR UPDATE");
-        $stmt_update_stock = $conn->prepare("UPDATE barang SET baki_semasa = baki_semasa - ? WHERE no_kod = ?");
+        $stmt_check_stock = $conn->prepare("SELECT stok_semasa, harga FROM PRODUK WHERE ID_produk = ? FOR UPDATE");
+        $stmt_update_stock = $conn->prepare("UPDATE PRODUK SET stok_semasa = stok_semasa - ? WHERE ID_produk = ?");
         $stmt_update_request_item = $conn->prepare("UPDATE permohonan_barang SET kuantiti_lulus = ? WHERE ID_permohonan = ? AND no_kod = ?");
         $stmt_log_transaction = $conn->prepare(
             "INSERT INTO transaksi_stok (no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, ID_rujukan_permohonan, tarikh_transaksi)
@@ -77,12 +77,12 @@ if ($action === 'approve') {
                 $result_stock = $stmt_check_stock->get_result();
                 $barang = $result_stock->fetch_assoc();
 
-                if (!$barang || $barang['baki_semasa'] < $kuantiti_lulus) {
+                if (!$barang || $barang['stok_semasa'] < $kuantiti_lulus) {
                     throw new Exception("Stok tidak mencukupi untuk " . htmlspecialchars($perihal_stok));
                 }
 
                 $at_least_one_item_approved = true;
-                $baki_selepas_transaksi = $barang['baki_semasa'] - $kuantiti_lulus;
+                $baki_selepas_transaksi = $barang['stok_semasa'] - $kuantiti_lulus;
 
                 // Update stock
                 $stmt_update_stock->bind_param("ii", $kuantiti_lulus, $no_kod);
