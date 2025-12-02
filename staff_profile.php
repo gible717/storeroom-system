@@ -309,9 +309,21 @@ function getInitials($name) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berjaya!',
+                        text: 'Gambar profil berjaya dimuat naik.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
                 } else {
-                    alert('Ralat: ' + data.error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ralat',
+                        text: data.error || 'Gagal memuat naik gambar.'
+                    });
                     cropModal.hide();
                 }
             })

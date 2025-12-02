@@ -47,15 +47,22 @@ function getDisplayLabel($preset, $start, $end) {
 }
 
 // Get summary card stats
-$sql_cards = "SELECT COUNT(ID_permohonan) AS jumlah_permohonan,
-    SUM(CASE WHEN status = 'Baru' THEN 1 ELSE 0 END) AS jumlah_pending,
-    SUM(CASE WHEN status = 'Diluluskan' THEN 1 ELSE 0 END) AS jumlah_lulus,
-    SUM(CASE WHEN status = 'Ditolak' THEN 1 ELSE 0 END) AS jumlah_tolak
+$sql_cards = "SELECT
+    COUNT(ID_permohonan) AS jumlah_permohonan,
+    COALESCE(SUM(CASE WHEN status = 'Baru' THEN 1 ELSE 0 END), 0) AS jumlah_pending,
+    COALESCE(SUM(CASE WHEN status = 'Diluluskan' OR status = 'Diterima' THEN 1 ELSE 0 END), 0) AS jumlah_lulus,
+    COALESCE(SUM(CASE WHEN status = 'Ditolak' THEN 1 ELSE 0 END), 0) AS jumlah_tolak
     FROM permohonan WHERE DATE(tarikh_mohon) BETWEEN ? AND ?";
 $stmt_cards = $conn->prepare($sql_cards);
 $stmt_cards->bind_param("ss", $current_month_start, $current_month_end);
 $stmt_cards->execute();
 $cards = $stmt_cards->get_result()->fetch_assoc();
+
+// Ensure all values are set (in case of empty result)
+$cards['jumlah_permohonan'] = $cards['jumlah_permohonan'] ?? 0;
+$cards['jumlah_pending'] = $cards['jumlah_pending'] ?? 0;
+$cards['jumlah_lulus'] = $cards['jumlah_lulus'] ?? 0;
+$cards['jumlah_tolak'] = $cards['jumlah_tolak'] ?? 0;
 
 // Get status chart data
 $sql_status_chart = "SELECT status, COUNT(ID_permohonan) AS jumlah FROM permohonan WHERE DATE(tarikh_mohon) BETWEEN ? AND ? GROUP BY status";
@@ -195,20 +202,28 @@ while ($row = $top_items_result->fetch_assoc()) {
     <h3 class="fw-bold d-inline-block" style="border-bottom: 3px solid #dee2e6; padding-bottom: 0.5rem; padding-left: 2rem; padding-right: 2rem;">Jana Laporan</h3>
 </div>
 <div class="row g-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="report-action-card">
             <i class="bi bi-file-earmark-ruled text-success"></i>
             <h5>KEW.PS-3 Bahagian B</h5>
             <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh (format rasmi kerajaan untuk audit)</p>
-            <a href="kewps3_report.php" class="btn btn-success btn-sm"></i>Jana KEW.PS-3</a>
+            <a href="kewps3_report.php" class="btn btn-success btn-sm">Jana KEW.PS-3</a>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="report-action-card">
             <i class="bi bi-graph-up text-primary"></i>
             <h5>Laporan Analisis Terperinci</h5>
             <p>Statistik permohonan staf, kadar kelulusan, trend bulanan, dan analisis penggunaan mengikut tempoh</p>
-            <a href="report_requests.php" class="btn btn-primary btn-sm"></i>Lihat Analisis</a>
+            <a href="report_requests.php" class="btn btn-primary btn-sm">Lihat Analisis</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="report-action-card">
+            <i class="bi bi-box-seam text-warning"></i>
+            <h5>Laporan Inventori</h5>
+            <p>Analisis inventori bulanan, nilai stok, pergerakan masuk/keluar, dan baki semasa mengikut item</p>
+            <a href="report_inventory.php" class="btn btn-warning btn-sm">Lihat Inventori</a>
         </div>
     </div>
 </div>

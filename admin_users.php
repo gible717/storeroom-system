@@ -129,6 +129,7 @@ $users = $stmt->get_result();
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
+                        <th style="width: 50px;">Bil.</th>
                         <th>ID Staf</th>
                         <th>Nama</th>
                         <th>Emel</th>
@@ -139,8 +140,12 @@ $users = $stmt->get_result();
                 </thead>
                 <tbody>
                     <?php if ($users && $users->num_rows > 0): ?>
-                        <?php while ($user = $users->fetch_assoc()): ?>
+                        <?php
+                        $bil = $offset + 1; // Start numbering from offset + 1
+                        while ($user = $users->fetch_assoc()):
+                        ?>
                             <tr>
+                                <td class="text-center"><?php echo $bil++; ?></td>
                                 <td><?php echo htmlspecialchars($user['ID_staf']); ?></td>
                                 <td><?php echo htmlspecialchars($user['nama']); ?></td>
                                 <td><?php echo htmlspecialchars($user['emel']); ?></td>
@@ -180,7 +185,7 @@ $users = $stmt->get_result();
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 Tiada pengguna ditemui.
                             </td>
                         </tr>

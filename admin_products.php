@@ -117,8 +117,8 @@ $result = $stmt->get_result();
                     <?php if ($kategori_result && $kategori_result->num_rows > 0):
                         $kategori_result->data_seek(0);
                         while($kategori_row = $kategori_result->fetch_assoc()): ?>
-                            <option value="<?php echo htmlspecialchars($kategori_row['ID_kategori']); ?>" <?php if ($category_filter == $kategori_row['ID_kategori']) echo 'selected'; ?>>
-                                <?php echo htmlspecialchars($kategori_row['nama_kategori']); ?>
+                            <option value="<?php echo htmlspecialchars($kategori_row['ID_kategori'] ?? ''); ?>" <?php if ($category_filter == $kategori_row['ID_kategori']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($kategori_row['nama_kategori'] ?? ''); ?>
                             </option>
                         <?php endwhile; endif; ?>
                 </select>
@@ -128,8 +128,8 @@ $result = $stmt->get_result();
                     <option value="">Semua Pembekal</option>
                     <?php if ($supplier_result && $supplier_result->num_rows > 0):
                         while($supplier_row = $supplier_result->fetch_assoc()): ?>
-                            <option value="<?php echo htmlspecialchars($supplier_row['nama_pembekal']); ?>" <?php if ($supplier_filter == $supplier_row['nama_pembekal']) echo 'selected'; ?>>
-                                <?php echo htmlspecialchars($supplier_row['nama_pembekal']); ?>
+                            <option value="<?php echo htmlspecialchars($supplier_row['nama_pembekal'] ?? ''); ?>" <?php if ($supplier_filter == $supplier_row['nama_pembekal']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($supplier_row['nama_pembekal'] ?? ''); ?>
                             </option>
                         <?php endwhile; endif; ?>
                 </select>
@@ -152,6 +152,7 @@ $result = $stmt->get_result();
                 <table class="table table-hover" width="100%">
                     <thead class="table-light">
                         <tr>
+                            <th style="width: 50px;">Bil.</th>
                             <th>Kod Item</th>
                             <th>Nama Produk</th>
                             <th>Kategori</th>
@@ -164,14 +165,18 @@ $result = $stmt->get_result();
                     </thead>
                     <tbody>
                         <?php if ($result && $result->num_rows > 0): ?>
-                            <?php while($row = $result->fetch_assoc()): ?>
+                            <?php
+                            $bil = $offset + 1; // Start numbering from offset + 1
+                            while($row = $result->fetch_assoc()):
+                            ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['ID_produk']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
+                                    <td class="text-center"><?php echo $bil++; ?></td>
+                                    <td><?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nama_produk'] ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
                                     <td><?php echo number_format((float)$row['harga'], 2); ?></td>
-                                    <td><?php echo htmlspecialchars($row['stok_semasa']); ?> unit</td>
+                                    <td><?php echo htmlspecialchars($row['stok_semasa'] ?? '0'); ?> unit</td>
                                     <td>
                                         <?php
                                         $stok = (int)$row['stok_semasa'];
@@ -182,13 +187,13 @@ $result = $stmt->get_result();
                                     </td>
                                     <td>
                                         <button class="btn btn-icon-only text-view" title="Lihat"><i class="bi bi-eye-fill"></i></button>
-                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk']); ?>" class="btn btn-icon-only text-edit" title="Kemaskini"><i class="bi bi-pencil-fill"></i></a>
-                                        <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk']); ?>" class="btn btn-icon-only text-delete" title="Padam" onclick="return confirm('Adakah anda pasti mahu memadam produk ini?');"><i class="bi bi-trash-fill"></i></a>
+                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only text-edit" title="Kemaskini"><i class="bi bi-pencil-fill"></i></a>
+                                        <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only text-delete" title="Padam" onclick="return confirm('Adakah anda pasti mahu memadam produk ini?');"><i class="bi bi-trash-fill"></i></a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="8" class="text-center">Tiada produk ditemui yang sepadan.</td></tr>
+                            <tr><td colspan="9" class="text-center">Tiada produk ditemui yang sepadan.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

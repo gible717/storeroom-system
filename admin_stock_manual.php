@@ -24,11 +24,11 @@ $products_result = $conn->query($products_sql);
                         <!-- Product Select -->
                         <div class="mb-4">
                             <label for="id_produk" class="form-label fw-bold">Nama Item</label>
-                            <select class="form-select form-control-lg" id="ID_produk" name="ID_produk" required>
+                            <select class="form-select form-control-lg" id="ID_produk" name="ID_produk" required onchange="updateStokSemasa()">
                                 <option value="">-- Sila Pilih Item --</option>
                                 <?php if ($products_result && $products_result->num_rows > 0): ?>
                                     <?php while($row = $products_result->fetch_assoc()): ?>
-                                        <option value="<?php echo $row['ID_produk']; ?>"><?php echo $row['nama_produk']; ?> (Stok Semasa: <?php echo $row['stok_semasa']; ?>)</option>
+                                        <option value="<?php echo $row['ID_produk']; ?>" data-stok="<?php echo $row['stok_semasa']; ?>"><?php echo $row['nama_produk']; ?></option>
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <option value="" disabled>Tiada produk ditemui. Sila tambah produk dahulu.</option>
@@ -36,8 +36,19 @@ $products_result = $conn->query($products_sql);
                             </select>
                         </div>
 
-                        <!-- Quantity and Notes -->
+                        <!-- Stock and Quantity Row -->
                         <div class="row mb-4 g-4">
+                            <!-- Current Stock Display -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Stok Semasa</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                                    <input type="text" class="form-control form-control-lg" id="stok_semasa_display" readonly placeholder="-" style="background-color: #f8f9fa; font-weight: bold;">
+                                    <span class="input-group-text">Unit</span>
+                                </div>
+                            </div>
+
+                            <!-- Quantity Input -->
                             <div class="col-md-6">
                                 <label for="jumlah_masuk" class="form-label fw-bold">Kuantiti Masuk</label>
                                 <div class="input-group input-group-lg">
@@ -45,12 +56,13 @@ $products_result = $conn->query($products_sql);
                                     <input type="number" class="form-control" id="jumlah_masuk" name="jumlah_masuk" value="1" min="1" required>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-6">
-                                <label for="no_dokumen" class="form-label fw-bold">Catatan (Optional)</label>
-                                <input type="text" class="form-control form-control-lg" id="no_dokumen" name="no_dokumen" placeholder="Cth: Invois 12345 / Dari Pembekal A">
-                                <div class="form-text text-muted">*Boleh diisi untuk rujukan Laporan Transaksi.</div>
-                            </div>
+                        <!-- Notes (Full Width) -->
+                        <div class="mb-4">
+                            <label for="no_dokumen" class="form-label fw-bold">Catatan (Optional)</label>
+                            <input type="text" class="form-control form-control-lg" id="no_dokumen" name="no_dokumen" placeholder="Cth: Invois 12345 / Dari Pembekal A">
+                            <div class="form-text text-muted">*Boleh diisi untuk rujukan Laporan Transaksi.</div>
                         </div>
 
                         <input type="hidden" name="ID_staf" value="<?php echo $_SESSION['ID_staf']; ?>">
@@ -66,5 +78,20 @@ $products_result = $conn->query($products_sql);
         </div>
     </div>
 </div>
+
+<script>
+function updateStokSemasa() {
+    const selectElement = document.getElementById('ID_produk');
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const stokSemasa = selectedOption.getAttribute('data-stok');
+    const displayField = document.getElementById('stok_semasa_display');
+
+    if (stokSemasa && selectElement.value !== '') {
+        displayField.value = stokSemasa;
+    } else {
+        displayField.value = '';
+    }
+}
+</script>
 
 <?php require 'admin_footer.php'; ?>
