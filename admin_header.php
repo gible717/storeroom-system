@@ -114,6 +114,12 @@ $header_user_initials = substr($initials, 0, 2);
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .page-content {
+            flex: 1;
         }
         .top-navbar {
             background: #fff;
@@ -186,8 +192,9 @@ $header_user_initials = substr($initials, 0, 2);
         /* Footer styling */
         .footer {
             margin-top: auto;
-            background-color: #f8f9fa !important;
+            background-color: #ffffff !important;
             border-top: 1px solid #dee2e6 !important;
+            margin-left: 0;
         }
         .footer small {
             font-size: 0.875rem;
@@ -214,3 +221,4 @@ $header_user_initials = substr($initials, 0, 2);
         <div class="main-content-wrapper">
             <?php require 'admin_top_navbar.php'; ?>
             <main class="page-content" id="main-content">
+                <!-- Page content starts here -->
