@@ -25,7 +25,6 @@ $result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran, baki_semas
 while ($row = $result->fetch_assoc()) {
     $barang_list[] = $row;
 }
-$conn->close();
 
 // Initialize cart session
 if (!isset($_GET['action'])) {

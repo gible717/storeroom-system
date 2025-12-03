@@ -69,6 +69,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php
-$conn->close();
 require 'admin_footer.php';
 ?>

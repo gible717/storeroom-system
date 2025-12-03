@@ -66,6 +66,5 @@ $result = $conn->query($sql);
 </div>
 
 <?php
-$conn->close();
 require 'admin_footer.php';
 ?>

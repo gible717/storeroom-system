@@ -43,7 +43,6 @@ while ($row = $result_items->fetch_assoc()) {
     $items_in_request[] = $row;
 }
 $stmt_items->close();
-$conn->close();
 ?>
 
 <form action="request_review_process.php" method="POST">

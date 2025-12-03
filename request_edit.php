@@ -47,7 +47,6 @@ $result_all_barang = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran 
 while ($row = $result_all_barang->fetch_assoc()) {
     $barang_list[] = $row;
 }
-$conn->close();
 ?>
 
 <div class="position-relative text-center mb-4">

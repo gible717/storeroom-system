@@ -40,7 +40,6 @@ $stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
 $items_result = $stmt_items->get_result();
-$conn->close();
 
 ?>
 
