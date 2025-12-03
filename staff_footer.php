@@ -6,17 +6,10 @@
 <!-- Footer -->
 <footer class="footer bg-light border-top mt-auto py-3">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6 text-center text-md-start">
-                <small class="text-muted">
-                    © 2025 <strong>Majlis Perbandaran Kangar, Perlis</strong>. Hak Cipta Terpelihara.
-                </small>
-            </div>
-            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <small class="text-muted">
-                    Sistem Pengurusan Bilik Stor dan Inventori
-                </small>
-            </div>
+        <div class="text-center">
+            <small class="text-muted">
+                © 2025 Majlis Perbandaran Kangar, Perlis.
+            </small>
         </div>
     </div>
 </footer>
