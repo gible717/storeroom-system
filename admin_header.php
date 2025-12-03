@@ -43,7 +43,16 @@ $header_user_initials = substr($initials, 0, 2);
 
     <style>
         :root { --sidebar-width: 280px; }
-        body { background-color: #f8f9fa; font-family: sans-serif; margin: 0; padding: 0; }
+        html { height: 100%; }
+        body {
+            background-color: #f8f9fa;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
         .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background-color: #1f2937; padding-top: 1rem; overflow-y: auto; }
 
         .sidebar-nav { padding: 1rem; }
@@ -172,6 +181,17 @@ $header_user_initials = substr($initials, 0, 2);
             z-index: 1050;
             min-width: 300px;
             max-width: 400px;
+        }
+
+        /* Footer styling */
+        .footer {
+            margin-top: auto;
+            background-color: #f8f9fa !important;
+            border-top: 1px solid #dee2e6 !important;
+        }
+        .footer small {
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
     </style>
 </head>

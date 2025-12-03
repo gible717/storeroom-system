@@ -47,9 +47,13 @@ $header_user_initials = substr($initials, 0, 2);
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        html { height: 100%; }
         body {
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .top-navbar {
             background-color: #ffffff;
@@ -158,6 +162,20 @@ $header_user_initials = substr($initials, 0, 2);
         }
         .skip-link:focus {
             top: 10px;
+        }
+
+        /* Footer styling */
+        .main-content {
+            flex: 1;
+        }
+        .footer {
+            margin-top: auto;
+            background-color: #f8f9fa !important;
+            border-top: 1px solid #dee2e6 !important;
+        }
+        .footer small {
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
