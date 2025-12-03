@@ -29,6 +29,7 @@ switch ($action) {
         $no_kod = $data['no_kod'] ?? null;
         $kuantiti = (int)($data['kuantiti'] ?? 0);
         $perihal_stok = $data['perihal_stok'] ?? 'Unknown';
+        $stok_semasa = (int)($data['stok_semasa'] ?? 0);
         $catatan = $data['catatan'] ?? '';
         $jawatan = $data['jawatan'] ?? '';
 
@@ -41,11 +42,12 @@ switch ($action) {
             $_SESSION['cart'][$no_kod] = [
                 'no_kod' => $no_kod,
                 'kuantiti' => $kuantiti,
-                'perihal_stok' => $perihal_stok
+                'perihal_stok' => $perihal_stok,
+                'stok_semasa' => $stok_semasa
             ];
             $_SESSION['request_catatan'] = $catatan;
             $_SESSION['request_jawatan'] = $jawatan;
-            
+
             $response['success'] = true;
             $response['message'] = 'Item berjaya ditambah!';
         }

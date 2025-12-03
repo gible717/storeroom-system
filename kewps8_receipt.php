@@ -33,9 +33,9 @@ if ($permohonan['status'] != 'Diluluskan') {
 }
 
 // Fetch approved items data
-$stmt_items = $conn->prepare("SELECT pb.*, prod.nama_produk AS perihal_stok, prod.unit_pengukuran
+$stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran
                             FROM permohonan_barang pb
-                            LEFT JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
+                            LEFT JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ? AND pb.kuantiti_lulus > 0");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();

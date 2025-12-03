@@ -45,8 +45,8 @@ $result = $conn->query($sql);
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
                                     <a href="department_process.php?action=delete&id=<?php echo $row['ID_jabatan']; ?>"
-                                       class="btn btn-sm btn-outline-danger" title="Padam"
-                                       onclick="return confirm('Adakah anda pasti mahu memadam jabatan ini?');">
+                                    class="btn btn-sm btn-outline-danger" title="Padam"
+                                    onclick="return confirm('Adakah anda pasti mahu memadam jabatan ini?');">
                                         <i class="bi bi-trash3-fill"></i>
                                     </a>
                                 </td>

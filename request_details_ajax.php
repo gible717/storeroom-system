@@ -28,9 +28,9 @@ if (!$request_header) {
 
 // Get items for this request
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, prod.nama_produk AS perihal_stok
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok
                             FROM permohonan_barang pb
-                            JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();

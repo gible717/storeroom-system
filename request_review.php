@@ -32,9 +32,9 @@ if (!$request_header) {
 
 // Get items for this request with current stock
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, prod.nama_produk AS perihal_stok, prod.stok_semasa AS baki_semasa
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok, b.baki_semasa
                             FROM permohonan_barang pb
-                            JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
@@ -133,10 +133,10 @@ $conn->close();
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-lg">
+                        <button type="button" id="approveBtn" class="btn btn-success btn-lg">
                             <i class="bi bi-check-circle-fill me-2"></i>Luluskan Permohonan
                         </button>
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg" onclick="return confirm('Adakah anda pasti mahu menolak permohonan ini?');">
+                        <button type="button" id="rejectBtn" class="btn btn-danger btn-lg">
                             <i class="bi bi-x-circle-fill me-2"></i>Tolak Permohonan
                         </button>
                     </div>
@@ -146,6 +146,106 @@ $conn->close();
         </div>
 </form>
 
-<?php 
-require 'admin_footer.php'; 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const approveBtn = document.getElementById('approveBtn');
+    const rejectBtn = document.getElementById('rejectBtn');
+    const form = document.querySelector('form');
+
+    // Handle Approve button
+    approveBtn.addEventListener('click', function() {
+        Swal.fire({
+            title: 'Luluskan Permohonan?',
+            text: 'Adakah anda pasti mahu meluluskan permohonan ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Luluskan',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return submitForm('approve');
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        });
+    });
+
+    // Handle Reject button
+    rejectBtn.addEventListener('click', function() {
+        Swal.fire({
+            title: 'Tolak Permohonan?',
+            text: 'Adakah anda pasti mahu menolak permohonan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Tolak',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return submitForm('reject');
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        });
+    });
+
+    // Submit form via AJAX
+    function submitForm(action) {
+        const formData = new FormData(form);
+        formData.append('action', action);
+
+        // Disable buttons
+        approveBtn.disabled = true;
+        rejectBtn.disabled = true;
+
+        return fetch('request_review_process.php', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berjaya!',
+                    text: data.message,
+                    confirmButtonColor: '#198754',
+                    timer: 3000,
+                    timerProgressBar: true
+                }).then(() => {
+                    window.location.href = 'manage_requests.php';
+                });
+            } else {
+                throw new Error(data.message || 'Gagal memproses permohonan');
+            }
+        })
+        .catch(error => {
+            // Re-enable buttons on error
+            approveBtn.disabled = false;
+            rejectBtn.disabled = false;
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Ralat!',
+                text: 'Gagal memproses permohonan: ' + error.message,
+                confirmButtonColor: '#dc3545'
+            });
+            throw error;
+        });
+    }
+});
+</script>
+
+<?php
+require 'admin_footer.php';
 ?>

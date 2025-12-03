@@ -1,15 +1,12 @@
 <?php
-// request_delete.php - Handle request deletion (AJAX)
+// request_delete.php - Handle request deletion
 
 require 'staff_auth_check.php';
 
-header('Content-Type: application/json');
-$response = ['success' => false, 'message' => 'Ralat tidak diketahui.'];
-
 // Check ID parameter
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    $response['message'] = 'ID Permohonan tidak sah.';
-    echo json_encode($response);
+    $_SESSION['error_msg'] = 'ID Permohonan tidak sah.';
+    header('Location: request_list.php');
     exit;
 }
 
@@ -24,8 +21,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows != 1) {
-    $response['message'] = 'Permohonan tidak dapat dipadam (mungkin telah diluluskan atau bukan milik anda).';
-    echo json_encode($response);
+    $_SESSION['error_msg'] = 'Permohonan tidak dapat dipadam (mungkin telah diluluskan atau bukan milik anda).';
+    header('Location: request_list.php');
     exit;
 }
 $stmt->close();
@@ -47,14 +44,13 @@ try {
 
     // Commit transaction
     $conn->commit();
-    $response['success'] = true;
-    $response['message'] = "Permohonan telah berjaya dipadam.";
+    $_SESSION['success_msg'] = "Permohonan #$id_permohonan telah berjaya dipadam.";
 
 } catch (Exception $e) {
     $conn->rollback();
-    $response['message'] = "Gagal memadam permohonan. Ralat: " . $e->getMessage();
+    $_SESSION['error_msg'] = "Gagal memadam permohonan. Ralat: " . $e->getMessage();
 }
 
-echo json_encode($response);
+header('Location: request_list.php');
 exit;
 ?>

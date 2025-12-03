@@ -1,4 +1,3 @@
-// kewps8_print.php - Print KEW.PS-8 stock request document
 <?php
 require 'auth_check.php';
 
@@ -29,13 +28,13 @@ if (!$header) {
 // 3. Fetch Request Items
 $stmt_items = $conn->prepare("SELECT
                                 pb.no_kod,
-                                prod.nama_produk AS perihal_stok,
+                                b.perihal_stok,
                                 pb.kuantiti_mohon,
                                 pb.kuantiti_lulus,
                                 (t.baki_selepas_transaksi + t.kuantiti) AS baki_sedia_ada,
                                 p.catatan AS catatan_pemohon
                             FROM permohonan_barang pb
-                            JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
+                            JOIN barang b ON pb.no_kod = b.no_kod
                             JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
                             LEFT JOIN transaksi_stok t ON pb.ID_permohonan = t.ID_rujukan_permohonan AND pb.no_kod = t.no_kod
                             WHERE pb.ID_permohonan = ?
@@ -189,7 +188,7 @@ $conn->close();
             <strong style="font-size: 1.1em;">KEW.PS-8</strong>
         </div>
         <div style="text-align: left; padding-left: 288px; margin-top: 3px;">
-            <span style="font-weight: normal;">No. BPSI: <?php echo htmlspecialchars($header['ID_permohonan']); ?></span>
+            <span style="font-weight: normal;">No. BPSI: </span>
         </div>
     </div>
 </div>
@@ -261,7 +260,7 @@ $conn->close();
             <div class="signature-space"></div>
             (Tandatangan)<br>
             Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
-            Jawatan&nbsp;&nbsp;: <?php echo htmlspecialchars($header['jawatan_pemohon']); ?><br>
+            Jawatan&nbsp;&nbsp;: <?php echo !empty($header['jawatan_pemohon']) ? htmlspecialchars($header['jawatan_pemohon']) : ''; ?><br>
             Tarikh&nbsp;&nbsp;&nbsp;: <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?>
         </td>
         <td colspan="3" style="border-left: 4px solid #000 !important;">
@@ -269,7 +268,7 @@ $conn->close();
             <div class="signature-space"></div>
             (Tandatangan)<br>
             Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pelulus'] ?? ''); ?><br>
-            Jawatan&nbsp;&nbsp;: <?php echo htmlspecialchars($header['jawatan_pelulus'] ?? ''); ?><br>
+            Jawatan&nbsp;&nbsp;: <?php echo !empty($header['jawatan_pelulus']) ? htmlspecialchars($header['jawatan_pelulus']) : ''; ?><br>
             Tarikh&nbsp;&nbsp;&nbsp;: <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : ''; ?>
         </td>
         <td colspan="2" style="border-left: 4px solid #000 !important;">

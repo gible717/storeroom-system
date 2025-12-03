@@ -79,24 +79,44 @@ require 'admin_header.php';
 </style>
 
 <?php
-// Helper function - convert datetime to "X minit yang lalu" format
-function time_ago($datetime) {
-    $timestamp = strtotime($datetime);
-    if ($timestamp === false) return "tarikh tidak sah";
+// Set timezone to match MySQL server timezone
+date_default_timezone_set('Asia/Kuala_Lumpur');
 
-    $strTime = array("saat", "minit", "jam", "hari", "bulan", "tahun");
-    $length = array("60", "60", "24", "30", "12", "10");
+// Helper function - smart time display: "X minit yang lalu" for today, date for older requests
+function smart_time_display($masa_mohon, $tarikh_mohon) {
+    // First check if tarikh_mohon is TODAY
+    $today = date('Y-m-d');
 
-    $currentTime = time();
-    if ($currentTime >= $timestamp) {
-        $diff = $currentTime - $timestamp;
-        for ($i = 0; $diff >= $length[$i] && $i < count($length) - 1; $i++) {
-            $diff = $diff / $length[$i];
-        }
-        $diff = round($diff);
-        return $diff . " " . $strTime[$i] . " yang lalu";
+    // If tarikh_mohon is NOT today, always show date format
+    if ($tarikh_mohon != $today) {
+        return date('d M Y', strtotime($tarikh_mohon));
     }
-    return "sebentar tadi";
+
+    // If tarikh_mohon IS today and masa_mohon is available, show "time ago"
+    if ($masa_mohon && $masa_mohon != '0000-00-00 00:00:00' && $masa_mohon != null) {
+        $timestamp = strtotime($masa_mohon);
+        $currentTime = time();
+        $diff = $currentTime - $timestamp;
+
+        // If within 24 hours and not in the future, show "time ago"
+        if ($diff < 86400 && $diff > 0) {
+            if ($diff < 60) {
+                // Less than 1 minute
+                return "sebentar tadi";
+            } elseif ($diff < 3600) {
+                // Less than 1 hour - show in minutes
+                $minutes = round($diff / 60);
+                return $minutes . " minit yang lalu";
+            } else {
+                // Less than 24 hours - show in hours
+                $hours = round($diff / 3600);
+                return $hours . " jam yang lalu";
+            }
+        }
+    }
+
+    // Fallback: show date format
+    return date('d M Y', strtotime($tarikh_mohon));
 }
 
 // Get dashboard stats
@@ -122,15 +142,15 @@ $low_stock_sql = "SELECT ID_produk, nama_produk, stok_semasa, unit_pengukuran
 $low_stock_items = $conn->query($low_stock_sql);
 
 // Get recent requests
-$sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
+$sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status, s.nama,
                     COUNT(pb.ID_permohonan_barang) AS bilangan_item,
-                    GROUP_CONCAT(prod.nama_produk SEPARATOR ', ') AS senarai_barang
+                    GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
                 FROM permohonan p
                 JOIN staf s ON p.ID_pemohon = s.ID_staf
                 LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-                LEFT JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
-                GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, s.nama
-                ORDER BY p.tarikh_mohon DESC, p.ID_permohonan DESC
+                LEFT JOIN barang b ON pb.no_kod = b.no_kod
+                GROUP BY p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status, s.nama
+                ORDER BY p.ID_permohonan DESC
                 LIMIT 4";
 $recent_requests = $conn->query($sql_requests);
 ?>
@@ -199,7 +219,7 @@ $recent_requests = $conn->query($sql_requests);
                     <div class="flex-grow-1">
                         <strong><?php echo htmlspecialchars($req['senarai_barang'] ?? 'Tiada Item'); ?></strong>
                         <small class="text-muted d-block">
-                            <?php echo htmlspecialchars($req['nama']); ?> - <?php echo time_ago($req['tarikh_mohon']); ?>
+                            <?php echo htmlspecialchars($req['nama']); ?> - <?php echo smart_time_display($req['masa_mohon'], $req['tarikh_mohon']); ?>
                         </small>
                     </div>
                     <span class="fw-bold me-4"><?php echo htmlspecialchars($req['bilangan_item']); ?> item</span>

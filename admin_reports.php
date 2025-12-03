@@ -206,7 +206,7 @@ while ($row = $top_items_result->fetch_assoc()) {
         <div class="report-action-card">
             <i class="bi bi-file-earmark-ruled text-success"></i>
             <h5>KEW.PS-3 Bahagian B</h5>
-            <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh (format rasmi kerajaan untuk audit)</p>
+            <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh</p>
             <a href="kewps3_report.php" class="btn btn-success btn-sm">Jana KEW.PS-3</a>
         </div>
     </div>

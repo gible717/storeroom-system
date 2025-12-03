@@ -1,10 +1,9 @@
-// kewps3_report.php - KEW.PS-3 report generation form
 <?php
 $pageTitle = "Laporan KEW.PS-3 - Transaksi Stok";
 require 'admin_header.php';
 
 // Get all items for dropdown
-$barang_result = $conn->query("SELECT ID_produk AS no_kod, nama_produk AS perihal_stok FROM PRODUK ORDER BY nama_produk ASC");
+$barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY perihal_stok ASC");
 ?>
 
 <div class="container-fluid">

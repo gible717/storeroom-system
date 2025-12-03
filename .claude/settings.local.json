@@ -1,13 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php -r:*)",
-      "Bash(find:*)",
-      "Bash(/c/laragon/bin/php/php-8.3.26-Win32-vs16-x64/php.exe:*)",
-      "Bash(\"/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root storeroom_db -e \"ALTER TABLE PRODUK ADD COLUMN harga_unit DECIMAL(10,2) DEFAULT 0.00 AFTER stok_semasa;\")",
-      "Bash(\"/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\":*)",
-      "Bash(\"/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root storeroom_db -e \"DESCRIBE barang_item;\")",
-      "Bash(\"/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe\" -u root storeroom_db -e \"DESCRIBE permohonan_barang;\")"
+      "Bash(mysql:*)",
+      "Bash(php check_barang_structure.php:*)",
+      "Bash(./php.exe:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

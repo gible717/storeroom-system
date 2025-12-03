@@ -19,9 +19,9 @@ $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $user['jawatan'];
 $nama_jabatan = $user['nama_jabatan'];
 
-// Get all items (including out of stock)
+// Get all items from barang table (the correct table for requests)
 $barang_list = [];
-$result = $conn->query("SELECT ID_produk AS no_kod, nama_produk AS perihal_stok, unit_pengukuran, stok_semasa FROM PRODUK ORDER BY nama_produk ASC");
+$result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran, baki_semasa AS stok_semasa FROM barang ORDER BY perihal_stok ASC");
 while ($row = $result->fetch_assoc()) {
     $barang_list[] = $row;
 }
@@ -132,9 +132,9 @@ if (!isset($_SESSION['cart'])) {
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 50%;">Perihal Stok</th>
-                                <th style="width: 25%;">Kuantiti</th>
-                                <th style="width: 25%;">Tindakan</th>
+                                <th style="width: 60%;">Perihal Stok</th>
+                                <th style="width: 20%;">Kuantiti</th>
+                                <th style="width: 20%;">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="modal_item_list">
@@ -179,55 +179,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOption = itemSelect.options[itemSelect.selectedIndex];
         currentStock = parseInt(selectedOption.dataset.stock) || 0;
 
-        // Only show alert and disable if stock is 0
+        // Always enable the form, show alert only for out of stock
         if (currentStock === 0) {
             stockAlert.classList.remove('d-none');
-            itemQuantity.disabled = true;
-            itemQuantity.value = 0;
-            itemQuantity.classList.add('bg-light');
-            addItemBtn.disabled = true;
         } else {
             stockAlert.classList.add('d-none');
-            itemQuantity.disabled = false;
-            itemQuantity.value = 1;
-            itemQuantity.classList.remove('bg-light');
-            addItemBtn.disabled = false;
         }
 
-        // Enable Sahkan button only if cart has items
-        checkCartStatus();
+        itemQuantity.disabled = false;
+        itemQuantity.value = 1;
+        itemQuantity.removeAttribute('max');
+        itemQuantity.classList.remove('bg-light');
+        addItemBtn.disabled = false;
+
+        // Enable Sahkan button if form is filled OR cart has items
+        validateSahkanButton();
     });
 
     // --- 4. Smart quantity validation ---
+    let validationTimeout;
     itemQuantity.addEventListener('input', function() {
         const requestedQty = parseInt(itemQuantity.value) || 0;
 
-        if (requestedQty > currentStock) {
+        // Validate if stock > 0 and quantity exceeds stock
+        if (currentStock > 0 && requestedQty > currentStock) {
             itemQuantity.value = currentStock;
-
-            Swal.fire({
-                icon: 'warning',
-                title: 'Kuantiti Melebihi Stok',
-                text: 'Kuantiti dimohon melebihi stok tersedia.',
-                showConfirmButton: false,
-                showCloseButton: true,
-                timer: 3000,
-                timerProgressBar: true
-            });
+            clearTimeout(validationTimeout);
+            validationTimeout = setTimeout(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Larat!',
+                    text: `Anda tidak boleh memohon barang yang melebihi stok tersedia. `,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }, 500);
         }
 
         if (requestedQty < 1) {
-            itemQuantity.value = 1;
-        }
-    });
-
-    // Also validate on blur (when user leaves the field)
-    itemQuantity.addEventListener('blur', function() {
-        const requestedQty = parseInt(itemQuantity.value) || 0;
-
-        if (requestedQty > currentStock && currentStock > 0) {
-            itemQuantity.value = currentStock;
-        } else if (requestedQty < 1) {
             itemQuantity.value = 1;
         }
     });
@@ -264,7 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 action: 'add',
                 no_kod: no_kod,
                 kuantiti: kuantiti,
-                perihal_stok: perihal_stok, // We send text for the session
+                perihal_stok: perihal_stok,
+                stok_semasa: currentStock,
                 catatan: catatan,
                 jawatan: jawatanInput.value
             })
@@ -272,8 +264,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                itemsInCart = data.cart_count;
-                
                 // Show success popup
                 Swal.fire({
                     title: 'Berjaya!',
@@ -286,15 +276,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Clear fields for next item
                 itemSelect.value = '';
                 itemQuantity.value = '1';
-                // We keep the Catatan field, as it's for the whole request
-
-                // Show and update the "Review" button
-                reviewCartBtn.style.display = 'block';
-                reviewCartBtn.innerHTML = `Selesai & Semak (${itemsInCart})`;
+                stockAlert.classList.add('d-none');
 
             } else {
                 Swal.fire('Ralat', data.message || 'Gagal menambah item.', 'error');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Ralat', 'Gagal menghubungi server.', 'error');
+        })
+        .finally(() => {
+            // Re-enable button
+            addItemBtn.disabled = false;
+            addItemBtn.innerHTML = '<i class="bi bi-plus-lg me-2"></i>Tambah Item';
         });
     });
 
@@ -315,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     no_kod: current_no_kod,
                     kuantiti: current_kuantiti,
                     perihal_stok: current_perihal,
+                    stok_semasa: currentStock,
                     catatan: current_catatan,
                     jawatan: jawatanInput.value
                 })
@@ -353,17 +349,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 for (const no_kod in data.cart) {
                     const item = data.cart[no_kod];
+                    const maxStock = item.stok_semasa || 0;
                     const row = `
                         <tr id="row-${item.no_kod}">
                             <td>${item.perihal_stok}</td>
                             <td>
-                                <input type="number" class="form-control form-control-sm" 
-                                    value="${item.kuantiti}" min="1" 
-                                    data-kod="${item.no_kod}" 
+                                <input type="number" class="form-control form-control-sm"
+                                    value="${item.kuantiti}" min="1"
+                                    data-kod="${item.no_kod}"
+                                    data-stock="${maxStock}"
+                                    oninput="validateModalQuantity(this)"
                                     onchange="updateCartQuantity(this)">
                             </td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                <button type="button" class="btn btn-outline-danger btn-sm"
                                         data-kod="${item.no_kod}"
                                         onclick="deleteCartItem(this)">
                                     <i class="bi bi-trash-fill"></i>
@@ -386,18 +385,69 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.count > 0) {
-                sahkanBtn.disabled = false;
-            } else {
-                sahkanBtn.disabled = true;
-            }
+            validateSahkanButton();
         });
     }
 
+    // --- 7b. Smart validation for Sahkan button ---
+    function validateSahkanButton() {
+        const hasItemSelected = itemSelect.value !== "";
+        const hasValidQuantity = parseInt(itemQuantity.value) > 0;
+        const isFormFilled = hasItemSelected && hasValidQuantity;
+
+        // Enable if form is filled (regardless of stock) OR check cart
+        if (isFormFilled) {
+            sahkanBtn.disabled = false;
+        } else {
+            // Check if cart has items
+            fetch('kewps8_cart_ajax.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'get_count' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.count > 0) {
+                    sahkanBtn.disabled = false;
+                } else {
+                    sahkanBtn.disabled = true;
+                }
+            });
+        }
+    }
+
     // --- 8. Modal "Edit" and "Delete" (must be global) ---
+    let modalValidationTimeout;
+    window.validateModalQuantity = function(input) {
+        const maxStock = parseInt(input.dataset.stock) || 0;
+        const requestedQty = parseInt(input.value) || 0;
+
+        // Only validate if stock > 0 and quantity exceeds stock
+        if (maxStock > 0 && requestedQty > maxStock) {
+            input.value = maxStock;
+            clearTimeout(modalValidationTimeout);
+            modalValidationTimeout = setTimeout(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Larat!',
+                    text: `Anda tidak boleh memohon barang yang melebihi stok tersedia.`,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }, 500);
+        }
+
+        if (requestedQty < 1) {
+            input.value = 1;
+        }
+    }
+
     window.updateCartQuantity = function(input) {
         const no_kod = input.dataset.kod;
         const kuantiti = input.value;
+
         fetch('kewps8_cart_ajax.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
