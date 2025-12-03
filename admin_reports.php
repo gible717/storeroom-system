@@ -79,12 +79,12 @@ while ($row = $status_chart_result->fetch_assoc()) {
 }
 
 // Get top 5 requested items
-$sql_top_items = "SELECT prod.nama_produk AS perihal_stok, SUM(pb.kuantiti_mohon) AS total_diminta
+$sql_top_items = "SELECT b.perihal_stok, SUM(pb.kuantiti_mohon) AS total_diminta
     FROM permohonan_barang pb
-    JOIN PRODUK prod ON pb.no_kod = prod.ID_produk
+    JOIN barang b ON pb.no_kod = b.no_kod
     JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
     WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ?
-    GROUP BY prod.nama_produk ORDER BY total_diminta DESC LIMIT 5";
+    GROUP BY b.perihal_stok ORDER BY total_diminta DESC LIMIT 5";
 $stmt_top_items = $conn->prepare($sql_top_items);
 $stmt_top_items->bind_param("ss", $current_month_start, $current_month_end);
 $stmt_top_items->execute();
