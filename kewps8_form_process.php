@@ -84,7 +84,7 @@ try {
         $no_kod = $item['no_kod'];
         $kuantiti_mohon = $item['kuantiti']; // In session, key is 'kuantiti'
 
-        $stmt_items->bind_param("iii", $id_permohonan_baru, $no_kod, $kuantiti_mohon);
+        $stmt_items->bind_param("isi", $id_permohonan_baru, $no_kod, $kuantiti_mohon);
         $stmt_items->execute();
     }
     $stmt_items->close();

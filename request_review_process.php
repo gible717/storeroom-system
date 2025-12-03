@@ -79,7 +79,7 @@ if ($action === 'approve') {
 
             if ($kuantiti_lulus > 0) {
                 // Lock row and check stock
-                $stmt_check_stock->bind_param("i", $no_kod);
+                $stmt_check_stock->bind_param("s", $no_kod);
                 $stmt_check_stock->execute();
                 $result_stock = $stmt_check_stock->get_result();
                 $barang = $result_stock->fetch_assoc();
@@ -92,16 +92,16 @@ if ($action === 'approve') {
                 $baki_selepas_transaksi = $barang['baki_semasa'] - $kuantiti_lulus;
 
                 // Update stock
-                $stmt_update_stock->bind_param("ii", $kuantiti_lulus, $no_kod);
+                $stmt_update_stock->bind_param("is", $kuantiti_lulus, $no_kod);
                 $stmt_update_stock->execute();
 
                 // Update approved quantity
-                $stmt_update_request_item->bind_param("iii", $kuantiti_lulus, $id_permohonan, $no_kod);
+                $stmt_update_request_item->bind_param("iis", $kuantiti_lulus, $id_permohonan, $no_kod);
                 $stmt_update_request_item->execute();
 
                 // Log transaction
                 $stmt_log_transaction->bind_param(
-                    "iiii",
+                    "siii",
                     $no_kod,
                     $kuantiti_lulus,
                     $baki_selepas_transaksi,
@@ -110,7 +110,7 @@ if ($action === 'approve') {
                 $stmt_log_transaction->execute();
             } else {
                 // Quantity set to 0
-                $stmt_update_request_item->bind_param("iii", $kuantiti_lulus, $id_permohonan, $no_kod);
+                $stmt_update_request_item->bind_param("iis", $kuantiti_lulus, $id_permohonan, $no_kod);
                 $stmt_update_request_item->execute();
             }
         }

@@ -70,7 +70,7 @@ try {
         $no_kod = $item['no_kod'];
         $kuantiti = (int)$item['kuantiti'];
         if ($kuantiti > 0) {
-            $stmt_insert->bind_param("iii", $id_permohonan, $no_kod, $kuantiti);
+            $stmt_insert->bind_param("isi", $id_permohonan, $no_kod, $kuantiti);
             $stmt_insert->execute();
         }
     }
