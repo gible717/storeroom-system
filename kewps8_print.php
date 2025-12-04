@@ -12,7 +12,7 @@ $stmt_header = $conn->prepare("SELECT
                                 p.ID_permohonan, p.tarikh_mohon, p.tarikh_lulus,
                                 p.nama_pemohon, p.jawatan_pemohon,
                                 j.nama_jabatan,
-                                pelulus.nama AS nama_pelulus, pelulus.jawatan AS jawatan_pelulus
+                                pelulus.nama AS nama_pelulus
                             FROM permohonan p
                             JOIN staf pemohon ON p.ID_pemohon = pemohon.ID_staf
                             LEFT JOIN jabatan j ON pemohon.ID_jabatan = j.ID_jabatan
@@ -270,7 +270,7 @@ $conn->close();
             <div class="signature-space"></div>
             (Tandatangan)<br>
             Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pelulus'] ?? ''); ?><br>
-            Jawatan&nbsp;&nbsp;: <?php echo !empty($header['jawatan_pelulus']) ? htmlspecialchars($header['jawatan_pelulus']) : ''; ?><br>
+            Jawatan&nbsp;&nbsp;:<br>
             Tarikh&nbsp;&nbsp;&nbsp;: <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : ''; ?>
         </td>
         <td colspan="2" style="border-left: 4px solid #000 !important;">

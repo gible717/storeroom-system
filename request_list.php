@@ -23,7 +23,7 @@ $sql = "SELECT
         GROUP BY
             p.ID_permohonan
         ORDER BY
-            p.tarikh_mohon DESC, p.ID_permohonan ASC";
+            p.ID_permohonan DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('s', $id_staf);

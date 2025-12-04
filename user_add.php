@@ -39,9 +39,9 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
             </div>
 
             <div class="mb-3">
-                <label for="emel" class="form-label">Emel <span class="text-danger">*</span></label>
+                <label for="emel" class="form-label">Emel</label>
                 <input type="email" class="form-control" id="emel" name="emel"
-                    placeholder="Cth: ali@mpk.gov.my" required>
+                    placeholder="Cth: ali@mpk.gov.my">
             </div>
 
             <div class="mb-3">

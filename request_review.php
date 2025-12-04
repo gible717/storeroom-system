@@ -15,7 +15,7 @@ if (!$id_permohonan) {
 }
 
 // Fetch request header with applicant info
-$stmt = $conn->prepare("SELECT p.*, s.nama AS nama_pemohon, s.jawatan AS jawatan_pemohon, j.nama_jabatan
+$stmt = $conn->prepare("SELECT p.*, j.nama_jabatan
                         FROM permohonan p
                         JOIN staf s ON p.ID_pemohon = s.ID_staf
                         LEFT JOIN jabatan j ON s.ID_jabatan = j.ID_jabatan
@@ -114,7 +114,7 @@ $stmt_items->close();
                 <div class="card-body p-4">
                     <div class="mb-3">
                         <label class="form-label text-muted">Nama</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($request_header['nama_pemohon']); ?>" disabled readonly>
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($request_header['nama_pemohon'] ?? '-'); ?>" disabled readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Jabatan / Unit</label>
@@ -122,7 +122,7 @@ $stmt_items->close();
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Jawatan</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($request_header['jawatan_pemohon'] ?? '-'); ?>" disabled readonly>
+                        <input type="text" class="form-control" value="<?php echo !empty($request_header['jawatan_pemohon']) ? htmlspecialchars($request_header['jawatan_pemohon']) : ''; ?>" disabled readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted">Catatan Pemohon</label>

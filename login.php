@@ -101,7 +101,13 @@ if (isset($_SESSION['ID_staf'])) {
 
         <!-- Right side - Login form -->
         <div class="form-section">
-            <div class="login-card">
+            <div style="width: 100%; max-width: 420px; position: relative;">
+                <div class="login-card" style="margin: 0;">
+                <!-- Back button outside card, aligned with logo -->
+                <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama"
+                   style="position: absolute; left: -3rem; top: 2.5rem;">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
                 <div class="form-header">
                     <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
                     <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
@@ -134,6 +140,7 @@ if (isset($_SESSION['ID_staf'])) {
                         <button type="submit" class="btn btn-primary">Log Masuk</button>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
     </div>

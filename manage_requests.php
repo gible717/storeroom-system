@@ -20,7 +20,7 @@ $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
             WHEN 'Selesai' THEN 3
             WHEN 'Ditolak' THEN 4
             ELSE 5
-        END, p.tarikh_mohon DESC";
+        END, p.ID_permohonan DESC";
 $requests_result = $conn->query($sql);
 $total_rows = $requests_result ? $requests_result->num_rows : 0;
 ?>
@@ -124,6 +124,14 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             <span class="text-muted small" id="pagination-info">Showing <?php echo $total_rows; ?> of <?php echo $total_rows; ?></span>
+
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">&raquo;</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

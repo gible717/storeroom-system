@@ -255,27 +255,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const monthlyLabels = <?php echo json_encode($monthly_chart_labels); ?>;
     const monthlyData = <?php echo json_encode($monthly_chart_data); ?>;
 
-    // 2. Status Chart (Pie Chart)
+    // 2. Status Chart (Pie Chart) with dynamic color mapping
     const statusCtx = document.getElementById('statusChart');
     if (statusCtx) {
+        // Map colors based on status name
+        const statusColors = statusLabels.map(status => {
+            if (status === 'Diluluskan' || status === 'Selesai') return '#10b981'; // Green
+            if (status === 'Ditolak') return '#ef4444'; // Red
+            if (status === 'Baru') return '#f59e0b'; // Yellow/Orange
+            return '#3b82f6'; // Blue (default)
+        });
+
         new Chart(statusCtx.getContext('2d'), {
             type: 'pie',
             data: {
                 labels: statusLabels,
                 datasets: [{
                     data: statusData,
-                    backgroundColor: [ // Assign colors based on status
-                        '#f59e0b', // Belum Diproses (Warning)
-                        '#10b981', // Diluluskan (Success)
-                        '#ef4444', // Ditolak (Danger)
-                        '#3b82f6'  // Selesai (Info)
-                    ],
+                    backgroundColor: statusColors,
                     hoverOffset: 4
                 }]
             },
-            options: { 
+            options: {
                 responsive: true,
-                maintainAspectRatio: false 
+                maintainAspectRatio: false
             }
         });
     }

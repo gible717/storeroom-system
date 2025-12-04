@@ -23,9 +23,9 @@ if ($filter_peranan !== 'Semua') {
     $types .= "s";
 }
 
-// Search filter
+// Search filter (by ID Staf or Nama)
 if (!empty($search_query)) {
-    $where_clauses[] = "(nama LIKE ? OR emel LIKE ?)";
+    $where_clauses[] = "(staf.ID_staf LIKE ? OR staf.nama LIKE ?)";
     $search_term = "%" . $search_query . "%";
     $params[] = $search_term;
     $params[] = $search_term;

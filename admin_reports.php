@@ -182,7 +182,7 @@ while ($row = $top_items_result->fetch_assoc()) {
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold mb-3"><i class="bi bi-pie-chart me-2"></i>Pecahan Status Permohonan</h6>
+                <h6 class="card-title fw-bold mb-3">Pecahan Status Permohonan</h6>
                 <div style="height: 300px;"><canvas id="statusChart"></canvas></div>
             </div>
         </div>
@@ -190,7 +190,7 @@ while ($row = $top_items_result->fetch_assoc()) {
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold mb-3"><i class="bi bi-bar-chart me-2"></i>Top 5 Item Paling Diminta</h6>
+                <h6 class="card-title fw-bold mb-3">Top 5 Item Paling Diminta</h6>
                 <div style="height: 300px;"><canvas id="topItemsChart"></canvas></div>
             </div>
         </div>
@@ -214,7 +214,7 @@ while ($row = $top_items_result->fetch_assoc()) {
         <div class="report-action-card">
             <i class="bi bi-graph-up text-primary"></i>
             <h5>Laporan Analisis Terperinci</h5>
-            <p>Statistik permohonan staf, kadar kelulusan, trend bulanan, dan analisis penggunaan mengikut tempoh</p>
+            <p>Statistik permohonan staf, kadar kelulusan, trend bulanan dan analisis penggunaan mengikut tempoh</p>
             <a href="report_requests.php" class="btn btn-primary btn-sm">Lihat Analisis</a>
         </div>
     </div>
@@ -233,7 +233,7 @@ while ($row = $top_items_result->fetch_assoc()) {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-calendar-range me-2"></i>Pilih Tempoh Tersuai</h5>
+                <h5 class="modal-title"><i class="bi bi-calendar-range me-2"></i>Pilih Tempoh</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="GET" action="admin_reports.php">
@@ -300,12 +300,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const topItemsLabels = <?php echo json_encode($top_items_labels); ?>;
     const topItemsData = <?php echo json_encode($top_items_data); ?>;
 
-    // Status doughnut chart
+    // Status doughnut chart with dynamic color mapping
     const statusCtx = document.getElementById('statusChart');
     if (statusCtx) {
+        // Map colors based on status name
+        const statusColors = statusLabels.map(status => {
+            if (status === 'Diluluskan' || status === 'Selesai') return '#10b981'; // Green
+            if (status === 'Ditolak') return '#ef4444'; // Red
+            if (status === 'Baru') return '#f59e0b'; // Yellow/Orange
+            return '#3b82f6'; // Blue (default)
+        });
+
         new Chart(statusCtx.getContext('2d'), {
             type: 'doughnut',
-            data: { labels: statusLabels, datasets: [{ data: statusData, backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#3b82f6'], hoverOffset: 4 }] },
+            data: { labels: statusLabels, datasets: [{ data: statusData, backgroundColor: statusColors, hoverOffset: 4 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
     }

@@ -67,8 +67,8 @@ if (!isset($_SESSION['cart'])) {
                     </div>
 
                     <div class="mb-4">
-                        <label for="jawatan_input" class="form-label">Jawatan</label>
-                        <input type="text" class="form-control" id="jawatan_input" value="<?php echo htmlspecialchars($jawatan_pemohon ?? ''); ?>" placeholder="Cth: Pegawai Teknologi Maklumat">
+                        <label for="jawatan_input" class="form-label">Jawatan (Optional)</label>
+                        <input type="text" class="form-control" id="jawatan_input" value="" placeholder="Contoh: Pegawai Teknologi Maklumat">
                     </div>
 
                     <div class="row g-3 mb-3">

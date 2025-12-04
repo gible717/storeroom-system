@@ -14,13 +14,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
     $id_staf = $_POST['id_staf'];
     $nama = $_POST['nama'];
-    $emel = $_POST['emel'];
+    $emel = !empty($_POST['emel']) ? $_POST['emel'] : null; // Email is optional
     $id_jabatan = $_POST['id_jabatan'];
     $is_admin = $_POST['is_admin'];
     $kata_laluan_sementara = $_POST['kata_laluan_sementara'];
 
-    // Validate required fields
-    if (empty($id_staf) || empty($nama) || empty($emel) || empty($id_jabatan) || !isset($is_admin) || empty($kata_laluan_sementara)) {
+    // Validate required fields (email is now optional)
+    if (empty($id_staf) || empty($nama) || empty($id_jabatan) || !isset($is_admin) || empty($kata_laluan_sementara)) {
         header("Location: user_add.php?error=Sila lengkapkan semua medan.");
         exit();
     }
