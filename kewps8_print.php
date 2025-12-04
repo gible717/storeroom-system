@@ -10,7 +10,7 @@ if (!$id_permohonan) {
 // 2. Fetch Request Header
 $stmt_header = $conn->prepare("SELECT
                                 p.ID_permohonan, p.tarikh_mohon, p.tarikh_lulus,
-                                pemohon.nama AS nama_pemohon, pemohon.jawatan AS jawatan_pemohon,
+                                p.nama_pemohon, p.jawatan_pemohon,
                                 j.nama_jabatan,
                                 pelulus.nama AS nama_pelulus, pelulus.jawatan AS jawatan_pelulus
                             FROM permohonan p
