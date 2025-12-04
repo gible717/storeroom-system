@@ -8,12 +8,14 @@ if (!$id_permohonan) {
 }
 
 // 2. Fetch Request Header
-$stmt_header = $conn->prepare("SELECT 
+$stmt_header = $conn->prepare("SELECT
                                 p.ID_permohonan, p.tarikh_mohon, p.tarikh_lulus,
                                 pemohon.nama AS nama_pemohon, pemohon.jawatan AS jawatan_pemohon,
+                                j.nama_jabatan,
                                 pelulus.nama AS nama_pelulus, pelulus.jawatan AS jawatan_pelulus
                             FROM permohonan p
                             JOIN staf pemohon ON p.ID_pemohon = pemohon.ID_staf
+                            LEFT JOIN jabatan j ON pemohon.ID_jabatan = j.ID_jabatan
                             LEFT JOIN staf pelulus ON p.ID_pelulus = pelulus.ID_staf
                             WHERE p.ID_permohonan = ?");
 $stmt_header->bind_param("i", $id_permohonan);
@@ -197,7 +199,7 @@ $conn->close();
         </div>
 
         <div style="padding-left: 40px; margin-bottom: 0px; font-size: 11px; font-weight: normal;">
-            Jabatan / Unit: <?php echo htmlspecialchars($header['jawatan_pemohon']); ?>
+            Jabatan / Unit: <?php echo htmlspecialchars($header['nama_jabatan'] ?? '-'); ?>
         </div>
 
         <table class="report-table">
@@ -290,6 +292,6 @@ $conn->close();
     
     <div class="no-print text-center mb-3" style="padding-top: 20px;">
         <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
-        <a href="manage_requests.php" class="btn btn-secondary">Kembali</a>
+        <a href="request_list.php" class="btn btn-secondary">Kembali</a>
     </div>
 </html>
