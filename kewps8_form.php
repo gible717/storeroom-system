@@ -282,7 +282,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             Swal.fire('Ralat', 'Gagal menghubungi server.', 'error');
         })
         .finally(() => {
@@ -525,8 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Fetch error:', error); // Log the error for debugging
-            Swal.fire('Ralat', 'Gagal menghubungi server. Sila semak konsol.', 'error');
+            Swal.fire('Ralat', 'Gagal menghubungi server.', 'error');
             hantarBtn.disabled = false;
             hantarBtn.innerHTML = 'Hantar';
         });

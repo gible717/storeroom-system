@@ -73,7 +73,14 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                                 data-staf="<?php echo htmlspecialchars(strtolower($row['nama'])); ?>"
                                 data-item-list="<?php echo htmlspecialchars(strtolower($row['senarai_barang'] ?? '')); ?>">
 
-                                <td class="fw-bold request-id">#<?php echo htmlspecialchars($row['ID_permohonan']); ?></td>
+                                <td class="fw-bold request-id">
+                                    <button type="button" class="btn btn-link p-0 fw-bold btn-view-details"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detailsModal"
+                                            data-id="<?php echo $row['ID_permohonan']; ?>">
+                                        #<?php echo htmlspecialchars($row['ID_permohonan']); ?>
+                                    </button>
+                                </td>
                                 <td class="staf-name"><?php echo htmlspecialchars($row['nama']); ?></td>
                                 <td class="item-list"><small><?php echo htmlspecialchars($row['senarai_barang'] ?? 'Tiada Item'); ?></small></td>
                                 <td class="text-center"><?php echo htmlspecialchars($row['bilangan_item']); ?></td>
@@ -123,7 +130,13 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-3">
-            <span class="text-muted small" id="pagination-info">Showing <?php echo $total_rows; ?> of <?php echo $total_rows; ?></span>
+            <span class="text-muted small" id="pagination-info">
+                <?php if ($total_rows > 0): ?>
+                    Showing 1 to <?php echo $total_rows; ?> of <?php echo $total_rows; ?> entries
+                <?php else: ?>
+                    Showing 0 to 0 of 0 entries
+                <?php endif; ?>
+            </span>
 
             <nav>
                 <ul class="pagination pagination-sm mb-0">
@@ -148,29 +161,42 @@ document.addEventListener('DOMContentLoaded', function () {
     const paginationInfo = document.getElementById('pagination-info');
     const totalRows = <?php echo $total_rows; ?>;
 
-    // Debug: Check if elements are found
-    console.log('Search functionality initialized');
-    console.log('Total rows found:', tableRows.length);
-    console.log('Total rows from PHP:', totalRows);
-
     // Highlight search text
     function highlightText(cell, searchText) {
         if (!cell) return;
 
-        // Store original HTML if not stored
-        if (!cell.dataset.originalHtml) {
-            cell.dataset.originalHtml = cell.innerHTML;
+        // Check if cell contains a button (for ID Permohonan column)
+        const button = cell.querySelector('button.btn-view-details');
+
+        if (button) {
+            // Store original text in button
+            if (!button.dataset.originalHtml) {
+                button.dataset.originalHtml = button.innerHTML;
+            }
+            let html = button.dataset.originalHtml;
+
+            if (searchText && searchText.length > 0) {
+                const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`(${safeText})`, 'gi');
+                html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
+            }
+
+            button.innerHTML = html;
+        } else {
+            // For regular cells
+            if (!cell.dataset.originalHtml) {
+                cell.dataset.originalHtml = cell.innerHTML;
+            }
+            let html = cell.dataset.originalHtml;
+
+            if (searchText && searchText.length > 0) {
+                const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const regex = new RegExp(`(${safeText})`, 'gi');
+                html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
+            }
+
+            cell.innerHTML = html;
         }
-
-        let html = cell.dataset.originalHtml;
-
-        if (searchText && searchText.length > 0) {
-            const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const regex = new RegExp(`(${safeText})`, 'gi');
-            html = html.replace(regex, '<mark style="background-color:#FFFF00; font-weight:bold; padding:0 2px; border-radius:3px;">$1</mark>');
-        }
-
-        cell.innerHTML = html;
     }
 
     function filterTable() {
@@ -201,16 +227,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.style.display = '';
                 visibleRows++;
 
-                // Highlight matching text
-                if (searchText) {
+                // Highlight matching text only if there's search text
+                if (searchText && searchText.length > 0) {
                     highlightText(requestIdCell, searchText);
                     highlightText(stafNameCell, searchText);
                     highlightText(itemListCell, searchText);
+                } else {
+                    // Remove highlights when search is cleared
+                    highlightText(requestIdCell, '');
+                    highlightText(stafNameCell, '');
+                    highlightText(itemListCell, '');
                 }
             } else {
                 row.style.display = 'none';
 
-                // Remove highlights
+                // Remove highlights for hidden rows
                 highlightText(requestIdCell, '');
                 highlightText(stafNameCell, '');
                 highlightText(itemListCell, '');
@@ -233,7 +264,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Update pagination info
         if (paginationInfo) {
-            paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
+            if (visibleRows > 0) {
+                paginationInfo.textContent = `Showing 1 to ${visibleRows} of ${totalRows} entries`;
+            } else {
+                paginationInfo.textContent = `Showing 0 to 0 of ${totalRows} entries`;
+            }
         }
     }
 
@@ -244,8 +279,85 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Run filter on page load to set initial state
     filterTable();
+
+    // Quick view modal logic
+    const detailsModal = document.getElementById('detailsModal');
+    const detailsModalTitle = document.getElementById('detailsModalLabel');
+    const detailsModalBody = document.getElementById('detailsModalBody');
+    const viewButtons = document.querySelectorAll('.btn-view-details');
+
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.dataset.id;
+
+            detailsModalTitle.textContent = 'Maklumat Permohonan #' + requestId;
+            detailsModalBody.innerHTML = '<div class="text-center p-4"><span class="spinner-border spinner-border-sm" role="status"></span> Loading...</div>';
+
+            // Fetch request details
+            fetch('admin_request_details_ajax.php?id=' + requestId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let html = `
+                            <h6 class="fw-bold">Maklumat Am</h6>
+                            <p>
+                                <strong>Nama Pemohon:</strong> ${data.header.nama_pemohon || '-'}<br>
+                                <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}<br>
+                                <strong>Catatan:</strong> ${data.header.catatan || '-'}
+                            </p>
+                            <hr>
+                            <h6 class="fw-bold">Senarai Item (${data.items.length})</h6>
+                            <table class="table table-sm table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Perihal Stok</th>
+                                        <th class="text-center">Kuantiti Mohon</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+
+                        data.items.forEach(item => {
+                            html += `
+                                <tr>
+                                    <td>${item.perihal_stok}</td>
+                                    <td class="text-center">${item.kuantiti_mohon}</td>
+                                </tr>
+                            `;
+                        });
+
+                        html += `
+                                </tbody>
+                            </table>
+                        `;
+
+                        detailsModalBody.innerHTML = html;
+
+                    } else {
+                        detailsModalBody.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                    }
+                })
+                .catch(error => {
+                    detailsModalBody.innerHTML = '<div class="alert alert-danger">Gagal menghubungi server.</div>';
+                });
+        });
+    });
 });
 </script>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Maklumat Permohonan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detailsModalBody">
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php
 require 'admin_footer.php';

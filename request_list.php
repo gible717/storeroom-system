@@ -172,8 +172,14 @@ require 'staff_header.php';
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <span class="text-muted small" id="pagination-info">Showing <?php echo $total_rows; ?> of <?php echo $total_rows; ?></span>
-                    
+                    <span class="text-muted small" id="pagination-info">
+                        <?php if ($total_rows > 0): ?>
+                            Showing 1 to <?php echo $total_rows; ?> of <?php echo $total_rows; ?> entries
+                        <?php else: ?>
+                            Showing 0 to 0 of 0 entries
+                        <?php endif; ?>
+                    </span>
+
                     <nav>
                         <ul class="pagination pagination-sm mb-0">
                             <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
@@ -246,9 +252,18 @@ require 'staff_header.php';
                 if (matchesSearch && matchesStatus) {
                     row.style.display = '';
                     visibleRows++;
-                    highlightText(requestIdCell, searchText);
+
+                    // Highlight matching text only if there's search text
+                    if (searchText && searchText.length > 0) {
+                        highlightText(requestIdCell, searchText);
+                    } else {
+                        // Remove highlights when search is cleared
+                        highlightText(requestIdCell, '');
+                    }
                 } else {
                     row.style.display = 'none';
+
+                    // Remove highlights for hidden rows
                     highlightText(requestIdCell, '');
                 }
             }
@@ -269,13 +284,20 @@ require 'staff_header.php';
 
             // Update pagination info
             if (paginationInfo) {
-                paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows}`;
+                if (visibleRows > 0) {
+                    paginationInfo.textContent = `Showing 1 to ${visibleRows} of ${totalRows} entries`;
+                } else {
+                    paginationInfo.textContent = `Showing 0 to 0 of ${totalRows} entries`;
+                }
             }
         }
 
         // Attach event listeners
         searchInput.addEventListener('keyup', filterTable);
+        searchInput.addEventListener('input', filterTable);
         statusFilter.addEventListener('change', filterTable);
+
+        // Run filter on page load to set initial state
         filterTable();
 
         // Quick view modal logic
@@ -335,7 +357,6 @@ require 'staff_header.php';
                         }
                     })
                     .catch(error => {
-                        console.error('Fetch error:', error);
                         detailsModalBody.innerHTML = '<div class="alert alert-danger">Gagal menghubungi server.</div>';
                     });
             });
