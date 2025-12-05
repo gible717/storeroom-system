@@ -21,9 +21,9 @@ $sql = "SELECT
     p.ID_produk,
     p.nama_produk,
     p.stok_semasa,
-    p.harga_unit,
+    p.harga AS harga_unit,
     k.nama_kategori,
-    (p.stok_semasa * p.harga_unit) AS jumlah_harga
+    (p.stok_semasa * p.harga) AS jumlah_harga
 FROM PRODUK p
 LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori
 ORDER BY p.nama_produk ASC";

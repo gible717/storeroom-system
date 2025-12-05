@@ -33,8 +33,8 @@ $sql = "SELECT
             p.nama_produk,
             k.nama_kategori AS kategori,
             p.stok_semasa,
-            p.harga_unit,
-            (p.stok_semasa * p.harga_unit) AS nilai_semasa
+            p.harga AS harga_unit,
+            (p.stok_semasa * p.harga) AS nilai_semasa
         FROM PRODUK p
         LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori
         $where_clause
