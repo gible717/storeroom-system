@@ -149,10 +149,10 @@ require 'staff_header.php';
                                                 </a>
                                             
                                             <?php elseif ($row['status'] === 'Diluluskan' || $row['status'] === 'Selesai'): ?>
-                                                <a href="kewps8_print.php?id=<?php echo $row['ID_permohonan']; ?>" target="_blank" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">
+                                                <a href="kewps8_print.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">
                                                     <i class="bi bi-eye-fill"></i>
                                                 </a>
-                                                <a href="kewps8_print.php?id=<?php echo $row['ID_permohonan']; ?>&print=true" target="_blank" class="btn btn-secondary btn-sm" title="Cetak Dokumen">
+                                                <a href="kewps8_print.php?id=<?php echo $row['ID_permohonan']; ?>&print=true" class="btn btn-secondary btn-sm" title="Cetak Dokumen">
                                                     <i class="bi bi-printer-fill"></i>
                                                 </a>
                                             
