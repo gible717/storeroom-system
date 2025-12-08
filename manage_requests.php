@@ -84,7 +84,7 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                                 <td class="staf-name"><?php echo htmlspecialchars($row['nama']); ?></td>
                                 <td class="item-list"><small><?php echo htmlspecialchars($row['senarai_barang'] ?? 'Tiada Item'); ?></small></td>
                                 <td class="text-center"><?php echo htmlspecialchars($row['bilangan_item']); ?></td>
-                                <td><?php echo date('d M Y', strtotime($row['tarikh_mohon'])); ?></td>
+                                <td><?php echo formatMalayDate($row['tarikh_mohon']); ?></td>
                                 <td class="status-cell text-center">
                                     <?php
                                     $status = trim(htmlspecialchars($row['status']));

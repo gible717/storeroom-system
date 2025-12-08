@@ -263,7 +263,7 @@ $conn->close();
             (Tandatangan)<br>
             Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pemohon']); ?><br>
             Jawatan&nbsp;&nbsp;: <?php echo !empty($header['jawatan_pemohon']) ? htmlspecialchars($header['jawatan_pemohon']) : ''; ?><br>
-            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo date('d M Y', strtotime($header['tarikh_mohon'])); ?>
+            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo formatMalayDate($header['tarikh_mohon']); ?>
         </td>
         <td colspan="3" style="border-left: 4px solid #000 !important;">
             <strong>Pegawai Pelulus:</strong>
@@ -271,7 +271,7 @@ $conn->close();
             (Tandatangan)<br>
             Nama&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?php echo htmlspecialchars($header['nama_pelulus'] ?? ''); ?><br>
             Jawatan&nbsp;&nbsp;:<br>
-            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo $header['tarikh_lulus'] ? date('d M Y', strtotime($header['tarikh_lulus'])) : ''; ?>
+            Tarikh&nbsp;&nbsp;&nbsp;: <?php echo $header['tarikh_lulus'] ? formatMalayDate($header['tarikh_lulus']) : ''; ?>
         </td>
         <td colspan="2" style="border-left: 4px solid #000 !important;">
             <strong>Pemohon/ Wakil:</strong>

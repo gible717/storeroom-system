@@ -123,7 +123,7 @@ require 'staff_header.php';
                                         </td>
                                         
                                         <td class="text-center"><?php echo htmlspecialchars($row['bilangan_item']); ?></td>
-                                        <td><?php echo date('d M Y', strtotime($row['tarikh_mohon'])); ?></td>
+                                        <td><?php echo formatMalayDate($row['tarikh_mohon']); ?></td>
                                         <td class="status-cell text-center">
                                             <?php
                                             $status = htmlspecialchars($row['status']);
