@@ -73,7 +73,7 @@ if (!empty($base_url)) {
 }
 
 // Main query with pagination
-$sql .= " ORDER BY nama ASC LIMIT ? OFFSET ?";
+$sql .= " ORDER BY staf.ID_staf ASC LIMIT ? OFFSET ?";
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
