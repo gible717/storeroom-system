@@ -155,6 +155,28 @@ if (isset($_SESSION['ID_staf'])) {
             icon.classList.toggle('bi-eye');
             icon.classList.toggle('bi-eye-slash');
         });
+
+        // Custom validation messages in Malay
+        document.addEventListener('DOMContentLoaded', function() {
+            const idStafInput = document.getElementById('ID_staf');
+            const passwordInput = document.getElementById('katalaluan');
+
+            idStafInput.addEventListener('invalid', function() {
+                this.setCustomValidity('Sila isi medan ini.');
+            });
+
+            idStafInput.addEventListener('input', function() {
+                this.setCustomValidity('');
+            });
+
+            passwordInput.addEventListener('invalid', function() {
+                this.setCustomValidity('Sila isi medan ini.');
+            });
+
+            passwordInput.addEventListener('input', function() {
+                this.setCustomValidity('');
+            });
+        });
     </script>
 </body>
 </html>
