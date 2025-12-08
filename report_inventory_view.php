@@ -13,6 +13,10 @@ if (!isset($_SESSION['ID_staf'])) {
 $selected_month = $_GET['month'] ?? date('Y-m');
 list($year, $month) = explode('-', $selected_month);
 
+// Calculate date ranges
+$month_start = "$selected_month-01";
+$month_end = date('Y-m-t', strtotime($month_start));
+
 // Get category filter
 $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
@@ -22,23 +26,22 @@ $params = [];
 $types = "";
 
 if ($kategori_filter !== 'Semua') {
-    $where_clause = "WHERE k.nama_kategori = ?";
+    $where_clause = "WHERE b.kategori = ?";
     $params[] = $kategori_filter;
     $types = "s";
 }
 
-// Get all products
+// Get all barang (inventory items)
 $sql = "SELECT
-            p.ID_produk,
-            p.nama_produk,
-            k.nama_kategori AS kategori,
-            p.stok_semasa,
-            p.harga AS harga_unit,
-            (p.stok_semasa * p.harga) AS nilai_semasa
-        FROM PRODUK p
-        LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori
+            b.no_kod,
+            b.perihal_stok AS nama_produk,
+            b.kategori,
+            b.baki_semasa AS stok_semasa,
+            b.harga_seunit AS harga_unit,
+            (b.baki_semasa * b.harga_seunit) AS nilai_semasa
+        FROM barang b
         $where_clause
-        ORDER BY p.ID_produk ASC";
+        ORDER BY b.perihal_stok ASC";
 
 $stmt = $conn->prepare($sql);
 if ($kategori_filter !== 'Semua') {
@@ -47,14 +50,33 @@ if ($kategori_filter !== 'Semua') {
 $stmt->execute();
 $inventory = $stmt->get_result();
 
-// Calculate totals
+// Calculate totals and movements
 $total_harga_seunit = 0;
 $total_nilai_semasa = 0;
 $total_stok_semasa = 0;
 
-// Store results in array
+// Store results in array with stock movements
 $products = [];
 while ($row = $inventory->fetch_assoc()) {
+    $no_kod = $row['no_kod'];
+
+    // Calculate stock movements from transaksi_stok table
+    $stmt_movement = $conn->prepare("
+        SELECT
+            SUM(CASE WHEN jenis_transaksi = 'Masuk' THEN kuantiti ELSE 0 END) AS masuk,
+            SUM(CASE WHEN jenis_transaksi = 'Keluar' THEN kuantiti ELSE 0 END) AS keluar
+        FROM transaksi_stok
+        WHERE no_kod = ?
+        AND DATE(tarikh_transaksi) BETWEEN ? AND ?
+    ");
+    $stmt_movement->bind_param("sss", $no_kod, $month_start, $month_end);
+    $stmt_movement->execute();
+    $movement = $stmt_movement->get_result()->fetch_assoc();
+
+    $row['masuk'] = $movement['masuk'] ?? 0;
+    $row['keluar'] = $movement['keluar'] ?? 0;
+    $row['baki_bulan_lepas'] = $row['stok_semasa'] + $row['keluar'] - $row['masuk'];
+
     $products[] = $row;
     $total_harga_seunit += $row['harga_unit'];
     $total_nilai_semasa += $row['nilai_semasa'];
@@ -66,8 +88,8 @@ $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
               'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
 $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 
-// Get all categories for filter dropdown
-$kategori_sql = "SELECT DISTINCT nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC";
+// Get all categories for filter dropdown from barang table
+$kategori_sql = "SELECT DISTINCT kategori AS nama_kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
 $kategori_result = $conn->query($kategori_sql);
 ?>
 <!DOCTYPE html>
@@ -320,7 +342,7 @@ $kategori_result = $conn->query($kategori_sql);
                     ?>
                         <tr>
                             <td class="text-center"><?php echo $bil++; ?></td>
-                            <td><?php echo htmlspecialchars($row['ID_produk']); ?></td>
+                            <td><?php echo htmlspecialchars($row['no_kod']); ?></td>
                             <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
                             <td class="text-center"><?php echo htmlspecialchars($row['kategori'] ?? '-'); ?></td>
                             <td class="text-center"><?php echo number_format($row['stok_semasa']); ?></td>
