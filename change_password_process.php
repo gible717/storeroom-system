@@ -34,7 +34,7 @@ if ($new_password !== $confirm_password) {
 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 $user_id = $_SESSION['ID_staf'];
 
-$stmt = $conn->prepare("UPDATE staf SET katalaluan = ?, is_first_login = 0 WHERE ID_staf = ?");
+$stmt = $conn->prepare("UPDATE staf SET kata_laluan = ?, is_first_login = 0 WHERE ID_staf = ?");
 $stmt->bind_param('ss', $hashed_password, $user_id);
 
 if ($stmt->execute()) {

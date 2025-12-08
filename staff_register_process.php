@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $is_first_login = 0;
 
    // THIS IS THE FIX
-    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, katalaluan, peranan, is_first_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, peranan, is_first_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     
     // === IMPORTANT: CHECK THIS LINE ===
