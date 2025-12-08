@@ -25,7 +25,7 @@ $sql = "SELECT
     b.kategori AS nama_kategori,
     (b.baki_semasa * b.harga_seunit) AS jumlah_harga
 FROM barang b
-ORDER BY b.perihal_stok ASC";
+ORDER BY b.no_kod ASC";
 
 $result = $conn->query($sql);
 
