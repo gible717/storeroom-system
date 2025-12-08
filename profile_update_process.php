@@ -30,13 +30,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Check if email is being changed to avoid duplicate error
-    $current_email_check = $conn->prepare("SELECT emel FROM staf WHERE ID_staf = ?");
-    $current_email_check->bind_param("s", $user_id);
-    $current_email_check->execute();
-    $current_email_result = $current_email_check->get_result();
-    $current_email_row = $current_email_result->fetch_assoc();
-    $current_email_check->close();
+    // Check if email is already used by another user
+    $email_check = $conn->prepare("SELECT ID_staf FROM staf WHERE emel = ? AND ID_staf != ?");
+    $email_check->bind_param("ss", $emel, $user_id);
+    $email_check->execute();
+    $email_result = $email_check->get_result();
+
+    if ($email_result->num_rows > 0) {
+        // Email is already used by another user
+        $error_msg = urlencode("Emel ini sudah digunakan oleh pengguna lain.");
+        $email_check->close();
+        if ($is_admin == 1) {
+            header("Location: admin_profile.php?error=" . $error_msg);
+        } else {
+            header("Location: staff_profile.php?error=" . $error_msg);
+        }
+        exit;
+    }
+    $email_check->close();
 
     // Update database
     $stmt = $conn->prepare("UPDATE staf SET nama = ?, emel = ?, jawatan = ? WHERE ID_staf = ?");
