@@ -18,14 +18,14 @@ $month_start = "$selected_month-01";
 $month_end = date('Y-m-t', strtotime($month_start));
 
 // Get category filter
-$kategori_filter = $_GET['kategori'] ?? 'Semua';
+$kategori_filter = $_GET['kategori'] ?? '';
 
 // Build WHERE clause
 $where_clause = "";
 $params = [];
 $types = "";
 
-if ($kategori_filter !== 'Semua') {
+if ($kategori_filter !== '') {
     $where_clause = "WHERE b.kategori = ?";
     $params[] = $kategori_filter;
     $types = "s";
@@ -41,10 +41,10 @@ $sql = "SELECT
             (b.baki_semasa * b.harga_seunit) AS nilai_semasa
         FROM barang b
         $where_clause
-        ORDER BY b.perihal_stok ASC";
+        ORDER BY b.no_kod ASC";
 
 $stmt = $conn->prepare($sql);
-if ($kategori_filter !== 'Semua') {
+if ($kategori_filter !== '') {
     $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();

@@ -8,6 +8,9 @@ require 'admin_header.php';
 $selected_month = $_GET['month'] ?? date('Y-m');
 list($year, $month) = explode('-', $selected_month);
 
+// Get category filter
+$selected_kategori = $_GET['kategori'] ?? '';
+
 // Calculate date ranges
 $month_start = "$selected_month-01";
 $month_end = date('Y-m-t', strtotime($month_start));
@@ -15,6 +18,12 @@ $month_end = date('Y-m-t', strtotime($month_start));
 // Previous month for balance calculation
 $prev_month = date('Y-m', strtotime("$month_start -1 month"));
 $prev_month_end = date('Y-m-t', strtotime("$prev_month-01"));
+
+// Build WHERE clause for category filter
+$where_clause = "";
+if ($selected_kategori !== '') {
+    $where_clause = "WHERE b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+}
 
 // Get all barang (inventory items) with calculations
 $sql = "SELECT
@@ -25,7 +34,18 @@ $sql = "SELECT
     b.kategori AS nama_kategori,
     (b.baki_semasa * b.harga_seunit) AS jumlah_harga
 FROM barang b
+$where_clause
 ORDER BY b.no_kod ASC";
+
+// Get all categories for dropdown
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+$categories = [];
+if ($kategori_result) {
+    while ($row = $kategori_result->fetch_assoc()) {
+        $categories[] = $row['kategori'];
+    }
+}
 
 $result = $conn->query($sql);
 
@@ -77,7 +97,7 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
         </a>
         <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
     </div>
-    <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>" class="btn btn-success">
+    <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>&kategori=<?php echo urlencode($selected_kategori); ?>" class="btn btn-success">
         <i class="bi bi-printer me-2"></i>Cetak Laporan
     </a>
 </div>
@@ -86,7 +106,7 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 <div class="card shadow-sm border-0 mb-4" style="border-radius: 1rem;">
     <div class="card-body p-4">
         <form method="GET" class="row g-3 align-items-end" id="filterForm">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="selected_month" class="form-label fw-bold">Bulan</label>
                 <select class="form-select form-select-lg" id="selected_month" name="selected_month" required>
                     <?php
@@ -99,7 +119,7 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
                     ?>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="selected_year" class="form-label fw-bold">Tahun</label>
                 <select class="form-select form-select-lg" id="selected_year" name="selected_year" required>
                     <?php
@@ -107,6 +127,18 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
                     for ($y = $current_year; $y >= $current_year - 5; $y--) {
                         $selected_attr = ($y == (int)$selected_year) ? 'selected' : '';
                         echo "<option value=\"$y\" $selected_attr>$y</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="kategori" class="form-label fw-bold">Kategori</label>
+                <select class="form-select form-select-lg" id="kategori" name="kategori">
+                    <option value="">Semua Kategori</option>
+                    <?php
+                    foreach ($categories as $kategori) {
+                        $selected_attr = ($kategori === $selected_kategori) ? 'selected' : '';
+                        echo "<option value=\"" . htmlspecialchars($kategori) . "\" $selected_attr>" . htmlspecialchars($kategori) . "</option>";
                     }
                     ?>
                 </select>
