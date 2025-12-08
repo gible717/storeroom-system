@@ -85,26 +85,33 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 <!-- Month Filter -->
 <div class="card shadow-sm border-0 mb-4" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <form method="GET" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label for="month" class="form-label fw-bold">Pilih Bulan</label>
-                <select class="form-select form-select-lg" id="month" name="month" required>
+        <form method="GET" class="row g-3 align-items-end" id="filterForm">
+            <div class="col-md-3">
+                <label for="selected_month" class="form-label fw-bold">Bulan</label>
+                <select class="form-select form-select-lg" id="selected_month" name="selected_month" required>
                     <?php
-                    // Generate month options for last 12 months
-                    $current_date = new DateTime();
-                    for ($i = 0; $i < 12; $i++) {
-                        $month_value = $current_date->format('Y-m');
-                        $year = $current_date->format('Y');
-                        $month_num = (int)$current_date->format('m');
-                        $month_name = $months_ms[$month_num - 1];
-                        $display_text = "$month_name $year";
-                        $selected = ($month_value === $selected_month) ? 'selected' : '';
-                        echo "<option value=\"$month_value\" $selected>$display_text</option>";
-                        $current_date->modify('-1 month');
+                    list($selected_year, $selected_month_num) = explode('-', $selected_month);
+                    for ($m = 1; $m <= 12; $m++) {
+                        $month_name = $months_ms[$m - 1];
+                        $selected_attr = ($m == (int)$selected_month_num) ? 'selected' : '';
+                        echo "<option value=\"$m\" $selected_attr>$month_name</option>";
                     }
                     ?>
                 </select>
             </div>
+            <div class="col-md-3">
+                <label for="selected_year" class="form-label fw-bold">Tahun</label>
+                <select class="form-select form-select-lg" id="selected_year" name="selected_year" required>
+                    <?php
+                    $current_year = (int)date('Y');
+                    for ($y = $current_year; $y >= $current_year - 5; $y--) {
+                        $selected_attr = ($y == (int)$selected_year) ? 'selected' : '';
+                        echo "<option value=\"$y\" $selected_attr>$y</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <input type="hidden" name="month" id="month" value="<?php echo $selected_month; ?>">
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-funnel-fill me-2"></i>Tapis
@@ -113,6 +120,15 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
         </form>
     </div>
 </div>
+
+<script>
+// Combine month and year into the month parameter before submitting
+document.getElementById('filterForm').addEventListener('submit', function(e) {
+    const month = document.getElementById('selected_month').value.padStart(2, '0');
+    const year = document.getElementById('selected_year').value;
+    document.getElementById('month').value = year + '-' + month;
+});
+</script>
 
 <!-- Summary Cards -->
 <div class="row g-4 mb-4">
