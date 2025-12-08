@@ -34,6 +34,20 @@ if (!$id_permohonan || !$action || !$id_pemohon) {
     exit;
 }
 
+// Prevent admin from approving their own request
+if ($id_pemohon === $id_pelulus) {
+    // Check if request is AJAX
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => "Anda tidak boleh meluluskan permohonan anda sendiri. Permohonan mesti diluluskan oleh admin lain."]);
+        exit;
+    }
+
+    $_SESSION['error_msg'] = "Anda tidak boleh meluluskan permohonan anda sendiri. Permohonan mesti diluluskan oleh admin lain.";
+    header('Location: request_review.php?id=' . $id_permohonan);
+    exit;
+}
+
 // Handle rejection
 if ($action === 'reject') {
     $stmt = $conn->prepare("UPDATE permohonan
