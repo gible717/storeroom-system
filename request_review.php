@@ -14,8 +14,11 @@ if (!$id_permohonan) {
     exit;
 }
 
-// Fetch request header with applicant info
-$stmt = $conn->prepare("SELECT p.*, j.nama_jabatan
+// Fetch request header with applicant info (current data from staf table)
+$stmt = $conn->prepare("SELECT p.*,
+                        s.nama AS nama_pemohon,
+                        s.jawatan AS jawatan_pemohon,
+                        j.nama_jabatan
                         FROM permohonan p
                         JOIN staf s ON p.ID_pemohon = s.ID_staf
                         LEFT JOIN jabatan j ON s.ID_jabatan = j.ID_jabatan
