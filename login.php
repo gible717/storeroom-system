@@ -5,7 +5,7 @@ session_start();
 
 // Redirect if already logged in
 if (isset($_SESSION['ID_staf'])) {
-    if ($_SESSION['peranan'] === 'Admin') {
+    if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
         header('Location: admin_dashboard.php');
     } else {
         header('Location: staff_dashboard.php');
