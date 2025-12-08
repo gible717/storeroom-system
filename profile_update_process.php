@@ -58,9 +58,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['nama'] = $nama;
 
         if ($is_admin == 1) {
-            header("Location: admin_profile.php?success=" . $success_msg);
+            header("Location: admin_dashboard.php?success=" . $success_msg);
         } else {
-            header("Location: staff_profile.php?success=" . $success_msg);
+            header("Location: staff_dashboard.php?success=" . $success_msg);
         }
     } else {
         $error_msg = urlencode("Gagal mengemaskini profil.");
