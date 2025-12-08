@@ -4,6 +4,38 @@
 session_start();
 require 'db.php';
 
+// Function to shorten Malaysian names
+function getShortenedName($full_name) {
+    $prefixes_to_remove = [
+        'MUHAMMAD', 'MOHD', 'MUHD', 'MOHAMMAD', 'MOHAMAD',
+        'SITI', 'NUR', 'KU', 'WAN', 'SYED', 'SHARIFAH',
+        'TENGKU', 'RAJA', 'ANAK', 'NIK', 'CHE'
+    ];
+
+    $name_upper = strtoupper(trim($full_name));
+    $bin_pos = stripos($name_upper, ' BIN ');
+    $binti_pos = stripos($name_upper, ' BINTI ');
+
+    if ($bin_pos !== false || $binti_pos !== false) {
+        $split_pos = ($bin_pos !== false) ? $bin_pos : $binti_pos;
+        $name_upper = trim(substr($name_upper, 0, $split_pos));
+    }
+
+    $parts = explode(' ', $name_upper);
+    $filtered = [];
+    foreach ($parts as $part) {
+        if (!in_array($part, $prefixes_to_remove)) {
+            $filtered[] = $part;
+        }
+    }
+
+    if (count($filtered) > 0) {
+        return implode(' ', $filtered);
+    } else {
+        return $parts[0];
+    }
+}
+
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: login.php');
@@ -46,7 +78,9 @@ if ($result && $result->num_rows === 1) {
             exit;
         }
 
-        $msg = urlencode("Selamat datang kembali, " . $user['nama'] . "!");
+        // Use shortened name for welcome message
+        $shortName = getShortenedName($user['nama']);
+        $msg = urlencode("Selamat datang kembali, " . $shortName . "!");
 
         // Redirect based on role
         if ($user['is_admin'] == 1) {

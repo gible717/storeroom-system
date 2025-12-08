@@ -9,12 +9,15 @@ $userInitials = strtoupper(substr($userName, 0, 2));
 <?php
 $pageTitle = "Dashboard Staf";
 require 'staff_header.php';
+
+// Use shortened name for welcome message (same as navbar)
+$userNameShort = getShortenedName($userName);
 ?>
 
 <!-- Welcome Card -->
 <div class="card welcome-card mb-4">
     <div class="card-body">
-        <h4 class="card-title fw-bold">Selamat Datang, <?php echo htmlspecialchars($userName); ?>!</h4>
+        <h4 class="card-title fw-bold">Selamat Datang, <?php echo htmlspecialchars($userNameShort); ?>!</h4>
         <p class="card-subtitle text-muted">
             <?php
             date_default_timezone_set('Asia/Kuala_Lumpur');
