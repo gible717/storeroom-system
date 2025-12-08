@@ -55,10 +55,10 @@ while ($row = $status_chart_result->fetch_assoc()) {
     $status_data[] = $row['jumlah'];
 }
 
-// --- SQL for Chart 2: Permohonan per bulan (Line Chart) ---
+// --- SQL for Chart 2: Permohonan per bulan (Bar Chart) ---
 // Note: This query groups by month/year for the date range
-$sql_monthly = "SELECT 
-                DATE_FORMAT(tarikh_mohon, '%Y-%m') AS 'bulan', 
+$sql_monthly = "SELECT
+                DATE_FORMAT(tarikh_mohon, '%Y-%m') AS 'bulan',
                 COUNT(ID_permohonan) AS 'jumlah'
                 FROM permohonan
                 $where_clause
@@ -69,11 +69,25 @@ $stmt_monthly->bind_param($types, ...$params);
 $stmt_monthly->execute();
 $monthly_result = $stmt_monthly->get_result();
 
+// Store results in associative array
+$monthly_data_raw = [];
+while ($row = $monthly_result->fetch_assoc()) {
+    $monthly_data_raw[$row['bulan']] = $row['jumlah'];
+}
+
+// Malay month names
+$months_malay = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+// Get current year from date range
+$current_year = date('Y', strtotime($tarikh_mula));
+
+// Generate all 12 months with Malay names and data
 $monthly_labels = [];
 $monthly_data = [];
-while ($row = $monthly_result->fetch_assoc()) {
-    $monthly_labels[] = date('M Y', strtotime($row['bulan'] . '-01'));
-    $monthly_data[] = $row['jumlah'];
+for ($m = 1; $m <= 12; $m++) {
+    $monthly_labels[] = $months_malay[$m - 1];
+    $month_key = sprintf('%d-%02d', $current_year, $m);
+    $monthly_data[] = $monthly_data_raw[$month_key] ?? 0; // 0 if no data for that month
 }
 
 // --- Prepare Data for JavaScript ---
@@ -131,23 +145,7 @@ $monthly_chart_data = $monthly_data;
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <h5 class="mb-3 fw-bold">Tapisan Data</h5>
-
-        <!-- Quick Filter Buttons -->
-        <div class="mb-3">
-            <label class="form-label fw-semibold small text-muted">Pilihan Pantas</label>
-            <div class="btn-group w-100" role="group">
-                <a href="report_requests.php?mula=<?php echo date('Y-m-d', strtotime('monday this week')); ?>&akhir=<?php echo date('Y-m-d', strtotime('sunday this week')); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar-week me-1"></i>Minggu Ini
-                </a>
-                <a href="report_requests.php?mula=<?php echo date('Y-m-01'); ?>&akhir=<?php echo date('Y-m-t'); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar-month me-1"></i>Bulan Ini
-                </a>
-                <a href="report_requests.php?mula=<?php echo date('Y-01-01'); ?>&akhir=<?php echo date('Y-12-31'); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
-                    <i class="bi bi-calendar-range me-1"></i>Tahun Ini
-                </a>
-            </div>
-        </div>
+        <h5 class="mb-3 fw-bold">Tapisan Permohonan</h5>
 
         <!-- Custom Filter Form -->
         <form action="report_requests.php" method="GET" id="filterForm">
@@ -300,25 +298,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 3. Monthly Chart (Line Chart)
+    // 3. Monthly Chart (Bar Chart)
     const monthlyCtx = document.getElementById('monthlyChart');
     if (monthlyCtx) {
         new Chart(monthlyCtx.getContext('2d'), {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: monthlyLabels,
                 datasets: [{
                     label: 'Jumlah Permohonan',
                     data: monthlyData,
-                    borderColor: '#4f46e5', // Indigo
-                    fill: false,
-                    tension: 0.1
+                    backgroundColor: '#4f46e5', // Indigo
+                    borderColor: '#4338ca',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
-            options: { 
+            options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
             }
         });
     }
