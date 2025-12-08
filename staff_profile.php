@@ -15,39 +15,8 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// Function to shorten Malaysian names
-function getShortenedName($full_name) {
-    $prefixes_to_remove = [
-        'MUHAMMAD', 'MOHD', 'MUHD', 'MOHAMMAD', 'MOHAMAD',
-        'SITI', 'NUR', 'KU', 'WAN', 'SYED', 'SHARIFAH',
-        'TENGKU', 'RAJA', 'ANAK', 'NIK', 'CHE'
-    ];
-
-    $name_upper = strtoupper(trim($full_name));
-    $bin_pos = stripos($name_upper, ' BIN ');
-    $binti_pos = stripos($name_upper, ' BINTI ');
-
-    if ($bin_pos !== false || $binti_pos !== false) {
-        $split_pos = ($bin_pos !== false) ? $bin_pos : $binti_pos;
-        $name_upper = trim(substr($name_upper, 0, $split_pos));
-    }
-
-    $parts = explode(' ', $name_upper);
-    $filtered = [];
-    foreach ($parts as $part) {
-        if (!in_array($part, $prefixes_to_remove)) {
-            $filtered[] = $part;
-        }
-    }
-
-    if (count($filtered) > 0) {
-        return implode(' ', $filtered);
-    } else {
-        return $parts[0];
-    }
-}
-
 // Get initials for avatar (based on shortened name)
+// Note: getShortenedName() is already defined in staff_header.php
 function getInitials($name) {
     $shortened = getShortenedName($name);
     $words = explode(" ", $shortened);
