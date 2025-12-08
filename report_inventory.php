@@ -88,7 +88,22 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="month" class="form-label fw-bold">Pilih Bulan</label>
-                <input type="month" class="form-control form-control-lg" id="month" name="month" value="<?php echo $selected_month; ?>" required>
+                <select class="form-select form-select-lg" id="month" name="month" required>
+                    <?php
+                    // Generate month options for last 12 months
+                    $current_date = new DateTime();
+                    for ($i = 0; $i < 12; $i++) {
+                        $month_value = $current_date->format('Y-m');
+                        $year = $current_date->format('Y');
+                        $month_num = (int)$current_date->format('m');
+                        $month_name = $months_ms[$month_num - 1];
+                        $display_text = "$month_name $year";
+                        $selected = ($month_value === $selected_month) ? 'selected' : '';
+                        echo "<option value=\"$month_value\" $selected>$display_text</option>";
+                        $current_date->modify('-1 month');
+                    }
+                    ?>
+                </select>
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
