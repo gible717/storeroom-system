@@ -131,35 +131,52 @@ $monthly_chart_data = $monthly_data;
 
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 fw-bold">Tapisan Data</h5>
-            <div class="btn-group btn-group-sm" role="group">
-                <a href="report_requests.php?mula=<?php echo date('Y-m-d', strtotime('monday this week')); ?>&akhir=<?php echo date('Y-m-d', strtotime('sunday this week')); ?>&status=Semua" class="btn btn-outline-secondary">Minggu Ini</a>
-                <a href="report_requests.php?mula=<?php echo date('Y-m-01'); ?>&akhir=<?php echo date('Y-m-t'); ?>&status=Semua" class="btn btn-outline-secondary">Bulan Ini</a>
-                <a href="report_requests.php?mula=<?php echo date('Y-01-01'); ?>&akhir=<?php echo date('Y-12-31'); ?>&status=Semua" class="btn btn-outline-secondary">Tahun Ini</a>
+        <h5 class="mb-3 fw-bold">Tapisan Data</h5>
+
+        <!-- Quick Filter Buttons -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">Pilihan Pantas</label>
+            <div class="btn-group w-100" role="group">
+                <a href="report_requests.php?mula=<?php echo date('Y-m-d', strtotime('monday this week')); ?>&akhir=<?php echo date('Y-m-d', strtotime('sunday this week')); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-week me-1"></i>Minggu Ini
+                </a>
+                <a href="report_requests.php?mula=<?php echo date('Y-m-01'); ?>&akhir=<?php echo date('Y-m-t'); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-month me-1"></i>Bulan Ini
+                </a>
+                <a href="report_requests.php?mula=<?php echo date('Y-01-01'); ?>&akhir=<?php echo date('Y-12-31'); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-range me-1"></i>Tahun Ini
+                </a>
             </div>
         </div>
 
+        <!-- Custom Filter Form -->
         <form action="report_requests.php" method="GET" id="filterForm">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label for="mula" class="form-label">Dari Tarikh</label>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="mula" class="form-label fw-semibold">Dari Tarikh</label>
                     <input type="date" class="form-control" id="mula" name="mula" value="<?php echo htmlspecialchars($tarikh_mula); ?>" required>
                 </div>
-                <div class="col-md-5">
-                    <label for="akhir" class="form-label">Hingga Tarikh</label>
+                <div class="col-md-4">
+                    <label for="akhir" class="form-label fw-semibold">Hingga Tarikh</label>
                     <input type="date" class="form-control" id="akhir" name="akhir" value="<?php echo htmlspecialchars($tarikh_akhir); ?>" required>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
+                    <label for="status" class="form-label fw-semibold">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="Semua" <?php echo ($status_filter === 'Semua') ? 'selected' : ''; ?>>Semua Status</option>
+                        <option value="Baru" <?php echo ($status_filter === 'Baru') ? 'selected' : ''; ?>>Baru</option>
+                        <option value="Diluluskan" <?php echo ($status_filter === 'Diluluskan') ? 'selected' : ''; ?>>Diluluskan</option>
+                        <option value="Ditolak" <?php echo ($status_filter === 'Ditolak') ? 'selected' : ''; ?>>Ditolak</option>
+                        <option value="Diterima" <?php echo ($status_filter === 'Diterima') ? 'selected' : ''; ?>>Diterima</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-funnel-fill me-2"></i>Tapis
+                        <i class="bi bi-funnel-fill"></i>
                     </button>
                 </div>
             </div>
         </form>
-        <div class="text-muted small mt-2">
-            <i class="bi bi-info-circle me-1"></i>Klik pada kad status di bawah untuk menapis mengikut status tertentu
-        </div>
     </div>
 </div>
 
