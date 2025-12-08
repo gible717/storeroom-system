@@ -133,7 +133,7 @@ function getInitials($name) {
 
             <div class="text-end mt-4">
                 <a href="admin_dashboard.php" class="btn btn-light me-2">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Simpan</button>
             </div>
         </form>
     </div>
@@ -327,5 +327,30 @@ require 'admin_footer.php';
             });
 
         }, outputType, 0.85);
+    });
+
+    // Track form changes to enable/disable submit button
+    const formFields = ['nama', 'jawatan', 'emel'];
+    const originalValues = {
+        nama: document.getElementById('nama').value,
+        jawatan: document.getElementById('jawatan').value,
+        emel: document.getElementById('emel').value
+    };
+    const submitBtn = document.getElementById('submitBtn');
+
+    function checkFormChanges() {
+        let hasChanges = false;
+        formFields.forEach(field => {
+            const currentValue = document.getElementById(field).value;
+            if (currentValue !== originalValues[field]) {
+                hasChanges = true;
+            }
+        });
+        submitBtn.disabled = !hasChanges;
+    }
+
+    // Add event listeners to all form fields
+    formFields.forEach(field => {
+        document.getElementById(field).addEventListener('input', checkFormChanges);
     });
 </script>
