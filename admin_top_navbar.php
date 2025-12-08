@@ -6,7 +6,7 @@
 
     <div class="user-info d-flex align-items-center">
         <a href="admin_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">
-            <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($header_user_name); ?></span>
+            <span class="me-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($header_user_name_short); ?></span>
             <?php if ($header_user_pic): ?>
                 <img src="<?php echo htmlspecialchars($header_user_pic) . '?t=' . time(); ?>"
                     class="user-initials-badge"
