@@ -188,6 +188,7 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
                 <thead class="table-light">
                     <tr>
                         <th style="width: 50px;" class="text-center">Bil.</th>
+                        <th class="text-center">No. Kod</th>
                         <th>Nama Item</th>
                         <th class="text-center">Kategori</th>
                         <th class="text-end">Harga Unit (RM)</th>
@@ -208,6 +209,7 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
                         ?>
                             <tr>
                                 <td class="text-center"><?php echo $bil++; ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($product['no_kod']); ?></td>
                                 <td><?php echo htmlspecialchars($product['nama_produk']); ?></td>
                                 <td class="text-center"><?php echo htmlspecialchars($product['nama_kategori'] ?? '-'); ?></td>
                                 <td class="text-end"><?php echo number_format($product['harga_unit'], 2); ?></td>
@@ -220,12 +222,12 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
                         <?php endforeach; ?>
                         <!-- Total Row -->
                         <tr class="table-secondary fw-bold">
-                            <td colspan="8" class="text-end">JUMLAH KESELURUHAN:</td>
+                            <td colspan="9" class="text-end">JUMLAH KESELURUHAN:</td>
                             <td class="text-end">RM <?php echo number_format($grand_total, 2); ?></td>
                         </tr>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">
+                            <td colspan="10" class="text-center text-muted py-4">
                                 Tiada data inventori.
                             </td>
                         </tr>
