@@ -100,14 +100,15 @@ if (isset($_SESSION['ID_staf'])) {
         <div class="image-section d-none d-lg-block"></div>
 
         <!-- Right side - Login form -->
-        <div class="form-section">
-            <div style="width: 100%; max-width: 420px; position: relative;">
+        <div class="form-section" style="position: relative;">
+            <!-- Home button at top right -->
+            <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama"
+               style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
+                <i class="bi bi-house-fill fs-4"></i>
+            </a>
+
+            <div style="width: 100%; max-width: 420px;">
                 <div class="login-card" style="margin: 0;">
-                <!-- Back button outside card, aligned with logo -->
-                <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama"
-                   style="position: absolute; left: -3rem; top: 2.5rem;">
-                    <i class="bi bi-arrow-left fs-4"></i>
-                </a>
                 <div class="form-header">
                     <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
                     <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
