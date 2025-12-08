@@ -67,8 +67,8 @@ function getShortenedName($full_name) {
 // Create shortened name for navbar
 $header_user_name_short = getShortenedName($header_user_name);
 
-// Get initials for avatar fallback
-$words = explode(" ", $header_user_name);
+// Get initials for avatar fallback (based on shortened name)
+$words = explode(" ", $header_user_name_short);
 $initials = "";
 foreach ($words as $w) {
     $initials .= strtoupper(substr($w, 0, 1));

@@ -45,7 +45,13 @@ function getShortenedName($full_name) {
 // Get user info from session
 $userName = $_SESSION['nama'] ?? 'Pengguna';
 $userName_short = getShortenedName($userName);
-$userInitials = strtoupper(substr($userName, 0, 2));
+// Get initials from shortened name
+$words = explode(" ", $userName_short);
+$initials = "";
+foreach ($words as $w) {
+    $initials .= strtoupper(substr($w, 0, 1));
+}
+$userInitials = substr($initials, 0, 2);
 
 ?>
 <header class="top-navbar">
