@@ -132,7 +132,7 @@ $monthly_chart_data = $monthly_data;
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-funnel me-2"></i>Penapis Data</h5>
+            <h5 class="mb-0 fw-bold">Tapisan Data</h5>
             <div class="btn-group btn-group-sm" role="group">
                 <a href="report_requests.php?mula=<?php echo date('Y-m-d', strtotime('monday this week')); ?>&akhir=<?php echo date('Y-m-d', strtotime('sunday this week')); ?>&status=Semua" class="btn btn-outline-secondary">Minggu Ini</a>
                 <a href="report_requests.php?mula=<?php echo date('Y-m-01'); ?>&akhir=<?php echo date('Y-m-t'); ?>&status=Semua" class="btn btn-outline-secondary">Bulan Ini</a>
@@ -166,7 +166,7 @@ $monthly_chart_data = $monthly_data;
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
     <h5 class="fw-bold mb-0">
         Ringkasan Data
-        <small class="text-muted fs-6">(<?php echo date('d M Y', strtotime($tarikh_mula)); ?> - <?php echo date('d M Y', strtotime($tarikh_akhir)); ?>
+        <small class="text-muted fs-6">(<?php echo formatMalayDate($tarikh_mula); ?> - <?php echo formatMalayDate($tarikh_akhir); ?>
         <?php if ($status_filter !== 'Semua'): ?>
             | Status: <?php echo htmlspecialchars($status_filter); ?>
         <?php endif; ?>)</small>
