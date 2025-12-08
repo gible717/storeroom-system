@@ -21,7 +21,7 @@ $barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY 
             <h6 class="m-0 font-weight-bold text-primary">Jana Laporan Transaksi Stok</h6>
         </div>
         <div class="card-body">
-            <form action="kewps3_print.php" method="GET" target="_blank">
+            <form action="kewps3_print.php" method="GET">
                 <div class="row">
                     <div class="col-md-12 mb-3">
                         <label for="no_kod" class="form-label">Pilih Barang <span class="text-danger">*</span></label>

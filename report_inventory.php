@@ -64,7 +64,7 @@ $month_name = $months_ms[(int)$month - 1] . ' ' . $year;
         </a>
         <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
     </div>
-    <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>" class="btn btn-success" target="_blank">
+    <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>" class="btn btn-success">
         <i class="bi bi-printer me-2"></i>Cetak Laporan
     </a>
 </div>
