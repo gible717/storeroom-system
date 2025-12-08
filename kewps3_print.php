@@ -438,7 +438,7 @@ for ($page = 1; $page <= $total_pages; $page++):
 
     <div class="print-controls no-print">
         <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
-        <button onclick="window.close()" class="btn btn-secondary">Kembali</button>
+        <button onclick="window.history.back()" class="btn btn-secondary">Kembali</button>
     </div>
 </body>
 </html>
