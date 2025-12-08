@@ -16,21 +16,20 @@ $month_end = date('Y-m-t', strtotime($month_start));
 $prev_month = date('Y-m', strtotime("$month_start -1 month"));
 $prev_month_end = date('Y-m-t', strtotime("$prev_month-01"));
 
-// Get all products with calculations
+// Get all barang (inventory items) with calculations
 $sql = "SELECT
-    p.ID_produk,
-    p.nama_produk,
-    p.stok_semasa,
-    p.harga AS harga_unit,
-    k.nama_kategori,
-    (p.stok_semasa * p.harga) AS jumlah_harga
-FROM PRODUK p
-LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori
-ORDER BY p.nama_produk ASC";
+    b.no_kod,
+    b.perihal_stok AS nama_produk,
+    b.baki_semasa AS stok_semasa,
+    b.harga_seunit AS harga_unit,
+    b.kategori AS nama_kategori,
+    (b.baki_semasa * b.harga_seunit) AS jumlah_harga
+FROM barang b
+ORDER BY b.perihal_stok ASC";
 
 $result = $conn->query($sql);
 
-// Calculate summary stats
+// Calculate summary stats and stock movements
 $total_items = 0;
 $total_stock = 0;
 $total_value = 0;
@@ -38,10 +37,24 @@ $total_value = 0;
 if ($result && $result->num_rows > 0) {
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        // Set default values for movement tracking (no historical data available for PRODUK table)
-        $row['masuk'] = 0;
-        $row['keluar'] = 0;
-        $row['baki_bulan_lepas'] = $row['stok_semasa']; // Assume current stock is the balance
+        $no_kod = $row['no_kod'];
+
+        // Calculate stock movements from transaksi_stok table for selected month
+        $stmt_movement = $conn->prepare("
+            SELECT
+                SUM(CASE WHEN jenis_transaksi = 'Masuk' THEN kuantiti ELSE 0 END) AS masuk,
+                SUM(CASE WHEN jenis_transaksi = 'Keluar' THEN kuantiti ELSE 0 END) AS keluar
+            FROM transaksi_stok
+            WHERE no_kod = ?
+            AND DATE(tarikh_transaksi) BETWEEN ? AND ?
+        ");
+        $stmt_movement->bind_param("sss", $no_kod, $month_start, $month_end);
+        $stmt_movement->execute();
+        $movement = $stmt_movement->get_result()->fetch_assoc();
+
+        $row['masuk'] = $movement['masuk'] ?? 0;
+        $row['keluar'] = $movement['keluar'] ?? 0;
+        $row['baki_bulan_lepas'] = $row['stok_semasa'] + $row['keluar'] - $row['masuk'];
 
         $products[] = $row;
 
