@@ -4,10 +4,15 @@
 $pageTitle = "Pengurusan Permohonan";
 require 'admin_header.php';
 
-// Get all requests with item details
+// Get all categories for dropdown filter
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+
+// Get all requests with item details and category info
 $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
             COUNT(pb.ID_permohonan_barang) AS bilangan_item,
-            GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
+            GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS senarai_barang,
+            GROUP_CONCAT(DISTINCT b.kategori SEPARATOR ', ') AS kategori_list
         FROM permohonan p
         JOIN staf s ON p.ID_pemohon = s.ID_staf
         LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
@@ -38,13 +43,24 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
     <div class="card-body p-4">
         <!-- Filters -->
         <div class="row mb-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select class="form-select" id="statusFilter">
                     <option value="">Semua Status</option>
                     <option value="Baru">Baru</option>
                     <option value="Diluluskan">Diluluskan</option>
-                    <option value="Selesai">Selesai</option>
                     <option value="Ditolak">Ditolak</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="kategoriFilter">
+                    <option value="">Semua Kategori</option>
+                    <?php
+                    if ($kategori_result && $kategori_result->num_rows > 0) {
+                        while ($kategori = $kategori_result->fetch_assoc()) {
+                            echo '<option value="' . htmlspecialchars($kategori['kategori']) . '">' . htmlspecialchars($kategori['kategori']) . '</option>';
+                        }
+                    }
+                    ?>
                 </select>
             </div>
             <div class="col-md-4 ms-auto">
@@ -74,7 +90,8 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                         <?php while ($row = $requests_result->fetch_assoc()): ?>
                             <tr class="data-row"
                                 data-staf="<?php echo htmlspecialchars(strtolower($row['nama'])); ?>"
-                                data-item-list="<?php echo htmlspecialchars(strtolower($row['senarai_barang'] ?? '')); ?>">
+                                data-item-list="<?php echo htmlspecialchars(strtolower($row['senarai_barang'] ?? '')); ?>"
+                                data-kategori="<?php echo htmlspecialchars(strtolower($row['kategori_list'] ?? '')); ?>">
 
                                 <td class="fw-bold request-id">
                                     <button type="button" class="btn btn-link p-0 fw-bold btn-view-details"
@@ -157,6 +174,7 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
+    const kategoriFilter = document.getElementById('kategoriFilter');
     const tableBody = document.querySelector('#requestTable tbody');
     const tableRows = tableBody.querySelectorAll('tr.data-row');
     const noResultsRow = document.getElementById('no-results-row');
@@ -205,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function filterTable() {
         const searchText = searchInput.value.toLowerCase().replace('#', '');
         const statusText = statusFilter.value.toLowerCase();
+        const kategoriText = kategoriFilter.value.toLowerCase();
         let visibleRows = 0;
 
         for (let i = 0; i < tableRows.length; i++) {
@@ -217,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const requestId = requestIdCell?.textContent.toLowerCase().replace('#', '') || '';
             const stafName = row.dataset.staf || '';
             const itemList = row.dataset.itemList || '';
+            const kategoriList = row.dataset.kategori || '';
             const status = row.querySelector('.status-cell')?.textContent.toLowerCase().trim() || '';
 
             const matchesSearch = searchText === '' ||
@@ -225,8 +245,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 itemList.includes(searchText);
 
             const matchesStatus = statusText === '' || status === statusText;
+            const matchesKategori = kategoriText === '' || kategoriList.includes(kategoriText);
 
-            if (matchesSearch && matchesStatus) {
+            if (matchesSearch && matchesStatus && matchesKategori) {
                 row.style.display = '';
                 visibleRows++;
 
@@ -279,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('keyup', filterTable);
     searchInput.addEventListener('input', filterTable);
     statusFilter.addEventListener('change', filterTable);
+    kategoriFilter.addEventListener('change', filterTable);
 
     // Run filter on page load to set initial state
     filterTable();

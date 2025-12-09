@@ -20,22 +20,10 @@ $prev_month = date('Y-m', strtotime("$month_start -1 month"));
 $prev_month_end = date('Y-m-t', strtotime("$prev_month-01"));
 
 // Build WHERE clause for category filter
-$where_clause = "";
+$kategori_condition = "";
 if ($selected_kategori !== '') {
-    $where_clause = "WHERE b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+    $kategori_condition = "AND b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
 }
-
-// Get all barang (inventory items) with calculations
-$sql = "SELECT
-    b.no_kod,
-    b.perihal_stok AS nama_produk,
-    b.baki_semasa AS stok_semasa,
-    b.harga_seunit AS harga_unit,
-    b.kategori AS nama_kategori,
-    (b.baki_semasa * b.harga_seunit) AS jumlah_harga
-FROM barang b
-$where_clause
-ORDER BY b.no_kod ASC";
 
 // Get all categories for dropdown
 $kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
@@ -47,15 +35,32 @@ if ($kategori_result) {
     }
 }
 
-$result = $conn->query($sql);
+// NEW LOGIC: Only get items that have transactions in the selected month
+$sql = "SELECT DISTINCT
+    b.no_kod,
+    b.perihal_stok AS nama_produk,
+    b.baki_semasa AS stok_semasa,
+    b.harga_seunit AS harga_unit,
+    b.kategori AS nama_kategori,
+    (b.baki_semasa * b.harga_seunit) AS jumlah_harga
+FROM barang b
+INNER JOIN transaksi_stok t ON b.no_kod = t.no_kod
+WHERE DATE(t.tarikh_transaksi) BETWEEN ? AND ?
+$kategori_condition
+ORDER BY b.no_kod ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $month_start, $month_end);
+$stmt->execute();
+$result = $stmt->get_result();
 
 // Calculate summary stats and stock movements
 $total_items = 0;
 $total_stock = 0;
 $total_value = 0;
+$products = [];
 
 if ($result && $result->num_rows > 0) {
-    $products = [];
     while ($row = $result->fetch_assoc()) {
         $no_kod = $row['no_kod'];
 
@@ -87,7 +92,8 @@ if ($result && $result->num_rows > 0) {
 // Month name in Malay
 $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
               'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
-$month_name = $months_ms[(int)$month - 1] . ' ' . $year;
+// Save the selected month name BEFORE any loops that might overwrite it
+$selected_month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -214,7 +220,7 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
 <!-- Inventory Table (Excel-like format) -->
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <h5 class="mb-3 fw-bold">Senarai Inventori - <?php echo $month_name; ?></h5>
+        <h5 class="mb-3 fw-bold">Senarai Inventori - <?php echo $selected_month_name; ?></h5>
         <div class="table-responsive">
             <table class="table table-hover table-bordered align-middle">
                 <thead class="table-light">
@@ -260,7 +266,11 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
                     <?php else: ?>
                         <tr>
                             <td colspan="10" class="text-center text-muted py-4">
-                                Tiada data inventori.
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                <strong>Tiada dalam rekod untuk <?php echo $selected_month_name; ?></strong>
+                                <?php if ($selected_kategori !== ''): ?>
+                                    <br><small>Kategori: <?php echo htmlspecialchars($selected_kategori); ?></small>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endif; ?>

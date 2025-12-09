@@ -97,7 +97,30 @@ $header_user_initials = substr($initials, 0, 2);
             display: flex;
             flex-direction: column;
         }
-        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background-color: #1f2937; padding-top: 1rem; overflow-y: auto; }
+
+        /* Sidebar - Responsive */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1f2937;
+            padding-top: 1rem;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1050;
+        }
+
+        /* Mobile: Hide sidebar by default */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
 
         .sidebar-nav { padding: 1rem; }
 
@@ -161,6 +184,15 @@ $header_user_initials = substr($initials, 0, 2);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* Mobile: Full width content */
+        @media (max-width: 991.98px) {
+            .main-content-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
         }
         .page-content {
             flex: 1;
@@ -173,7 +205,51 @@ $header_user_initials = substr($initials, 0, 2);
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Hamburger Menu Button */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #374151;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-right: 1rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .hamburger-btn {
+                display: block;
+            }
+            .top-navbar {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
         .page-content { padding: 2.5rem; }
+
+        /* Mobile: Adjust content padding */
+        @media (max-width: 767.98px) {
+            .page-content {
+                padding: 1.5rem 1rem !important;
+            }
+        }
 
         .user-initials-badge {
             width: 32px;
@@ -259,6 +335,9 @@ $header_user_initials = substr($initials, 0, 2);
     </script>
 
     <a href="#main-content" class="skip-link">Langkau ke Kandungan Utama (Skip to Main Content)</a>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="d-flex">
         <?php require 'admin_sidebar.php'; ?>

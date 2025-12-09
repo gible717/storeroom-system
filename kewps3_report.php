@@ -2,8 +2,19 @@
 $pageTitle = "Laporan KEW.PS-3 - Transaksi Stok";
 require 'admin_header.php';
 
-// Get all items for dropdown
-$barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY perihal_stok ASC");
+// Get all categories for dropdown filter
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+
+// Get category filter
+$kategori_filter = $_GET['kategori'] ?? 'Semua';
+
+// Build query for items based on category filter
+if ($kategori_filter !== 'Semua') {
+    $barang_result = $conn->query("SELECT no_kod, perihal_stok, kategori FROM barang WHERE kategori = '" . $conn->real_escape_string($kategori_filter) . "' ORDER BY perihal_stok ASC");
+} else {
+    $barang_result = $conn->query("SELECT no_kod, perihal_stok, kategori FROM barang ORDER BY perihal_stok ASC");
+}
 ?>
 
 <div class="container-fluid">
@@ -21,18 +32,50 @@ $barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY 
             <h6 class="m-0 font-weight-bold text-primary">Jana Laporan Transaksi Stok</h6>
         </div>
         <div class="card-body">
-            <form action="kewps3_print.php" method="GET">
+            <form action="kewps3_print.php" method="GET" id="kewps3Form">
                 <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="kategori" class="form-label">Tapis Mengikut Kategori</label>
+                        <select class="form-select" id="kategori" name="kategori_filter">
+                            <option value="Semua" <?php echo ($kategori_filter === 'Semua') ? 'selected' : ''; ?>>Semua Kategori</option>
+                            <?php
+                            // Reset pointer to beginning
+                            if ($kategori_result) {
+                                $kategori_result->data_seek(0);
+                                while ($kategori = $kategori_result->fetch_assoc()):
+                            ?>
+                                <option value="<?php echo htmlspecialchars($kategori['kategori']); ?>" <?php echo ($kategori_filter === $kategori['kategori']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($kategori['kategori']); ?>
+                                </option>
+                            <?php
+                                endwhile;
+                            }
+                            ?>
+                        </select>
+                        <small class="text-muted">Pilih kategori untuk menapis senarai barang di bawah</small>
+                    </div>
+
                     <div class="col-md-12 mb-3">
                         <label for="no_kod" class="form-label">Pilih Barang <span class="text-danger">*</span></label>
                         <select class="form-select" id="no_kod" name="no_kod" required>
                             <option value="">-- Sila Pilih Barang --</option>
-                            <?php while ($barang = $barang_result->fetch_assoc()): ?>
+                            <?php
+                            if ($barang_result && $barang_result->num_rows > 0):
+                                while ($barang = $barang_result->fetch_assoc()):
+                            ?>
                                 <option value="<?php echo $barang['no_kod']; ?>">
                                     <?php echo htmlspecialchars($barang['perihal_stok']); ?>
                                     (Kod: <?php echo $barang['no_kod']; ?>)
+                                    <?php if (!empty($barang['kategori'])): ?>
+                                        - [<?php echo htmlspecialchars($barang['kategori']); ?>]
+                                    <?php endif; ?>
                                 </option>
-                            <?php endwhile; ?>
+                            <?php
+                                endwhile;
+                            else:
+                            ?>
+                                <option value="" disabled>Tiada barang dijumpai untuk kategori ini</option>
+                            <?php endif; ?>
                         </select>
                     </div>
 
@@ -62,9 +105,17 @@ $barang_result = $conn->query("SELECT no_kod, perihal_stok FROM barang ORDER BY 
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date();
     const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-    
+
     document.getElementById('tarikh_akhir').valueAsDate = today;
     document.getElementById('tarikh_mula').valueAsDate = thirtyDaysAgo;
+
+    // Category filter change - reload page with selected category
+    document.getElementById('kategori').addEventListener('change', function() {
+        const selectedKategori = this.value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('kategori', selectedKategori);
+        window.location.href = currentUrl.toString();
+    });
 });
 </script>
 

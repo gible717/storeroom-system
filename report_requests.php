@@ -4,29 +4,42 @@
 $pageTitle = "Laporan Permohonan";
 require 'admin_header.php';
 
+// Fetch categories for dropdown filter
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+
 // Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $status_filter = $_GET['status'] ?? 'Semua';
+$kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Build the WHERE clause for filters
-$where_clause = " WHERE DATE(tarikh_mohon) BETWEEN ? AND ? ";
+$where_clause = " WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ? ";
 $params = [$tarikh_mula, $tarikh_akhir];
 $types = "ss";
 
 if ($status_filter !== 'Semua') {
-    $where_clause .= " AND status = ? ";
+    $where_clause .= " AND p.status = ? ";
     $params[] = $status_filter;
+    $types .= "s";
+}
+
+if ($kategori_filter !== 'Semua') {
+    $where_clause .= " AND b.kategori = ? ";
+    $params[] = $kategori_filter;
     $types .= "s";
 }
 
 // --- SQL Queries for Summary Cards ---
 $sql_cards = "SELECT
-    COUNT(ID_permohonan) AS jumlah_permohonan,
-    COALESCE(SUM(CASE WHEN status = 'Baru' THEN 1 ELSE 0 END), 0) AS jumlah_pending,
-    COALESCE(SUM(CASE WHEN status = 'Diluluskan' OR status = 'Diterima' THEN 1 ELSE 0 END), 0) AS jumlah_lulus,
-    COALESCE(SUM(CASE WHEN status = 'Ditolak' THEN 1 ELSE 0 END), 0) AS jumlah_tolak
-FROM permohonan" . $where_clause;
+    COUNT(DISTINCT p.ID_permohonan) AS jumlah_permohonan,
+    COALESCE(SUM(CASE WHEN p.status = 'Baru' THEN 1 ELSE 0 END), 0) AS jumlah_pending,
+    COALESCE(SUM(CASE WHEN p.status = 'Diluluskan' OR p.status = 'Diterima' THEN 1 ELSE 0 END), 0) AS jumlah_lulus,
+    COALESCE(SUM(CASE WHEN p.status = 'Ditolak' THEN 1 ELSE 0 END), 0) AS jumlah_tolak
+FROM permohonan p
+LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+LEFT JOIN barang b ON pb.no_kod = b.no_kod" . $where_clause;
 $stmt_cards = $conn->prepare($sql_cards);
 $stmt_cards->bind_param($types, ...$params);
 $stmt_cards->execute();
@@ -39,10 +52,12 @@ $cards['jumlah_lulus'] = $cards['jumlah_lulus'] ?? 0;
 $cards['jumlah_tolak'] = $cards['jumlah_tolak'] ?? 0;
 
 // --- SQL for Chart 1: Pecahan Status (Pie Chart) ---
-$sql_status_chart = "SELECT status, COUNT(ID_permohonan) AS jumlah
-                    FROM permohonan
+$sql_status_chart = "SELECT p.status, COUNT(DISTINCT p.ID_permohonan) AS jumlah
+                    FROM permohonan p
+                    LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+                    LEFT JOIN barang b ON pb.no_kod = b.no_kod
                     $where_clause
-                    GROUP BY status";
+                    GROUP BY p.status";
 $stmt_status_chart = $conn->prepare($sql_status_chart);
 $stmt_status_chart->bind_param($types, ...$params);
 $stmt_status_chart->execute();
@@ -58,11 +73,13 @@ while ($row = $status_chart_result->fetch_assoc()) {
 // --- SQL for Chart 2: Permohonan per bulan (Bar Chart) ---
 // Note: This query groups by month/year for the date range
 $sql_monthly = "SELECT
-                DATE_FORMAT(tarikh_mohon, '%Y-%m') AS 'bulan',
-                COUNT(ID_permohonan) AS 'jumlah'
-                FROM permohonan
+                DATE_FORMAT(p.tarikh_mohon, '%Y-%m') AS 'bulan',
+                COUNT(DISTINCT p.ID_permohonan) AS 'jumlah'
+                FROM permohonan p
+                LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+                LEFT JOIN barang b ON pb.no_kod = b.no_kod
                 $where_clause
-                GROUP BY DATE_FORMAT(tarikh_mohon, '%Y-%m')
+                GROUP BY DATE_FORMAT(p.tarikh_mohon, '%Y-%m')
                 ORDER BY bulan ASC";
 $stmt_monthly = $conn->prepare($sql_monthly);
 $stmt_monthly->bind_param($types, ...$params);
@@ -138,7 +155,7 @@ $monthly_chart_data = $monthly_data;
         </a>
         <h3 class="mb-0 fw-bold">Laporan Permohonan</h3>
     </div>
-    <a href="report_requests_view.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-success" target="_blank">
+    <a href="report_requests_view.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=<?php echo urlencode($status_filter); ?>&kategori=<?php echo urlencode($kategori_filter); ?>" class="btn btn-success" target="_blank">
         <i class="bi bi-printer me-2"></i>Cetak Laporan
     </a>
 </div>
@@ -150,15 +167,15 @@ $monthly_chart_data = $monthly_data;
         <!-- Custom Filter Form -->
         <form action="report_requests.php" method="GET" id="filterForm">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="mula" class="form-label fw-semibold">Dari Tarikh</label>
                     <input type="date" class="form-control" id="mula" name="mula" value="<?php echo htmlspecialchars($tarikh_mula); ?>" required>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="akhir" class="form-label fw-semibold">Hingga Tarikh</label>
                     <input type="date" class="form-control" id="akhir" name="akhir" value="<?php echo htmlspecialchars($tarikh_akhir); ?>" required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="status" class="form-label fw-semibold">Status</label>
                     <select class="form-select" id="status" name="status">
                         <option value="Semua" <?php echo ($status_filter === 'Semua') ? 'selected' : ''; ?>>Semua Status</option>
@@ -166,6 +183,21 @@ $monthly_chart_data = $monthly_data;
                         <option value="Diluluskan" <?php echo ($status_filter === 'Diluluskan') ? 'selected' : ''; ?>>Diluluskan</option>
                         <option value="Ditolak" <?php echo ($status_filter === 'Ditolak') ? 'selected' : ''; ?>>Ditolak</option>
                         <option value="Diterima" <?php echo ($status_filter === 'Diterima') ? 'selected' : ''; ?>>Diterima</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="kategori" class="form-label fw-semibold">Kategori</label>
+                    <select class="form-select" id="kategori" name="kategori">
+                        <option value="Semua" <?php echo ($kategori_filter === 'Semua') ? 'selected' : ''; ?>>Semua Kategori</option>
+                        <?php
+                        // Reset pointer to beginning
+                        $kategori_result->data_seek(0);
+                        while ($kategori = $kategori_result->fetch_assoc()):
+                        ?>
+                            <option value="<?php echo htmlspecialchars($kategori['kategori']); ?>" <?php echo ($kategori_filter === $kategori['kategori']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($kategori['kategori']); ?>
+                            </option>
+                        <?php endwhile; ?>
                     </select>
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
@@ -184,9 +216,12 @@ $monthly_chart_data = $monthly_data;
         <small class="text-muted fs-6">(<?php echo formatMalayDate($tarikh_mula); ?> - <?php echo formatMalayDate($tarikh_akhir); ?>
         <?php if ($status_filter !== 'Semua'): ?>
             | Status: <?php echo htmlspecialchars($status_filter); ?>
+        <?php endif; ?>
+        <?php if ($kategori_filter !== 'Semua'): ?>
+            | Kategori: <?php echo htmlspecialchars($kategori_filter); ?>
         <?php endif; ?>)</small>
     </h5>
-    <?php if ($status_filter !== 'Semua' || $tarikh_mula !== date('Y-m-01') || $tarikh_akhir !== date('Y-m-d')): ?>
+    <?php if ($status_filter !== 'Semua' || $kategori_filter !== 'Semua' || $tarikh_mula !== date('Y-m-01') || $tarikh_akhir !== date('Y-m-d')): ?>
         <a href="report_requests.php" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-x-circle me-1"></i>Reset Penapis
         </a>
@@ -194,7 +229,7 @@ $monthly_chart_data = $monthly_data;
 </div>
 <div class="row g-4">
     <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Semua" class="stat-card-link <?php echo ($status_filter == 'Semua') ? 'active' : ''; ?>">
+        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Semua&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Semua') ? 'active' : ''; ?>">
             <div class="stat-card">
                 <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
                 <div class="stat-card-info">
@@ -205,7 +240,7 @@ $monthly_chart_data = $monthly_data;
         </a>
     </div>
     <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Diluluskan" class="stat-card-link <?php echo ($status_filter == 'Diluluskan') ? 'active' : ''; ?>">
+        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Diluluskan&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Diluluskan') ? 'active' : ''; ?>">
             <div class="stat-card">
                 <div class="stat-card-icon bg-success-light"><i class="bi bi-check-circle"></i></div>
                 <div class="stat-card-info">
@@ -216,7 +251,7 @@ $monthly_chart_data = $monthly_data;
         </a>
     </div>
     <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Ditolak" class="stat-card-link <?php echo ($status_filter == 'Ditolak') ? 'active' : ''; ?>">
+        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Ditolak&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Ditolak') ? 'active' : ''; ?>">
             <div class="stat-card">
                 <div class="stat-card-icon bg-danger-light"><i class="bi bi-x-circle"></i></div>
                 <div class="stat-card-info">
@@ -227,7 +262,7 @@ $monthly_chart_data = $monthly_data;
         </a>
     </div>
     <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Baru" class="stat-card-link <?php echo ($status_filter == 'Baru') ? 'active' : ''; ?>">
+        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Baru&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Baru') ? 'active' : ''; ?>">
             <div class="stat-card">
                 <div class="stat-card-icon bg-warning-light"><i class="bi bi-hourglass-split"></i></div>
                 <div class="stat-card-info">

@@ -107,6 +107,13 @@ $header_user_initials = substr($initials, 0, 2);
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Mobile responsiveness */
+        @media (max-width: 767.98px) {
+            .top-navbar {
+                padding: 0.75rem 1rem;
+            }
+        }
         .navbar-brand-custom {
             display: flex;
             align-items: center;
@@ -144,6 +151,13 @@ $header_user_initials = substr($initials, 0, 2);
         }
         .main-content {
             padding: 2.5rem;
+        }
+
+        /* Mobile responsiveness for content padding */
+        @media (max-width: 767.98px) {
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
         }
         .welcome-card, .action-card {
             background-color: #ffffff;

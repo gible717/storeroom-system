@@ -2,7 +2,12 @@
 // admin_top_navbar.php - Top navigation bar with user info
 ?>
 <nav class="top-navbar">
-    <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle ?? 'Dashboard'; ?></h1>
+    <div class="d-flex align-items-center">
+        <button class="hamburger-btn" id="sidebarToggle" aria-label="Toggle Sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+        <h1 class="h3 mb-0 text-gray-800"><?php echo $pageTitle ?? 'Dashboard'; ?></h1>
+    </div>
 
     <div class="user-info d-flex align-items-center">
         <a href="admin_profile.php" class="d-flex align-items-center text-decoration-none text-dark me-3" title="Lihat Profil">

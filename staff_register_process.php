@@ -3,6 +3,9 @@
 
 require 'db.php';
 
+// Set JSON header for AJAX response
+header('Content-Type: application/json');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Get form data
@@ -15,8 +18,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validate passwords match
     if ($kata_laluan !== $sahkan_kata_laluan) {
-        $error = "Kata laluan tidak sepadan.";
-        header("Location: staff_register.php?error=" . urlencode($error));
+        echo json_encode([
+            'success' => false,
+            'message' => 'Kata laluan tidak sepadan.'
+        ]);
         exit();
     }
 
@@ -26,8 +31,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        $error = "ID Staf ini telah wujud. Sila guna ID lain.";
-        header("Location: staff_register.php?error=" . urlencode($error));
+        echo json_encode([
+            'success' => false,
+            'message' => 'ID Staf ini telah wujud. Sila guna ID lain.'
+        ]);
         $stmt->close();
         $conn->close();
         exit();
@@ -40,8 +47,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        $error = "Emel ini telah didaftarkan. Sila guna emel lain.";
-        header("Location: staff_register.php?error=" . urlencode($error));
+        echo json_encode([
+            'success' => false,
+            'message' => 'Emel ini telah didaftarkan. Sila guna emel lain.'
+        ]);
         $stmt->close();
         $conn->close();
         exit();
@@ -67,14 +76,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // THIS IS THE FIX: Add "i" for the integer and the $is_first_login variable
     $stmt->bind_param("sssissi", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $peranan, $is_first_login);
     if ($stmt->execute()) {
-        // Success! Redirect to login page with a success message
-        $success = "Pendaftaran berjaya! Sila log masuk dengan akaun baru anda.";
-        header("Location: login.php?success=" . urlencode($success));
+        // Success! Return JSON response for AJAX
+        echo json_encode([
+            'success' => true,
+            'message' => 'Pendaftaran berjaya! Anda akan dibawa ke halaman log masuk...'
+        ]);
         exit();
     } else {
         // Database error
-        $error = "Pendaftaran gagal disebabkan ralat pangkalan data. Sila cuba lagi.";
-        header("Location: staff_register.php?error=" . urlencode($error));
+        echo json_encode([
+            'success' => false,
+            'message' => 'Pendaftaran gagal disebabkan ralat pangkalan data. Sila cuba lagi.'
+        ]);
         exit();
     }
 

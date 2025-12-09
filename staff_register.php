@@ -45,6 +45,56 @@ $jabatan_result = $conn->query($sql);
             height: 50px;
         }
 
+        /* Success Popup Notification */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 9999;
+            text-align: center;
+            min-width: 400px;
+            transition: transform 0.3s ease;
+        }
+        .success-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .success-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+            display: none;
+        }
+        .success-popup-overlay.show {
+            display: block;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #d4edda;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-icon i {
+            font-size: 3rem;
+            color: #28a745;
+        }
+        .countdown {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -156,22 +206,93 @@ $jabatan_result = $conn->query($sql);
             });
         }
         
-        // --- EXISTING: Client-side password matching ---
+        // --- AJAX Form Submission ---
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
                 const password = document.getElementById('kata_laluan').value;
                 const confirmPassword = document.getElementById('sahkan_kata_laluan').value;
 
                 if (password !== confirmPassword) {
-                    e.preventDefault(); // Stop the form from submitting
                     alert('Kata laluan tidak sepadan! Sila semak semula.');
+                    return;
                 }
+
+                // Get form data
+                const formData = new FormData(registerForm);
+
+                // Disable submit button to prevent double submission
+                const submitBtn = registerForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mendaftar...';
+
+                // Send AJAX request
+                fetch('staff_register_process.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success popup
+                        showSuccessPopup();
+                    } else {
+                        // Show error alert
+                        alert(data.message);
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Daftar';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ralat berlaku. Sila cuba lagi.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Daftar';
+                });
             });
+        }
+
+        // Function to show success popup and redirect after 5 seconds
+        function showSuccessPopup() {
+            const overlay = document.getElementById('popupOverlay');
+            const popup = document.getElementById('successPopup');
+            const countdownElement = document.getElementById('countdown');
+
+            // Show overlay and popup
+            overlay.classList.add('show');
+            popup.classList.add('show');
+
+            let countdown = 5;
+            countdownElement.textContent = countdown;
+
+            // Countdown timer
+            const timer = setInterval(function() {
+                countdown--;
+                countdownElement.textContent = countdown;
+
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = 'login.php';
+                }
+            }, 1000);
         }
 
     }); // End DOMContentLoaded
     </script>
+
+    <!-- Success Popup -->
+    <div class="success-popup-overlay" id="popupOverlay"></div>
+    <div class="success-popup" id="successPopup">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h4 class="fw-bold mb-3">Pendaftaran Berjaya!</h4>
+        <p class="text-muted mb-2">Akaun anda telah berjaya didaftarkan.</p>
+        <p class="countdown">Mengalih ke halaman log masuk dalam <span id="countdown">5</span> saat...</p>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

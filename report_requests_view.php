@@ -7,6 +7,7 @@ require 'admin_header.php';
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
 $status_filter = $_GET['status'] ?? 'Semua';
+$kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Build the WHERE clause for filters
 $where_clause = " WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ? ";
@@ -19,19 +20,26 @@ if ($status_filter !== 'Semua') {
     $types .= "s";
 }
 
+if ($kategori_filter !== 'Semua') {
+    $where_clause .= " AND b.kategori = ? ";
+    $params[] = $kategori_filter;
+    $types .= "s";
+}
+
 // --- Main SQL Query ---
-$sql = "SELECT 
+$sql = "SELECT DISTINCT
             p.*,
-            s.nama AS nama_staf,
-            pr.nama_produk
-        FROM 
+            s.nama AS nama_staf
+        FROM
             permohonan p
-        JOIN 
-            staf s ON p.ID_staf = s.ID_staf
-        JOIN 
-            produk pr ON p.ID_produk = pr.ID_produk
+        JOIN
+            staf s ON p.ID_pemohon = s.ID_staf
+        LEFT JOIN
+            permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+        LEFT JOIN
+            barang b ON pb.no_kod = b.no_kod
         $where_clause
-        ORDER BY 
+        ORDER BY
             p.tarikh_mohon DESC";
 
 $stmt = $conn->prepare($sql);
