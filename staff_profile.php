@@ -39,6 +39,12 @@ function getInitials($name) {
         height: 100px;
         margin: 0 auto 1rem;
     }
+    /* Mobile responsive adjustments */
+    @media (max-width: 576px) {
+        .profile-card .card-body {
+            padding: 1.5rem !important;
+        }
+    }
     .profile-avatar {
         width: 100%;
         height: 100%;
@@ -85,20 +91,23 @@ function getInitials($name) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4 position-relative">
-    <div>
+<div class="mb-4">
+    <!-- Back Button -->
+    <div class="mb-3">
         <a href="staff_dashboard.php" class="btn btn-light">
-            <i class="bi bi-arrow-left"></i>
+            <i class="bi bi-arrow-left me-1"></i><span class="d-none d-sm-inline">Kembali</span>
         </a>
     </div>
 
-    <div class="position-absolute" style="left: 50%; transform: translateX(-50%);">
+    <!-- Title -->
+    <div class="text-center mb-3">
         <h3 class="mb-0 fw-bold">Profil Saya</h3>
     </div>
 
-    <div>
+    <!-- Change Password Button -->
+    <div class="text-center">
         <a href="profile_change_password.php" class="btn btn-outline-secondary">
-            <i class="bi bi-key-fill me-2"></i>Tukar Kata Laluan
+            <i class="bi bi-key-fill me-2"></i><span class="d-none d-sm-inline">Tukar </span>Kata Laluan
         </a>
     </div>
 </div>
@@ -149,9 +158,9 @@ function getInitials($name) {
                 <input type="text" class="form-control" id="jabatan" name="jabatan" value="<?php echo htmlspecialchars($user['nama_jabatan']); ?>" disabled readonly>
             </div>
 
-            <div class="text-end mt-4">
-                <a href="staff_dashboard.php" class="btn btn-light me-2">Batal</a>
-                <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Simpan</button>
+            <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                <a href="staff_dashboard.php" class="btn btn-light order-2 order-sm-1">Batal</a>
+                <button type="submit" id="submitBtn" class="btn btn-primary order-1 order-sm-2" disabled>Simpan</button>
             </div>
         </form>
     </div>

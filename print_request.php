@@ -4,6 +4,16 @@
 require 'db.php';
 session_start();
 
+// Malay month formatting function
+function format_malay_date($date_string) {
+    $malay_months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+    $date = strtotime($date_string);
+    $day = date('d', $date);
+    $month_index = (int)date('n', $date) - 1;
+    $year = date('Y', $date);
+    return $day . ' ' . $malay_months[$month_index] . ' ' . $year;
+}
+
 // Check login
 if (!isset($_SESSION['ID_staf'])) {
     die("Akses tidak dibenarkan. Sila log masuk.");
@@ -96,7 +106,7 @@ if ($request['status'] === 'Diluluskan' || $request['status'] === 'Selesai') {
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <strong>ID Permohonan:</strong> REQ<?php echo str_pad($request['ID_permohonan'], 4, '0', STR_PAD_LEFT); ?><br>
-                    <strong>Tarikh Mohon:</strong> <?php echo date('d M Y', strtotime($request['tarikh_mohon'])); ?>
+                    <strong>Tarikh Mohon:</strong> <?php echo format_malay_date($request['tarikh_mohon']); ?>
                 </div>
                 <div>
                     <strong>Status:</strong> 
@@ -120,7 +130,7 @@ if ($request['status'] === 'Diluluskan' || $request['status'] === 'Selesai') {
                     <h5>Butiran Kelulusan</h5>
                     <p><strong>Status:</strong> <?php echo htmlspecialchars($request['status']); ?></p>
                     <p><strong>Diluluskan Oleh:</strong> <?php echo htmlspecialchars($approver_name); ?></p>
-                    <p><strong>Tarikh Selesai:</strong> <?php echo $request['tarikh_selesai'] ? date('d M Y, g:ia', strtotime($request['tarikh_selesai'])) : '-'; ?></p>
+                    <p><strong>Tarikh Selesai:</strong> <?php echo $request['tarikh_selesai'] ? format_malay_date($request['tarikh_selesai']) . ', ' . date('g:ia', strtotime($request['tarikh_selesai'])) : '-'; ?></p>
                 </div>
             </div>
 

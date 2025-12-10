@@ -3,6 +3,16 @@
 $pageTitle = "Laporan Permohonan";
 require 'admin_header.php';
 
+// Malay month formatting function
+function format_malay_date($date_string) {
+    $malay_months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+    $date = strtotime($date_string);
+    $day = date('d', $date);
+    $month_index = (int)date('n', $date) - 1;
+    $year = date('Y', $date);
+    return $day . ' ' . $malay_months[$month_index] . ' ' . $year;
+}
+
 // Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
@@ -99,7 +109,7 @@ $requests = $stmt->get_result();
                         <?php while ($row = $requests->fetch_assoc()): ?>
                             <tr>
                                 <td>REQ-<?php echo str_pad($row['ID_permohonan'], 4, '0', STR_PAD_LEFT); ?></td>
-                                <td><?php echo date('d M Y', strtotime($row['tarikh_mohon'])); ?></td>
+                                <td><?php echo format_malay_date($row['tarikh_mohon']); ?></td>
                                 <td><?php echo htmlspecialchars($row['nama_staf']); ?></td>
                                 <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
                                 <td class="text-center"><?php echo $row['jumlah_diminta']; ?></td>
@@ -116,7 +126,7 @@ $requests = $stmt->get_result();
                                     <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
                                 </td>
                                 <td>
-                                    <?php echo $row['tarikh_selesai'] ? date('d M Y', strtotime($row['tarikh_selesai'])) : '-'; ?>
+                                    <?php echo $row['tarikh_selesai'] ? format_malay_date($row['tarikh_selesai']) : '-'; ?>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

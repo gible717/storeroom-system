@@ -84,12 +84,22 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // Helper function - smart time display: "X minit yang lalu" for today, date for older requests
 function smart_time_display($masa_mohon, $tarikh_mohon) {
+    // Malay month abbreviations
+    $malay_months = [
+        'Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'
+    ];
+
     // First check if tarikh_mohon is TODAY
     $today = date('Y-m-d');
 
-    // If tarikh_mohon is NOT today, always show date format
+    // If tarikh_mohon is NOT today, always show date format with Malay month
     if ($tarikh_mohon != $today) {
-        return date('d M Y', strtotime($tarikh_mohon));
+        $date = strtotime($tarikh_mohon);
+        $day = date('d', $date);
+        $month_index = (int)date('n', $date) - 1;
+        $year = date('Y', $date);
+        return $day . ' ' . $malay_months[$month_index] . ' ' . $year;
     }
 
     // If tarikh_mohon IS today and masa_mohon is available, show "time ago"
@@ -115,8 +125,12 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
         }
     }
 
-    // Fallback: show date format
-    return date('d M Y', strtotime($tarikh_mohon));
+    // Fallback: show date format with Malay month
+    $date = strtotime($tarikh_mohon);
+    $day = date('d', $date);
+    $month_index = (int)date('n', $date) - 1;
+    $year = date('Y', $date);
+    return $day . ' ' . $malay_months[$month_index] . ' ' . $year;
 }
 
 // Get dashboard stats from barang table

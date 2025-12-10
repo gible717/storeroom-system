@@ -3,6 +3,16 @@
 $pageTitle = "Laporan Pembekal";
 require 'admin_header.php';
 
+// Malay month formatting function
+function format_malay_date($date_string) {
+    $malay_months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+    $date = strtotime($date_string);
+    $day = date('d', $date);
+    $month_index = (int)date('n', $date) - 1;
+    $year = date('Y', $date);
+    return $day . ' ' . $malay_months[$month_index] . ' ' . $year;
+}
+
 // Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
@@ -62,8 +72,8 @@ $orders = $stmt->get_result();
 </div>
 
 <p>
-    <strong>Julat Tarikh:</strong> <?php echo date('d M Y', strtotime($tarikh_mula)); ?>
-    <strong>Hingga:</strong> <?php echo date('d M Y', strtotime($tarikh_akhir)); ?><br>
+    <strong>Julat Tarikh:</strong> <?php echo format_malay_date($tarikh_mula); ?>
+    <strong>Hingga:</strong> <?php echo format_malay_date($tarikh_akhir); ?><br>
     <strong>Pembekal:</strong> <?php echo htmlspecialchars($pembekal_nama); ?>
 </p>
 
@@ -87,7 +97,7 @@ $orders = $stmt->get_result();
                         <?php while ($row = $orders->fetch_assoc()): ?>
                             <tr>
                                 <td>PO-<?php echo str_pad($row['ID_pesanan'], 3, '0', STR_PAD_LEFT); ?></td>
-                                <td><?php echo date('d M Y', strtotime($row['tarikh_pesan'])); ?></td>
+                                <td><?php echo format_malay_date($row['tarikh_pesan']); ?></td>
                                 <td><?php echo htmlspecialchars($row['nama_pembekal']); ?></td>
                                 D <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
                                 <td class="text-center"><?php echo $row['kuantiti_dipesan']; ?></td>

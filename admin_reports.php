@@ -38,11 +38,30 @@ switch ($filter_preset) {
 // Display label for current filter period
 function getDisplayLabel($preset, $start, $end) {
     $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+    $malay_months_short = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+
     switch ($preset) {
-        case 'week': return date('d M', strtotime($start)) . ' - ' . date('d M Y', strtotime($end));
-        case 'year': return date('Y', strtotime($start));
-        case 'custom': return date('d M Y', strtotime($start)) . ' - ' . date('d M Y', strtotime($end));
-        default: $month_num = (int)date('m', strtotime($start)); return $months_ms[$month_num - 1] . ' ' . date('Y', strtotime($start));
+        case 'week':
+            $start_day = date('d', strtotime($start));
+            $start_month = $malay_months_short[(int)date('n', strtotime($start)) - 1];
+            $end_day = date('d', strtotime($end));
+            $end_month = $malay_months_short[(int)date('n', strtotime($end)) - 1];
+            $end_year = date('Y', strtotime($end));
+            return $start_day . ' ' . $start_month . ' - ' . $end_day . ' ' . $end_month . ' ' . $end_year;
+        case 'year':
+            return date('Y', strtotime($start));
+        case 'custom':
+            $start_day = date('d', strtotime($start));
+            $start_month = $malay_months_short[(int)date('n', strtotime($start)) - 1];
+            $start_year = date('Y', strtotime($start));
+            $end_day = date('d', strtotime($end));
+            $end_month = $malay_months_short[(int)date('n', strtotime($end)) - 1];
+            $end_year = date('Y', strtotime($end));
+            return $start_day . ' ' . $start_month . ' ' . $start_year . ' - ' . $end_day . ' ' . $end_month . ' ' . $end_year;
+        default:
+            $month_num = (int)date('m', strtotime($start));
+            return $months_ms[$month_num - 1] . ' ' . date('Y', strtotime($start));
     }
 }
 

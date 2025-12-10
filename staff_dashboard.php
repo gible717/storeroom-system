@@ -34,7 +34,18 @@ $userNameShort = getShortenedName($userName);
                 );
                 echo $formatter->format(time());
             } else {
-                echo date('l, d F Y');
+                // Malay day and month names
+                $days_ms = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+                $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+
+                $day_num = (int)date('w');
+                $day_name = $days_ms[$day_num];
+                $day = date('d');
+                $month_num = (int)date('n') - 1;
+                $month_name = $months_ms[$month_num];
+                $year = date('Y');
+
+                echo $day_name . ', ' . $day . ' ' . $month_name . ' ' . $year;
             }
             ?>
         </p>
