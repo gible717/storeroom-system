@@ -10,7 +10,7 @@ if ($conn === null || $conn->connect_error) {
 
 // Get categories & suppliers for filter dropdowns
 $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
-$supplier_result = $conn->query("SELECT DISTINCT nama_pembekal FROM PRODUK WHERE nama_pembekal IS NOT NULL AND nama_pembekal != '' ORDER BY nama_pembekal ASC");
+$supplier_result = $conn->query("SELECT DISTINCT nama_pembekal FROM barang WHERE nama_pembekal IS NOT NULL AND nama_pembekal != '' ORDER BY nama_pembekal ASC");
 
 // Build WHERE clause based on filters
 $where_clauses = [];
@@ -20,17 +20,17 @@ $types = '';
 // Status filter
 $status_filter = $_GET['status'] ?? '';
 if ($status_filter === 'in_stock') {
-    $where_clauses[] = "p.stok_semasa > 10";
+    $where_clauses[] = "b.baki_semasa > 10";
 } elseif ($status_filter === 'low_stock') {
-    $where_clauses[] = "p.stok_semasa > 0 AND p.stok_semasa <= 10";
+    $where_clauses[] = "b.baki_semasa > 0 AND b.baki_semasa <= 10";
 } elseif ($status_filter === 'out_of_stock') {
-    $where_clauses[] = "p.stok_semasa = 0";
+    $where_clauses[] = "b.baki_semasa = 0";
 }
 
 // Category filter
 $category_filter = $_GET['kategori'] ?? '';
 if (!empty($category_filter)) {
-    $where_clauses[] = "p.ID_kategori = ?";
+    $where_clauses[] = "b.ID_kategori = ?";
     $params[] = $category_filter;
     $types .= 'i';
 }
@@ -38,7 +38,7 @@ if (!empty($category_filter)) {
 // Supplier filter
 $supplier_filter = $_GET['pembekal'] ?? '';
 if (!empty($supplier_filter)) {
-    $where_clauses[] = "p.nama_pembekal = ?";
+    $where_clauses[] = "b.nama_pembekal = ?";
     $params[] = $supplier_filter;
     $types .= 's';
 }
@@ -50,7 +50,7 @@ if ($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 
 // Count total rows for pagination
-$count_sql = "SELECT COUNT(p.ID_produk) AS total FROM PRODUK p LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori";
+$count_sql = "SELECT COUNT(b.no_kod) AS total FROM barang b LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori";
 if (!empty($where_clauses)) {
     $count_sql .= " WHERE " . implode(' AND ', $where_clauses);
 }
@@ -70,12 +70,12 @@ $base_url = http_build_query($query_params);
 $base_url = !empty($base_url) ? 'admin_products.php?' . $base_url . '&' : 'admin_products.php?';
 
 // Main query - fetch products with category name
-$sql = "SELECT p.ID_produk, p.nama_produk, p.harga, p.nama_pembekal, p.stok_semasa, k.nama_kategori
-        FROM PRODUK p LEFT JOIN KATEGORI k ON p.ID_kategori = k.ID_kategori";
+$sql = "SELECT b.no_kod AS ID_produk, b.perihal_stok AS nama_produk, b.harga_seunit AS harga, b.nama_pembekal, b.baki_semasa AS stok_semasa, k.nama_kategori
+        FROM barang b LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori";
 if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(' AND ', $where_clauses);
 }
-$sql .= " ORDER BY p.ID_produk ASC LIMIT ? OFFSET ?";
+$sql .= " ORDER BY b.no_kod ASC LIMIT ? OFFSET ?";
 
 $types .= 'ii';
 $params[] = $limit;

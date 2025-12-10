@@ -11,8 +11,8 @@ if (!$product_id) {
     exit;
 }
 
-// Fetch product data
-$sql = "SELECT ID_produk, nama_produk, ID_kategori, harga, nama_pembekal, stok_semasa FROM PRODUK WHERE ID_produk = ?";
+// Fetch product data from barang table
+$sql = "SELECT no_kod AS ID_produk, perihal_stok AS nama_produk, ID_kategori, harga_seunit AS harga, nama_pembekal, baki_semasa AS stok_semasa FROM barang WHERE no_kod = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $product_id);
 $stmt->execute();

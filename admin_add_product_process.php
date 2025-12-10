@@ -25,8 +25,20 @@ if (empty($id_produk) || empty($nama_produk)) {
     exit;
 }
 
-// Insert into database
-$sql = "INSERT INTO PRODUK (ID_produk, nama_produk, ID_kategori, harga, nama_pembekal, stok_semasa) VALUES (?, ?, ?, ?, ?, ?)";
+// Get kategori name from KATEGORI table
+$kategori_name = '';
+$kategori_query = "SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?";
+$kategori_stmt = $conn->prepare($kategori_query);
+$kategori_stmt->bind_param("i", $ID_kategori);
+$kategori_stmt->execute();
+$kategori_result = $kategori_stmt->get_result();
+if ($kategori_row = $kategori_result->fetch_assoc()) {
+    $kategori_name = $kategori_row['nama_kategori'];
+}
+$kategori_stmt->close();
+
+// Insert into barang table (mapped field names)
+$sql = "INSERT INTO barang (no_kod, perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa) VALUES (?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {
@@ -35,7 +47,8 @@ if ($stmt === false) {
 }
 
 // Bind params: s=string, i=int, d=double
-$stmt->bind_param("ssidsi", $id_produk, $nama_produk, $ID_kategori, $harga, $nama_pembekal, $stok_semasa);
+// no_kod, perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa
+$stmt->bind_param("ssisssi", $id_produk, $nama_produk, $ID_kategori, $kategori_name, $harga, $nama_pembekal, $stok_semasa);
 
 try {
     $stmt->execute();

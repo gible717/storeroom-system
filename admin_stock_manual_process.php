@@ -26,8 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->begin_transaction();
 
     try {
-        // Update product stock
-        $sql_update_stock = "UPDATE PRODUK SET stok_semasa = stok_semasa + ? WHERE ID_produk = ?";
+        // Update product stock in barang table
+        $sql_update_stock = "UPDATE barang SET baki_semasa = baki_semasa + ? WHERE no_kod = ?";
         $stmt_update = $conn->prepare($sql_update_stock);
         $stmt_update->bind_param("is", $jumlah_masuk, $id_produk);
         $stmt_update->execute();

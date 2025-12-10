@@ -36,8 +36,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Update database
-    $sql = "UPDATE PRODUK SET nama_produk = ?, ID_kategori = ?, harga = ?, nama_pembekal = ?, stok_semasa = ? WHERE ID_produk = ?";
+    // Get kategori name from KATEGORI table
+    $kategori_name = '';
+    $kategori_query = "SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?";
+    $kategori_stmt = $conn->prepare($kategori_query);
+    $kategori_stmt->bind_param("i", $ID_kategori);
+    $kategori_stmt->execute();
+    $kategori_result = $kategori_stmt->get_result();
+    if ($kategori_row = $kategori_result->fetch_assoc()) {
+        $kategori_name = $kategori_row['nama_kategori'];
+    }
+    $kategori_stmt->close();
+
+    // Update barang table (mapped field names)
+    $sql = "UPDATE barang SET perihal_stok = ?, ID_kategori = ?, kategori = ?, harga_seunit = ?, nama_pembekal = ?, baki_semasa = ? WHERE no_kod = ?";
     $stmt = $conn->prepare($sql);
 
     if ($stmt === false) {
@@ -47,7 +59,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Bind params: s=string, i=int, d=double
-    $stmt->bind_param("sidsis", $nama_produk, $ID_kategori, $harga, $nama_pembekal, $stok_semasa, $id_produk);
+    // perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa, no_kod
+    $stmt->bind_param("sisdsss", $nama_produk, $ID_kategori, $kategori_name, $harga, $nama_pembekal, $stok_semasa, $id_produk);
 
     try {
         $stmt->execute();

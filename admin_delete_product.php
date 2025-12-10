@@ -15,8 +15,8 @@ if (empty($id_produk)) {
     exit;
 }
 
-// Delete product
-$sql = "DELETE FROM PRODUK WHERE ID_produk = ?";
+// Delete product from barang table
+$sql = "DELETE FROM barang WHERE no_kod = ?";
 
 try {
     $stmt = $conn->prepare($sql);

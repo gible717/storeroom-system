@@ -35,7 +35,7 @@ if ($kategori_result) {
     }
 }
 
-// NEW LOGIC: Only get items that have transactions in the selected month
+// Get all items (including those without transactions in the selected month)
 $sql = "SELECT DISTINCT
     b.no_kod,
     b.perihal_stok AS nama_produk,
@@ -44,13 +44,11 @@ $sql = "SELECT DISTINCT
     b.kategori AS nama_kategori,
     (b.baki_semasa * b.harga_seunit) AS jumlah_harga
 FROM barang b
-INNER JOIN transaksi_stok t ON b.no_kod = t.no_kod
-WHERE DATE(t.tarikh_transaksi) BETWEEN ? AND ?
+WHERE 1=1
 $kategori_condition
 ORDER BY b.no_kod ASC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $month_start, $month_end);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -96,16 +94,21 @@ $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
 $selected_month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
     <div class="d-flex align-items-center">
         <a href="admin_reports.php" class="btn btn-light me-3">
             <i class="bi bi-arrow-left"></i>
         </a>
         <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
     </div>
-    <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>&kategori=<?php echo urlencode($selected_kategori); ?>" class="btn btn-success">
-        <i class="bi bi-printer me-2"></i>Cetak Laporan
-    </a>
+    <div class="d-flex gap-2">
+        <a href="report_inventory_excel.php?month=<?php echo urlencode($selected_month); ?>&kategori=<?php echo urlencode($selected_kategori); ?>" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i><span class="d-none d-sm-inline">Export </span>Excel
+        </a>
+        <a href="report_inventory_view.php?month=<?php echo urlencode($selected_month); ?>&kategori=<?php echo urlencode($selected_kategori); ?>" class="btn btn-primary">
+            <i class="bi bi-printer me-1"></i><span class="d-none d-sm-inline">Cetak </span>PDF
+        </a>
+    </div>
 </div>
 
 <!-- Month Filter -->

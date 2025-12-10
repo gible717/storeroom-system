@@ -5,13 +5,39 @@ require 'staff_auth_check.php';
 
 $id_staf = $_SESSION['ID_staf'];
 
+// Get category filter
+$selected_kategori = $_GET['kategori'] ?? '';
+
+// Get all categories for dropdown
+$kategori_sql = "SELECT DISTINCT b.kategori
+                 FROM barang b
+                 INNER JOIN permohonan_barang pb ON b.no_kod = pb.no_kod
+                 INNER JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
+                 WHERE p.ID_pemohon = ? AND b.kategori IS NOT NULL AND b.kategori != ''
+                 ORDER BY b.kategori ASC";
+$kategori_stmt = $conn->prepare($kategori_sql);
+$kategori_stmt->bind_param('s', $id_staf);
+$kategori_stmt->execute();
+$kategori_result = $kategori_stmt->get_result();
+$categories = [];
+while ($row = $kategori_result->fetch_assoc()) {
+    $categories[] = $row['kategori'];
+}
+$kategori_stmt->close();
+
+// Build WHERE clause for category filter
+$kategori_condition = "";
+if ($selected_kategori !== '') {
+    $kategori_condition = "AND b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+}
+
 // Get all requests for this staff
 $sql = "SELECT
             p.ID_permohonan,
             p.tarikh_mohon,
             p.status,
-            COUNT(pb.ID_permohonan_barang) AS bilangan_item,
-            GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
+            COUNT(DISTINCT pb.ID_permohonan_barang) AS bilangan_item,
+            GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS senarai_barang
         FROM
             permohonan p
         LEFT JOIN
@@ -19,7 +45,7 @@ $sql = "SELECT
         LEFT JOIN
             barang b ON pb.no_kod = b.no_kod
         WHERE
-            p.ID_pemohon = ?
+            p.ID_pemohon = ? $kategori_condition
         GROUP BY
             p.ID_permohonan
         ORDER BY
@@ -76,6 +102,18 @@ require 'staff_header.php';
         <div class="card content-card">
             <div class="card-body p-4">
                 <div class="row mb-4">
+                    <div class="col-md-3">
+                        <form method="GET" id="categoryFilterForm">
+                            <select name="kategori" class="form-select" onchange="this.form.submit()">
+                                <option value="">Semua Kategori</option>
+                                <?php foreach ($categories as $kategori): ?>
+                                    <option value="<?php echo htmlspecialchars($kategori); ?>" <?php if ($selected_kategori === $kategori) echo 'selected'; ?>>
+                                        <?php echo htmlspecialchars($kategori); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </form>
+                    </div>
                     <div class="col-md-3">
                         <select class="form-select" id="statusFilter">
                             <option value="">Semua Status</option>

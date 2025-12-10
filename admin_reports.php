@@ -247,15 +247,6 @@ while ($row = $top_items_result->fetch_assoc()) {
                         <label class="form-label">Tarikh Akhir</label>
                         <input type="date" class="form-control" id="end_date" name="end" value="<?php echo $custom_end ?? date('Y-m-d'); ?>" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Atau pilih tempoh pantas:</label>
-                        <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange('last_week')">Minggu Lepas</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange('last_month')">Bulan Lepas</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange('last_3_months')">3 Bulan Lepas</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setDateRange('last_year')">Tahun Lepas</button>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -267,32 +258,6 @@ while ($row = $top_items_result->fetch_assoc()) {
 </div>
 
 <script>
-// Quick date presets for modal
-function setDateRange(preset) {
-    const today = new Date();
-    let startDate, endDate;
-    switch(preset) {
-        case 'last_week':
-            endDate = new Date(today.setDate(today.getDate() - today.getDay()));
-            startDate = new Date(endDate); startDate.setDate(endDate.getDate() - 6);
-            break;
-        case 'last_month':
-            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            break;
-        case 'last_3_months':
-            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-            startDate = new Date(today.getFullYear(), today.getMonth() - 3, 1);
-            break;
-        case 'last_year':
-            startDate = new Date(today.getFullYear() - 1, 0, 1);
-            endDate = new Date(today.getFullYear() - 1, 11, 31);
-            break;
-    }
-    document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
-    document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
-}
-
 // Initialize charts
 document.addEventListener('DOMContentLoaded', function() {
     const statusLabels = <?php echo json_encode($status_labels); ?>;

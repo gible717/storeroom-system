@@ -19,9 +19,28 @@ $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $user['jawatan'];
 $nama_jabatan = $user['nama_jabatan'];
 
+// Get category filter
+$selected_kategori = $_GET['kategori'] ?? '';
+
+// Get all categories for dropdown
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
+$categories = [];
+if ($kategori_result) {
+    while ($row = $kategori_result->fetch_assoc()) {
+        $categories[] = $row['kategori'];
+    }
+}
+
+// Build WHERE clause for category filter
+$kategori_condition = "";
+if ($selected_kategori !== '') {
+    $kategori_condition = "WHERE kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+}
+
 // Get all items from barang table (the correct table for requests)
 $barang_list = [];
-$result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran, baki_semasa AS stok_semasa FROM barang ORDER BY perihal_stok ASC");
+$result = $conn->query("SELECT no_kod, perihal_stok, unit_pengukuran, baki_semasa AS stok_semasa, kategori FROM barang $kategori_condition ORDER BY perihal_stok ASC");
 while ($row = $result->fetch_assoc()) {
     $barang_list[] = $row;
 }
@@ -54,7 +73,7 @@ if (!isset($_SESSION['cart'])) {
             <div class="card-body p-4 p-md-5">
 
                 <div id="item_entry_form">
-                    
+
                     <h5 class="fw-bold mb-3">Maklumat Permohonan</h5>
                     
                     <div class="mb-3">
@@ -69,6 +88,26 @@ if (!isset($_SESSION['cart'])) {
                     <div class="mb-4">
                         <label for="jawatan_input" class="form-label">Jawatan (Optional)</label>
                         <input type="text" class="form-control" id="jawatan_input" value="" placeholder="Contoh: Pegawai Teknologi Maklumat">
+                    </div>
+
+                    <!-- Category Filter (For Filtering Only) -->
+                    <div class="mb-4">
+                        <label for="kategori_filter" class="form-label">Tapisan mengikut Kategori</label>
+                        <div class="d-flex gap-2">
+                            <select name="kategori" id="kategori_filter" class="form-select" onchange="window.location.href='kewps8_form.php?kategori=' + this.value + '&action=new'">
+                                <option value="">Semua Kategori</option>
+                                <?php foreach ($categories as $kategori): ?>
+                                    <option value="<?php echo htmlspecialchars($kategori); ?>" <?php if ($selected_kategori === $kategori) echo 'selected'; ?>>
+                                        <?php echo htmlspecialchars($kategori); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php if ($selected_kategori !== ''): ?>
+                                <a href="kewps8_form.php?action=new" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <div class="row g-3 mb-3">
@@ -178,18 +217,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOption = itemSelect.options[itemSelect.selectedIndex];
         currentStock = parseInt(selectedOption.dataset.stock) || 0;
 
-        // Always enable the form, show alert only for out of stock
+        // Show alert and disable adding if out of stock
         if (currentStock === 0) {
             stockAlert.classList.remove('d-none');
+            itemQuantity.disabled = true;
+            itemQuantity.value = '';
+            itemQuantity.classList.add('bg-light');
+            addItemBtn.disabled = true;
         } else {
             stockAlert.classList.add('d-none');
+            itemQuantity.disabled = false;
+            itemQuantity.value = 1;
+            itemQuantity.removeAttribute('max');
+            itemQuantity.classList.remove('bg-light');
+            addItemBtn.disabled = false;
         }
-
-        itemQuantity.disabled = false;
-        itemQuantity.value = 1;
-        itemQuantity.removeAttribute('max');
-        itemQuantity.classList.remove('bg-light');
-        addItemBtn.disabled = false;
 
         // Enable Sahkan button if form is filled OR cart has items
         validateSahkanButton();

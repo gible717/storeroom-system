@@ -119,15 +119,15 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
     return date('d M Y', strtotime($tarikh_mohon));
 }
 
-// Get dashboard stats
-$jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM PRODUK");
+// Get dashboard stats from barang table
+$jumlahProduk_result = $conn->query("SELECT COUNT(*) as total FROM barang");
 $jumlahProduk = $jumlahProduk_result ? $jumlahProduk_result->fetch_assoc()['total'] : 0;
 
 $tertunda_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE status = 'Baru'");
 $tertunda = $tertunda_result ? $tertunda_result->fetch_assoc()['total'] : 0;
 
 // Calculate low stock items (0-10 units)
-$stokRendah_result = $conn->query("SELECT COUNT(*) as total FROM PRODUK WHERE stok_semasa <= 10");
+$stokRendah_result = $conn->query("SELECT COUNT(*) as total FROM barang WHERE baki_semasa <= 10");
 $stokRendah = $stokRendah_result ? $stokRendah_result->fetch_assoc()['total'] : 0;
 
 // Calculate requests this month
@@ -135,10 +135,10 @@ $pesananBulanIni_result = $conn->query("SELECT COUNT(*) as total FROM permohonan
 $pesananBulanIni = $pesananBulanIni_result ? $pesananBulanIni_result->fetch_assoc()['total'] : 0;
 
 // Get low stock items details (all items with stock <= 10, no limit for modal)
-$low_stock_sql = "SELECT ID_produk, nama_produk, stok_semasa, unit_pengukuran
-                  FROM PRODUK
-                  WHERE stok_semasa <= 10
-                  ORDER BY stok_semasa ASC, nama_produk ASC";
+$low_stock_sql = "SELECT no_kod AS ID_produk, perihal_stok AS nama_produk, baki_semasa AS stok_semasa, unit_pengukuran
+                  FROM barang
+                  WHERE baki_semasa <= 10
+                  ORDER BY baki_semasa ASC, perihal_stok ASC";
 $low_stock_items = $conn->query($low_stock_sql);
 
 // Get recent requests
