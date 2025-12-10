@@ -94,13 +94,11 @@ $months_ms = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
 $selected_month_name = $months_ms[(int)$month - 1] . ' ' . $year;
 ?>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-    <div class="d-flex align-items-center">
-        <a href="admin_reports.php" class="btn btn-light me-3">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <h3 class="mb-0 fw-bold">Laporan Inventori</h3>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="admin_reports.php" class="text-dark" title="Kembali">
+        <i class="bi bi-arrow-left fs-4"></i>
+    </a>
+    <h3 class="mb-0 fw-bold">Senarai Inventori</h3>
     <div class="d-flex gap-2">
         <a href="report_inventory_excel.php?month=<?php echo urlencode($selected_month); ?>&kategori=<?php echo urlencode($selected_kategori); ?>" class="btn btn-success">
             <i class="bi bi-file-earmark-excel me-1"></i><span class="d-none d-sm-inline">Export </span>Excel

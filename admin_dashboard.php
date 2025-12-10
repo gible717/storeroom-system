@@ -169,10 +169,8 @@ $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status,
 $recent_requests = $conn->query($sql_requests);
 ?>
 
-<title>Dashboard Admin - Sistem Pengurusan Stor</title>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">Dashboard Admin</h3>
+<div class="text-center mb-4">
+    <h3 class="mb-0 fw-bold">Dashboard Ringkas Admin</h3>
 </div>
 
 <!-- Stats Cards -->

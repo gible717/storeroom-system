@@ -87,19 +87,20 @@ require 'staff_header.php';
         <?php unset($_SESSION['error_msg']); ?>
     <?php endif; ?>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <a href="staff_dashboard.php" class="text-dark me-3" title="Kembali">
-                <i class="bi bi-arrow-left fs-4"></i>
-            </a>
-            <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
-        </div>
-        <a href="kewps8_form.php?action=new" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-2"></i>Buat Permohonan Baru
-        </a>
-    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header Section: Back Arrow | Title | Buat Permohonan Button -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="staff_dashboard.php" class="text-dark" title="Kembali">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
+                <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
+                <a href="kewps8_form.php?action=new" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-2"></i>Buat Permohonan Baru
+                </a>
+            </div>
 
-        <div class="card content-card">
+            <div class="card content-card">
             <div class="card-body p-4">
                 <div class="row mb-4">
                     <div class="col-md-3">
@@ -229,6 +230,7 @@ require 'staff_header.php';
             </div>
         </div>
     </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

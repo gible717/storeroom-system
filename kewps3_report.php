@@ -1,5 +1,5 @@
 <?php
-$pageTitle = "Laporan KEW.PS-3 - Transaksi Stok";
+$pageTitle = "Laporan KEW.PS-3";
 require 'admin_header.php';
 
 // Get all categories for dropdown filter
@@ -18,18 +18,17 @@ if ($kategori_filter !== 'Semua') {
 ?>
 
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800 fw-bold">
-            <a href="admin_reports.php" class="text-decoration-none text-secondary me-2">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-            Laporan KEW.PS-3 Bahagian B - Transaksi Stok
-        </h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="admin_reports.php" class="text-dark" title="Kembali">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <h1 class="h3 mb-0 text-gray-800 fw-bold">Laporan KEW.PS-3 Bahagian B - Transaksi Stok</h1>
+        <div style="width: 40px;"></div>
     </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Jana Laporan Transaksi Stok</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Jana Laporan</h6>
         </div>
         <div class="card-body">
             <form action="kewps3_print.php" method="GET" id="kewps3Form">

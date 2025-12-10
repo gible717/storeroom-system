@@ -55,20 +55,19 @@ if (!isset($_SESSION['cart'])) {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-        <a href="staff_dashboard.php" class="text-dark me-3" title="Kembali">
-            <i class="bi bi-arrow-left fs-4"></i>
-        </a>
-        <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
-    </div>
-    <button type="button" class="btn btn-primary" id="add_item_ajax_btn">
-        <i class="bi bi-plus-lg me-2"></i>Tambah Item
-    </button>
-</div>
-
 <div class="row justify-content-center">
     <div class="col-lg-8">
+        <!-- Header Section: Back Arrow | Title | Tambah Item Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="staff_dashboard.php" class="text-dark" title="Kembali">
+                <i class="bi bi-arrow-left fs-4"></i>
+            </a>
+            <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
+            <button type="button" class="btn btn-primary" id="add_item_ajax_btn">
+                <i class="bi bi-plus-lg me-2"></i>Tambah Item
+            </button>
+        </div>
+
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4 p-md-5">
 

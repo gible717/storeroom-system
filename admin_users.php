@@ -87,16 +87,16 @@ $users = $stmt->get_result();
 ?>
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Pengurusan Pengguna</h3>
-    <div>
-        <a href="admin_department.php" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-building me-2"></i>Urus Jabatan
-        </a>
-        <a href="user_add.php" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-2"></i>Tambah Pengguna
-        </a>
-    </div>
+<div class="text-center mb-3">
+    <h3 class="mb-0 fw-bold">Senarai Pengguna</h3>
+</div>
+<div class="d-flex justify-content-end mb-4">
+    <a href="admin_department.php" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-building me-2"></i>Urus Jabatan
+    </a>
+    <a href="user_add.php" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Tambah Pengguna
+    </a>
 </div>
 
 <!-- Filter Form -->

@@ -1,7 +1,7 @@
 <?php
 // admin_profile.php - Admin profile page
 
-$pageTitle = "Profil Saya";
+$pageTitle = "Pengurusan Profil";
 require 'admin_header.php';
 
 // Fetch admin data
@@ -85,15 +85,12 @@ function getInitials($name) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
 <!-- Page Header -->
-<div class="mb-4">
-    <div class="text-center mb-3">
-        <h3 class="mb-0 fw-bold">Profil Saya</h3>
-    </div>
-    <div class="text-center">
-        <a href="profile_change_password.php" class="btn btn-outline-secondary">
-            <i class="bi bi-key-fill me-2"></i><span class="d-none d-sm-inline">Tukar </span>Kata Laluan
-        </a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div style="width: 200px;"></div>
+    <h3 class="mb-0 fw-bold">Profil Saya</h3>
+    <a href="profile_change_password.php" class="btn btn-outline-secondary">
+        <i class="bi bi-key-fill me-2"></i><span class="d-none d-sm-inline">Tukar </span>Kata Laluan
+    </a>
 </div>
 
 <!-- Profile Card -->

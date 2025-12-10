@@ -99,12 +99,12 @@ $result = $stmt->get_result();
 
 <div class="container-fluid">
     <!-- Header -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-2">
-        <h1 class="h3 mb-0 text-gray-800">Senarai Produk Inventori</h1>
-        <div>
-            <a href="admin_category.php" class="btn btn-outline-secondary"><i class="bi bi-tags-fill me-1"></i> Urus Kategori</a>
-            <a href="admin_add_product.php" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Tambah Produk</a>
-        </div>
+    <div class="text-center mb-3">
+        <h1 class="h3 mb-0 text-gray-800 fw-bold">Senarai Produk</h1>
+    </div>
+    <div class="d-flex justify-content-end mb-2">
+        <a href="admin_category.php" class="btn btn-outline-secondary me-2"><i class="bi bi-tags-fill me-1"></i> Urus Kategori</a>
+        <a href="admin_add_product.php" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Tambah Produk</a>
     </div>
 
     <!-- Filter Form -->

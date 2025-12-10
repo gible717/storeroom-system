@@ -13,14 +13,11 @@ $products_result = $conn->query($products_sql);
 ?>
 
 <div class="main-content">
-    <div class="d-sm-flex align-items-center mb-4">
-        <a href="admin_dashboard.php" class="btn btn-link nav-link p-0 me-3" title="Kembali">
-        </a>
-        <h1 class="h3 mb-0 text-gray-800 fw-bold">Kemaskini Stok</h1>
-    </div>
-
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-8">
+            <div class="text-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800 fw-bold">Kemaskini Stok</h1>
+            </div>
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-body p-4 p-md-5">
                     <form action="admin_stock_manual_process.php" method="POST">

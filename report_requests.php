@@ -1,7 +1,7 @@
 <?php
 // report_requests.php - Requests report dashboard
 
-$pageTitle = "Laporan Permohonan";
+$pageTitle = "Ringkasan Permohonan";
 require 'admin_header.php';
 
 // Fetch categories for dropdown filter
@@ -148,13 +148,11 @@ $monthly_chart_data = $monthly_data;
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-        <a href="admin_reports.php" class="btn btn-light me-3">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <h3 class="mb-0 fw-bold">Laporan Permohonan</h3>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="admin_reports.php" class="text-dark" title="Kembali">
+        <i class="bi bi-arrow-left fs-4"></i>
+    </a>
+    <h3 class="mb-0 fw-bold">Graf Visual Permohonan</h3>
     <a href="report_requests_view.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=<?php echo urlencode($status_filter); ?>&kategori=<?php echo urlencode($kategori_filter); ?>" class="btn btn-success" target="_blank">
         <i class="bi bi-printer me-2"></i>Cetak Laporan
     </a>
@@ -202,7 +200,7 @@ $monthly_chart_data = $monthly_data;
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-funnel-fill"></i>
+                        Tapis
                     </button>
                 </div>
             </div>

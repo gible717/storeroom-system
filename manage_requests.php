@@ -31,8 +31,10 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
 ?>
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0 fw-bold">Pengurusan Permohonan</h3>
+<div class="text-center mb-3">
+    <h3 class="mb-0 fw-bold">Senarai Permohonan</h3>
+</div>
+<div class="d-flex justify-content-end mb-4">
     <a href="kewps8_form.php" class="btn btn-primary">
         <i class="bi bi-plus-circle me-2"></i>Buat Permohonan
     </a>

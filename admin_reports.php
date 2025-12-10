@@ -1,7 +1,7 @@
 <?php
 // admin_reports.php - Reports dashboard with charts & quick filters
 
-$pageTitle = "Laporan Sistem";
+$pageTitle = "Dokumentasi Laporan";
 require 'admin_header.php';
 
 // Filter logic - week/month/year/custom
@@ -145,7 +145,9 @@ while ($row = $top_items_result->fetch_assoc()) {
 .custom-date-btn:hover { border-color: #9ca3af; background: #f9fafb; }
 </style>
 
-<h3 class="mb-4 fw-bold"></i>Dashboard & Laporan Sistem</h3>
+<div class="text-center mb-4">
+    <h3 class="mb-0 fw-bold">Dashboard Ringkas</h3>
+</div>
 
 <!-- Summary Section with Filters -->
 <div class="mb-4">
