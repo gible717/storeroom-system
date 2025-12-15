@@ -104,6 +104,40 @@
             padding: 0.75rem 1.5rem;
             min-width: 250px;
         }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 3;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 767.98px) {
+            .welcome-content h1 {
+                font-size: 1.75rem;
+            }
+            .footer {
+                font-size: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -134,6 +168,15 @@
             </div>
 
         </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p class="mb-0">
+                    &copy; <?php echo date('Y'); ?> Majlis Perbandaran Kangar.
+                </p>
+            </div>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

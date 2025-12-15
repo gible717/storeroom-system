@@ -115,7 +115,15 @@ if (isset($_SESSION['ID_staf'])) {
                 </div>
 
                 <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($_GET['error']); ?></div>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($_GET['error']); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i><?php echo htmlspecialchars($_GET['success']); ?>
+                    </div>
                 <?php endif; ?>
 
                 <form action="login_process.php" method="POST">
@@ -135,7 +143,7 @@ if (isset($_SESSION['ID_staf'])) {
                             <input class="form-check-input" type="checkbox" value="" id="rememberMe">
                             <label class="form-check-label" for="rememberMe">Ingat Saya</label>
                         </div>
-                        <a href="#" class="text-link">Lupa Kata Laluan?</a>
+                        <a href="forgot_password.php" class="text-link">Lupa Kata Laluan?</a>
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">Log Masuk</button>
