@@ -1,7 +1,7 @@
 <?php
 // admin_stock_manual.php - Manual stock update form
 
-$pageTitle = "Kemaskini Stok";
+$pageTitle = "Pengemaskinian Stok";
 require 'admin_header.php';
 
 // Get categories for dropdown

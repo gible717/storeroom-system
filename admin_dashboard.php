@@ -181,7 +181,7 @@ $recent_requests = $conn->query($sql_requests);
                 <div class="card-body d-flex align-items-center">
                     <i class="bi bi-box-seam-fill fs-1 text-primary opacity-50 me-4"></i>
                     <div class="text-center flex-grow-1">
-                        <h5 class="card-title text-muted">Jumlah Produk</h5>
+                        <h5 class="card-title text-muted fw-bold">Jumlah Produk</h5>
                         <p class="card-text fs-2 fw-bold mb-0"><?php echo $jumlahProduk; ?></p>
                         <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
                     </div>
@@ -195,7 +195,7 @@ $recent_requests = $conn->query($sql_requests);
                 <div class="card-body d-flex align-items-center">
                     <i class="bi bi-clock-history fs-1 text-warning opacity-50 me-4"></i>
                     <div class="text-center flex-grow-1">
-                        <h5 class="card-title text-muted">Permohonan Tertunda</h5>
+                        <h5 class="card-title text-muted fw-bold">Permohonan Tertunda</h5>
                         <p class="card-text fs-2 fw-bold mb-0" id="pendingRequestNumber" data-pending-count="<?php echo $tertunda; ?>"><?php echo $tertunda; ?></p>
                         <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
                     </div>
@@ -208,7 +208,7 @@ $recent_requests = $conn->query($sql_requests);
             <div class="card-body d-flex align-items-center">
                 <i class="bi bi-exclamation-triangle-fill fs-1 text-danger opacity-75 me-4"></i>
                 <div class="text-center flex-grow-1">
-                    <h5 class="card-title text-muted">Pantau Stok</h5>
+                    <h5 class="card-title text-muted fw-bold">Pantau Stok</h5>
                     <p class="card-text fs-2 fw-bold mb-0" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>"><?php echo $stokRendah; ?></p>
                     <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
                 </div>

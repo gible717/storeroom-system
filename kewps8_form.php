@@ -1,8 +1,22 @@
 <?php
 // kewps8_form.php - KEW.PS-8 stock request form
+session_start();
+require_once 'db.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['ID_staf'])) {
+    header('Location: login.php');
+    exit;
+}
 
 $pageTitle = "Borang Permohonan Stok";
-require 'staff_header.php';
+
+// Load appropriate header based on user role
+if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
+    require 'admin_header.php';
+} else {
+    require 'staff_header.php';
+}
 
 // Get logged-in staff details
 $staff_id = $_SESSION['ID_staf'];
@@ -17,7 +31,7 @@ $stmt->close();
 
 $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $user['jawatan'];
-$nama_jabatan = $user['nama_jabatan'];
+$nama_jabatan = $user['nama_jabatan'] ?? 'Tiada Jabatan';
 
 // Get category filter
 $selected_kategori = $_GET['kategori'] ?? '';
@@ -53,13 +67,16 @@ if (!isset($_GET['action'])) {
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
+
+// Set appropriate back link based on user role
+$back_link = (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) ? 'manage_requests.php' : 'staff_dashboard.php';
 ?>
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <!-- Header Section: Back Arrow | Title | Tambah Item Button -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="staff_dashboard.php" class="text-dark" title="Kembali">
+            <a href="<?php echo $back_link; ?>" class="text-dark" title="Kembali">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
             <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
@@ -143,7 +160,7 @@ if (!isset($_SESSION['cart'])) {
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-end">
-                        <a href="staff_dashboard.php" class="btn btn-light btn-lg me-3">
+                        <a href="<?php echo $back_link; ?>" class="btn btn-light btn-lg me-3">
                             Batal
                         </a>
                         <button type="button" class="btn btn-success btn-lg" id="sahkan_btn" data-bs-toggle="modal" data-bs-target="#confirmModal" disabled>
@@ -551,9 +568,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     confirmButtonText: 'OK'
                 }).then((result) => {
-                    // 5. Redirect to request_list.php
+                    // 5. Redirect based on user role
                     if (result.isConfirmed) {
-                        window.location.href = 'request_list.php';
+                        window.location.href = '<?php echo $back_link; ?>';
                     }
                 });
 
@@ -574,6 +591,11 @@ document.addEventListener('DOMContentLoaded', function() {
 }); // End of DOMContentLoaded
 </script>
 
-<?php 
-require 'staff_footer.php'; 
+<?php
+// Load appropriate footer based on user role
+if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
+    require 'admin_footer.php';
+} else {
+    require 'staff_footer.php';
+}
 ?>

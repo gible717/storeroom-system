@@ -18,6 +18,7 @@ $jabatan_result = $conn->query($sql);
     <style>
         body {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
@@ -99,16 +100,28 @@ $jabatan_result = $conn->query($sql);
 </head>
 <body>
 
+    <!-- Back Arrow + Title (outside container, same horizontal line) -->
+    <div style="max-width: 600px; width: 100%; margin: 0 auto; margin-bottom: 1.5rem; position: relative;">
+        <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%);">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <h2 class="h4 fw-bold mb-0 text-center">Daftar Akaun Baru</h2>
+    </div>
+
     <div class="card register-card">
         <div class="card-body">
-            
+
             <div class="form-header">
                                 <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
                 <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
             </div>
 
-            <div class="text-center mb-4">
-                <h2 class="h4 fw-bold mb-2">Daftar Akaun Baru</h2>
+            <!-- Divider Line -->
+            <div class="d-flex justify-content-center my-3">
+                <hr style="width: 150px; border-top: 1px solid #dee2e6; margin: 0;">
+            </div>
+
+            <div class="text-center mb-3">
                 <p class="text-muted">Sila lengkapkan maklumat di bawah.</p>
             </div>
 

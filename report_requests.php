@@ -276,7 +276,7 @@ $monthly_chart_data = $monthly_data;
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold">Pecahan Status</h6>
+                <h6 class="card-title fw-bold">Pecahan Status Permohonan</h6>
                 <div style="height: 350px;">
                     <canvas id="statusChart"></canvas>
                 </div>

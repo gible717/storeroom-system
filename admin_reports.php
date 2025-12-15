@@ -8,6 +8,11 @@ require 'admin_header.php';
 $filter_preset = $_GET['preset'] ?? 'month';
 $custom_start = $_GET['start'] ?? null;
 $custom_end = $_GET['end'] ?? null;
+$kategori_filter = $_GET['kategori'] ?? 'Semua';
+
+// Get all categories for dropdown
+$kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
+$kategori_result = $conn->query($kategori_sql);
 
 // Calculate date range based on preset
 switch ($filter_preset) {
@@ -97,15 +102,25 @@ while ($row = $status_chart_result->fetch_assoc()) {
     $status_data[] = $row['jumlah'];
 }
 
-// Get top 5 requested items
+// Get top 5 requested items (with category filter)
+$kategori_condition = "";
+$top_items_params = [$current_month_start, $current_month_end];
+$top_items_types = "ss";
+
+if ($kategori_filter !== 'Semua') {
+    $kategori_condition = " AND b.kategori = ?";
+    $top_items_params[] = $kategori_filter;
+    $top_items_types .= "s";
+}
+
 $sql_top_items = "SELECT b.perihal_stok, SUM(pb.kuantiti_mohon) AS total_diminta
     FROM permohonan_barang pb
     JOIN barang b ON pb.no_kod = b.no_kod
     JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
-    WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ?
+    WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ?" . $kategori_condition . "
     GROUP BY b.perihal_stok ORDER BY total_diminta DESC LIMIT 5";
 $stmt_top_items = $conn->prepare($sql_top_items);
-$stmt_top_items->bind_param("ss", $current_month_start, $current_month_end);
+$stmt_top_items->bind_param($top_items_types, ...$top_items_params);
 $stmt_top_items->execute();
 $top_items_result = $stmt_top_items->get_result();
 
@@ -143,6 +158,17 @@ while ($row = $top_items_result->fetch_assoc()) {
 .filter-tab.active { background: #fff; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .custom-date-btn { padding: 0.5rem 1.25rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background: #fff; color: #374151; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
 .custom-date-btn:hover { border-color: #9ca3af; background: #f9fafb; }
+
+/* Category filter select */
+.kategori-filter-select { width: 200px; }
+
+/* Mobile responsiveness for filters */
+@media (max-width: 767.98px) {
+    .kategori-filter-select { width: 100%; }
+    .filter-tabs { flex-wrap: wrap; width: 100%; }
+    .filter-tab { font-size: 0.8rem; padding: 0.4rem 0.75rem; }
+    .custom-date-btn { font-size: 0.8rem; padding: 0.4rem 0.75rem; width: 100%; }
+}
 </style>
 
 <div class="text-center mb-4">
@@ -151,18 +177,24 @@ while ($row = $top_items_result->fetch_assoc()) {
 
 <!-- Summary Section with Filters -->
 <div class="mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center mb-3 gap-3">
         <h5 class="fw-bold mb-0">
             Ringkasan
             <small class="text-muted fs-6">(<?php echo getDisplayLabel($filter_preset, $current_month_start, $current_month_end); ?>)</small>
         </h5>
-        <div class="d-flex align-items-center gap-3">
-            <!-- Quick filter tabs -->
-            <div class="filter-tabs">
-                <a href="?preset=week" class="filter-tab <?php echo $filter_preset === 'week' ? 'active' : ''; ?>">Minggu Ini</a>
-                <a href="?preset=month" class="filter-tab <?php echo $filter_preset === 'month' ? 'active' : ''; ?>">Bulan Ini</a>
-                <a href="?preset=year" class="filter-tab <?php echo $filter_preset === 'year' ? 'active' : ''; ?>">Tahun Ini</a>
-            </div>
+        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-3">
+            <!-- Category Filter Dropdown -->
+            <select class="form-select kategori-filter-select" onchange="window.location.href='?preset=<?php echo $filter_preset; ?>&kategori=' + this.value<?php echo $filter_preset === 'custom' && $custom_start && $custom_end ? " + '&start=<?php echo $custom_start; ?>&end=<?php echo $custom_end; ?>'" : ''; ?>">
+                <option value="Semua" <?php echo $kategori_filter === 'Semua' ? 'selected' : ''; ?>>Semua Kategori</option>
+                <?php
+                if ($kategori_result && $kategori_result->num_rows > 0) {
+                    while ($kategori = $kategori_result->fetch_assoc()) {
+                        $selected = ($kategori_filter === $kategori['kategori']) ? 'selected' : '';
+                        echo '<option value="' . htmlspecialchars($kategori['kategori']) . '" ' . $selected . '>' . htmlspecialchars($kategori['kategori']) . '</option>';
+                    }
+                }
+                ?>
+            </select>
             <button type="button" class="custom-date-btn" data-bs-toggle="modal" data-bs-target="#customDateModal">
                 <i class="bi bi-calendar-range me-2"></i>Pilih Tempoh...
             </button>
@@ -174,25 +206,25 @@ while ($row = $top_items_result->fetch_assoc()) {
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
-                <div class="stat-card-info"><h6>Jumlah Permohonan</h6><h4><?php echo $cards['jumlah_permohonan']; ?></h4></div>
+                <div class="stat-card-info fw-bold"><h6>Jumlah Permohonan</h6><h4><?php echo $cards['jumlah_permohonan']; ?></h4></div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-icon bg-success-light"><i class="bi bi-check-circle"></i></div>
-                <div class="stat-card-info"><h6>Diluluskan</h6><h4><?php echo $cards['jumlah_lulus']; ?></h4></div>
+                <div class="stat-card-info fw-bold"><h6>Diluluskan</h6><h4><?php echo $cards['jumlah_lulus']; ?></h4></div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-icon bg-danger-light"><i class="bi bi-x-circle"></i></div>
-                <div class="stat-card-info"><h6>Ditolak</h6><h4><?php echo $cards['jumlah_tolak']; ?></h4></div>
+                <div class="stat-card-info fw-bold"><h6>Ditolak</h6><h4><?php echo $cards['jumlah_tolak']; ?></h4></div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <div class="stat-card-icon bg-warning-light"><i class="bi bi-hourglass-split"></i></div>
-                <div class="stat-card-info"><h6>Belum Diproses</h6><h4><?php echo $cards['jumlah_pending']; ?></h4></div>
+                <div class="stat-card-info fw-bold"><h6>Belum Diproses</h6><h4><?php echo $cards['jumlah_pending']; ?></h4></div>
             </div>
         </div>
     </div>
@@ -304,12 +336,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Top items bar chart
+    // Top items bar chart with different colors for each bar
     const topItemsCtx = document.getElementById('topItemsChart');
     if (topItemsCtx) {
+        const topItemsColors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']; // Different colors for each item
         new Chart(topItemsCtx.getContext('2d'), {
             type: 'bar',
-            data: { labels: topItemsLabels, datasets: [{ label: 'Jumlah Diminta', data: topItemsData, backgroundColor: '#4f46e5' }] },
+            data: { labels: topItemsLabels, datasets: [{ label: 'Jumlah Diminta', data: topItemsData, backgroundColor: topItemsColors }] },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,

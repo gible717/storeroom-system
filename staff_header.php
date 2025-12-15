@@ -101,7 +101,7 @@ $header_user_initials = substr($initials, 0, 2);
         }
         .top-navbar {
             background-color: #ffffff;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #e5e7eb;
             padding: 0.75rem 2rem;
             display: flex;
             justify-content: space-between;

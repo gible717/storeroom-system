@@ -27,6 +27,13 @@ if (!$permohonan) {
     exit;
 }
 
+// Check if admin is trying to approve their own request
+if ($permohonan['ID_pemohon'] == $_SESSION['ID_staf']) {
+    $_SESSION['error_msg'] = "Ralat: Anda tidak boleh meluluskan permohonan anda sendiri.";
+    header('Location: admin_request_list.php');
+    exit;
+}
+
 // Fetch request items data
 $stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran, b.baki_semasa
                             FROM permohonan_barang pb

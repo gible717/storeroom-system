@@ -43,7 +43,7 @@ if (!$user) {
 
 $nama_pemohon = $user['nama'];
 $jawatan_pemohon = $jawatan_pemohon_session ?? ($user['jawatan'] ?? '');
-$id_jabatan = (int)$user['ID_jabatan'];
+$id_jabatan = !empty($user['ID_jabatan']) ? (int)$user['ID_jabatan'] : null;
 $tarikh_mohon = date('Y-m-d'); // Current date
 
 // --- 3. Database Transaction ---
@@ -51,21 +51,35 @@ $conn->begin_transaction();
 
 try {
     // --- 4. Insert into `permohonan` (Header Table) ---
-    $sql_header = "INSERT INTO permohonan 
-                (tarikh_mohon, status, ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan, catatan)
-                VALUES (?, 'Baru', ?, ?, ?, ?, ?)";
-    $stmt_header = $conn->prepare($sql_header);
-    
-    // Bind parameters (s = string, i = integer)
-    $stmt_header->bind_param("ssssis", 
-        $tarikh_mohon, 
-        $staff_id, 
-        $nama_pemohon, 
-        $jawatan_pemohon, 
-        $id_jabatan, 
-        $catatan
-    );
-    
+    // Handle NULL ID_jabatan for admin users who may not have a department
+    if ($id_jabatan !== null) {
+        $sql_header = "INSERT INTO permohonan
+                    (tarikh_mohon, status, ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan, catatan)
+                    VALUES (?, 'Baru', ?, ?, ?, ?, ?)";
+        $stmt_header = $conn->prepare($sql_header);
+        $stmt_header->bind_param("ssssis",
+            $tarikh_mohon,
+            $staff_id,
+            $nama_pemohon,
+            $jawatan_pemohon,
+            $id_jabatan,
+            $catatan
+        );
+    } else {
+        // If no department, insert NULL for ID_jabatan
+        $sql_header = "INSERT INTO permohonan
+                    (tarikh_mohon, status, ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan, catatan)
+                    VALUES (?, 'Baru', ?, ?, ?, NULL, ?)";
+        $stmt_header = $conn->prepare($sql_header);
+        $stmt_header->bind_param("sssss",
+            $tarikh_mohon,
+            $staff_id,
+            $nama_pemohon,
+            $jawatan_pemohon,
+            $catatan
+        );
+    }
+
     $stmt_header->execute();
 
     // Get the ID of the new request we just created
@@ -92,14 +106,28 @@ try {
     // --- 6. If everything is OK, commit the transaction ---
     $conn->commit();
 
-    // --- 7. Clear the cart from the session ---
+    // --- 7. Send Telegram notification to admins ---
+    require_once __DIR__ . '/telegram_helper.php';
+
+    $item_count = count($items);
+
+    // Send notification (non-blocking - won't affect user experience if it fails)
+    send_new_request_notification(
+        $id_permohonan_baru,
+        $nama_pemohon,
+        $jawatan_pemohon,
+        $item_count,
+        $catatan ?? ''
+    );
+
+    // --- 8. Clear the cart from the session ---
     unset($_SESSION['cart']);
     unset($_SESSION['request_catatan']);
-    unset($_SESSION['request_jawatan']); // <-- ADD THIS
+    unset($_SESSION['request_jawatan']);
 
-    // --- 8. Send the "Success" JSON response ---
+    // --- 9. Send the "Success" JSON response ---
     echo json_encode([
-        'success' => true, 
+        'success' => true,
         'message' => "Permohonan anda telah berjaya dihantar."
     ]);
     exit;

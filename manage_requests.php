@@ -36,7 +36,7 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
 </div>
 <div class="d-flex justify-content-end mb-4">
     <a href="kewps8_form.php" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-2"></i>Buat Permohonan
+        <i class="bi bi-plus-lg me-2"></i>Buat Permohonan
     </a>
 </div>
 
@@ -82,7 +82,7 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                         <th style="width: 15%;">Nama Staf</th>
                         <th style="width: 30%;">Senarai Item</th>
                         <th style="width: 10%;" class="text-center">Bil. Item</th>
-                        <th style="width: 10%;">Tarikh</th>
+                        <th style="width: 10%;">Tarikh Mohon</th>
                         <th style="width: 10%;" class="text-center">Status</th>
                         <th style="width: 15%;" class="text-center">Tindakan</th>
                     </tr>

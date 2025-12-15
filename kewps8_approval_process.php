@@ -22,6 +22,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama_pelulus = $_SESSION['nama'];
     $tarikh_lulus = date('Y-m-d');
 
+    // Check if admin is trying to approve their own request
+    $stmt_check = $conn->prepare("SELECT ID_pemohon FROM permohonan WHERE ID_permohonan = ?");
+    $stmt_check->bind_param("i", $id_permohonan);
+    $stmt_check->execute();
+    $check_result = $stmt_check->get_result()->fetch_assoc();
+    $stmt_check->close();
+
+    if ($check_result && $check_result['ID_pemohon'] == $id_pelulus) {
+        $_SESSION['error_msg'] = "Ralat: Anda tidak boleh meluluskan permohonan anda sendiri.";
+        header('Location: admin_request_list.php');
+        exit;
+    }
+
     // We must fetch the admin's 'jawatan' from the DB
     $stmt_admin = $conn->prepare("SELECT jawatan FROM staf WHERE ID_staf = ?");
     $stmt_admin->bind_param("s", $id_pelulus);

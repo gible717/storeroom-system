@@ -1,4 +1,3 @@
-// report_requests_view.php - Detailed requests report view
 <?php
 $pageTitle = "Laporan Permohonan";
 require 'admin_header.php';
@@ -37,9 +36,15 @@ if ($kategori_filter !== 'Semua') {
 }
 
 // --- Main SQL Query ---
-$sql = "SELECT DISTINCT
-            p.*,
-            s.nama AS nama_staf
+$sql = "SELECT
+            p.ID_permohonan,
+            p.tarikh_mohon,
+            p.status,
+            p.tarikh_lulus,
+            p.catatan,
+            s.nama AS nama_staf,
+            GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS nama_produk,
+            SUM(pb.kuantiti_mohon) AS jumlah_diminta
         FROM
             permohonan p
         JOIN
@@ -49,6 +54,7 @@ $sql = "SELECT DISTINCT
         LEFT JOIN
             barang b ON pb.no_kod = b.no_kod
         $where_clause
+        GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, p.tarikh_lulus, p.catatan, s.nama
         ORDER BY
             p.tarikh_mohon DESC";
 
@@ -101,32 +107,32 @@ $requests = $stmt->get_result();
                         <th class="text-center">Kuantiti</th>
                         <th>Catatan</th>
                         <th>Status</th>
-                        <th>Tarikh Selesai</th>
+                        <th>Tarikh Lulus</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($requests && $requests->num_rows > 0): ?>
                         <?php while ($row = $requests->fetch_assoc()): ?>
                             <tr>
-                                <td>REQ-<?php echo str_pad($row['ID_permohonan'], 4, '0', STR_PAD_LEFT); ?></td>
+                                <td>#<?php echo $row['ID_permohonan']; ?></td>
                                 <td><?php echo format_malay_date($row['tarikh_mohon']); ?></td>
                                 <td><?php echo htmlspecialchars($row['nama_staf']); ?></td>
-                                <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
-                                <td class="text-center"><?php echo $row['jumlah_diminta']; ?></td>
-                                <td><?php echo htmlspecialchars($row['catatan']); ?></td>
+                                <td><?php echo htmlspecialchars($row['nama_produk'] ?? '-'); ?></td>
+                                <td class="text-center"><?php echo $row['jumlah_diminta'] ?? 0; ?></td>
+                                <td><?php echo htmlspecialchars($row['catatan'] ?? '-'); ?></td>
                                 <td>
                                     <?php
                                         $status = $row['status'];
                                         $badge_class = 'bg-secondary';
                                         if ($status == 'Diluluskan') $badge_class = 'bg-success';
-                                        if ($status == 'Belum Diproses') $badge_class = 'bg-warning text-dark';
+                                        if ($status == 'Baru') $badge_class = 'bg-warning text-dark';
                                         if ($status == 'Ditolak') $badge_class = 'bg-danger';
-                                        if ($status == 'Selesai') $badge_class = 'bg-info';
+                                        if ($status == 'Diterima') $badge_class = 'bg-info';
                                     ?>
                                     <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
                                 </td>
                                 <td>
-                                    <?php echo $row['tarikh_selesai'] ? format_malay_date($row['tarikh_selesai']) : '-'; ?>
+                                    <?php echo !empty($row['tarikh_lulus']) ? format_malay_date($row['tarikh_lulus']) : '-'; ?>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

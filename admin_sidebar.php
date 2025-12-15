@@ -11,7 +11,7 @@
         <li class="sidebar-item">
             <a href="admin_dashboard.php" class="sidebar-link <?php if($current_page == 'admin_dashboard.php') echo 'active'; ?>">
                 <i class="bi bi-house-door-fill me-3"></i>
-                <span>Admin Dashboard</span>
+                <span>Dashboard Admin</span>
             </a>
         </li>
 

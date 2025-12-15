@@ -85,24 +85,45 @@ function getInitials($name) {
     #profilePictureInput {
         display: none;
     }
+
+    /* Mobile responsiveness for header */
+    @media (max-width: 767.98px) {
+        .staff-profile-header {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 1rem;
+        }
+        .staff-profile-header .invisible-spacer {
+            display: none;
+        }
+        .staff-profile-header h3 {
+            text-align: center;
+        }
+    }
 </style>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
+<!-- Header Section: Back Arrow | Title | Change Password Button -->
+<div class="d-flex align-items-center mb-4 px-3">
+    <div class="row justify-content-center flex-grow-1 g-0">
+        <div class="col-lg-6 col-md-8">
+            <div class="d-flex align-items-center">
+                <a href="staff_dashboard.php" class="text-dark" title="Kembali">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
+                <h3 class="mb-0 fw-bold flex-grow-1 text-center">Profil Saya</h3>
+            </div>
+        </div>
+    </div>
+    <a href="profile_change_password.php" class="btn btn-outline-secondary ms-3">
+        <i class="bi bi-key-fill me-2"></i><span class="d-none d-sm-inline">Tukar </span>Kata Laluan
+    </a>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
-        <!-- Header Section: Back Arrow | Title | Change Password Button -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="staff_dashboard.php" class="text-dark" title="Kembali">
-                <i class="bi bi-arrow-left fs-4"></i>
-            </a>
-            <h3 class="mb-0 fw-bold">Profil Saya</h3>
-            <a href="profile_change_password.php" class="btn btn-outline-secondary">
-                <i class="bi bi-key-fill me-2"></i><span class="d-none d-sm-inline">Tukar </span>Kata Laluan
-            </a>
-        </div>
-
         <!-- Profile Card -->
         <div class="card shadow-sm border-0 profile-card" style="border-radius: 1rem;">
     <div class="card-body p-4 p-md-5">
