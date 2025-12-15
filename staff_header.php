@@ -222,6 +222,17 @@ $header_user_initials = substr($initials, 0, 2);
             top: 10px;
         }
 
+        /* Keyboard Navigation - Better focus indicators (only shows when using keyboard) */
+        *:focus-visible {
+            outline: 3px solid #0d6efd !important;
+            outline-offset: 2px !important;
+        }
+
+        /* Remove focus outline for mouse clicks (keeps it for keyboard) */
+        *:focus:not(:focus-visible) {
+            outline: none;
+        }
+
         /* Footer styling */
         .main-content {
             flex: 1;

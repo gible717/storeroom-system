@@ -127,7 +127,7 @@ if (isset($_SESSION['ID_staf'])) {
                         <label for="katalaluan" class="form-label">Kata Laluan</label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="katalaluan" name="katalaluan" placeholder="Masukkan kata laluan" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"><i class="bi bi-eye-slash"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tunjuk atau sembunyikan kata laluan"><i class="bi bi-eye-slash"></i></button>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-4">

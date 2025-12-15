@@ -161,7 +161,7 @@ $jabatan_result = $conn->query($sql);
                 <div class="mb-3"> <label for="kata_laluan" class="form-label">Kata Laluan <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="kata_laluan" name="kata_laluan" required>
-                        <span class="input-group-text" id="togglePassword1" style="cursor: pointer;">
+                        <span class="input-group-text" id="togglePassword1" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk atau sembunyikan kata laluan">
                             <i class="bi bi-eye-slash-fill" id="eyeIcon1"></i>
                         </span>
                     </div>
@@ -169,7 +169,7 @@ $jabatan_result = $conn->query($sql);
                 <div class="mb-3"> <label for="sahkan_kata_laluan" class="form-label">Sahkan Kata Laluan <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="sahkan_kata_laluan" name="sahkan_kata_laluan" required>
-                        <span class="input-group-text" id="togglePassword2" style="cursor: pointer;">
+                        <span class="input-group-text" id="togglePassword2" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk atau sembunyikan kata laluan pengesahan">
                             <i class="bi bi-eye-slash-fill" id="eyeIcon2"></i>
                         </span>
                     </div>
