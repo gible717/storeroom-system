@@ -4,86 +4,16 @@
 $pageTitle = "Pengurusan Pengguna";
 require 'admin_header.php';
 
-// Get filter and search params
-$filter_peranan = $_GET['peranan'] ?? 'Semua';
-$search_query = $_GET['search'] ?? '';
-
-// Build SQL query
+// Main query - fetch ALL users (no pagination limit for client-side filtering)
 $sql = "SELECT staf.*, jabatan.nama_jabatan
         FROM staf
-        LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan";
-$params = [];
-$types = "";
-$where_clauses = [];
-
-// Filter by role
-if ($filter_peranan !== 'Semua') {
-    $where_clauses[] = "peranan = ?";
-    $params[] = $filter_peranan;
-    $types .= "s";
-}
-
-// Search filter (by ID Staf or Nama)
-if (!empty($search_query)) {
-    $where_clauses[] = "(staf.ID_staf LIKE ? OR staf.nama LIKE ?)";
-    $search_term = "%" . $search_query . "%";
-    $params[] = $search_term;
-    $params[] = $search_term;
-    $types .= "ss";
-}
-
-// Add WHERE clause
-if (!empty($where_clauses)) {
-    $sql .= " WHERE " . implode(" AND ", $where_clauses);
-}
-
-// Pagination setup
-$limit = 7;
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-if ($page < 1) $page = 1;
-$offset = ($page - 1) * $limit;
-
-// Get total count for pagination
-$count_sql = "SELECT COUNT(staf.ID_staf) AS total
-            FROM staf
-            LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan";
-if (!empty($where_clauses)) {
-    $count_sql .= " WHERE " . implode(" AND ", $where_clauses);
-}
-
-$count_stmt = $conn->prepare($count_sql);
-if ($count_stmt === false) { die("Error preparing count query: " . $conn->error); }
-if (!empty($params)) {
-    $count_stmt->bind_param($types, ...$params);
-}
-$count_stmt->execute();
-$count_result = $count_stmt->get_result();
-$total_rows = $count_result->fetch_assoc()['total'];
-$total_pages = ceil($total_rows / $limit);
-$count_stmt->close();
-
-// Build pagination URL
-$query_params = $_GET;
-unset($query_params['page']);
-$base_url = http_build_query($query_params);
-if (!empty($base_url)) {
-    $base_url = 'admin_users.php?' . $base_url . '&';
-} else {
-    $base_url = 'admin_users.php?';
-}
-
-// Main query with pagination
-$sql .= " ORDER BY staf.ID_staf ASC LIMIT ? OFFSET ?";
-$types .= 'ii';
-$params[] = $limit;
-$params[] = $offset;
+        LEFT JOIN jabatan ON staf.ID_jabatan = jabatan.ID_jabatan
+        ORDER BY staf.ID_staf ASC";
 
 $stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
 $stmt->execute();
 $users = $stmt->get_result();
+$total_rows = $users->num_rows;
 ?>
 
 <!-- Page Header -->
@@ -100,27 +30,26 @@ $users = $stmt->get_result();
 </div>
 
 <!-- Filter Form -->
-<form method="GET" id="filterForm" class="mb-4">
+<div class="mb-4">
     <div class="row g-3 justify-content-between">
         <div class="col-md-auto">
-            <select name="peranan" class="form-select" onchange="this.form.submit()">
-                <option value="Semua" <?php if($filter_peranan == 'Semua') echo 'selected'; ?>>Semua Peranan</option>
-                <option value="Admin" <?php if($filter_peranan == 'Admin') echo 'selected'; ?>>Admin</option>
-                <option value="Staf" <?php if($filter_peranan == 'Staf') echo 'selected'; ?>>Staf</option>
+            <select id="perananFilter" class="form-select">
+                <option value="Semua">Semua Peranan</option>
+                <option value="Admin">Admin</option>
+                <option value="Staf">Staf</option>
             </select>
         </div>
         <div class="col-12 col-md-3">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0" style="border-radius: 0.375rem 0 0 0.375rem;">
+                <span class="input-group-text bg-light border-0">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" name="search" class="form-control bg-white border-start-0"
-                    placeholder="Cari Pengguna..." value="<?php echo htmlspecialchars($search_query); ?>"
-                    style="border-radius: 0 0.375rem 0 0.375rem;">
+                <input type="text" id="searchInput" class="form-control bg-light border-0"
+                    placeholder="Cari ID Staf, Nama, Emel...">
             </div>
         </div>
     </div>
-</form>
+</div>
 
 <!-- Users Table -->
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
@@ -141,7 +70,7 @@ $users = $stmt->get_result();
                 <tbody>
                     <?php if ($users && $users->num_rows > 0): ?>
                         <?php
-                        $bil = $offset + 1; // Start numbering from offset + 1
+                        $bil = 1; // Start numbering from 1
                         while ($user = $users->fetch_assoc()):
                         ?>
                             <tr>
@@ -194,40 +123,134 @@ $users = $stmt->get_result();
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <?php
-            $start_entry = ($total_rows > 0) ? $offset + 1 : 0;
-            $end_entry = $offset + $users->num_rows;
-            ?>
-            <small class="text-muted">Showing <?php echo $start_entry; ?> to <?php echo $end_entry; ?> of <?php echo $total_rows; ?> entries</small>
-
-            <nav aria-label="User pagination">
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
-                        <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page - 1; ?>" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-
-                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                        <li class="page-item <?php if($page == $i) echo 'active'; ?>">
-                            <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $i; ?>">
-                                <?php echo $i; ?>
-                            </a>
-                        </li>
-                    <?php endfor; ?>
-
-                    <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
-                        <a class="page-link" href="<?php echo $base_url; ?>page=<?php echo $page + 1; ?>" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+        <!-- Info Footer -->
+        <div class="card-footer">
+            <small class="text-muted">Showing <?php echo $total_rows; ?> of <?php echo $total_rows; ?> entries</small>
         </div>
     </div>
 </div>
+
+<script>
+// Real-time search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const perananFilter = document.getElementById('perananFilter');
+    const tableBody = document.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    // Highlight search text
+    function highlightText(cell, searchText) {
+        if (!cell) return;
+
+        const originalText = cell.textContent;
+
+        // Remove existing highlights
+        cell.innerHTML = originalText;
+
+        // Add new highlights if search text exists
+        if (searchText && searchText.length > 0) {
+            const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const regex = new RegExp(`(${safeText})`, 'gi');
+            const highlightedText = originalText.replace(regex, '<mark style="background-color: yellow; padding: 0;">$1</mark>');
+            cell.innerHTML = highlightedText;
+        }
+    }
+
+    function filterTable() {
+        const searchText = searchInput.value.toLowerCase().trim();
+        const perananText = perananFilter.value;
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            // Skip the "no data" row
+            if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) {
+                row.style.display = 'none';
+                return;
+            }
+
+            // Get cell data
+            const bilCell = row.cells[0]; // Bil. column
+            const idStafCell = row.cells[1];
+            const namaCell = row.cells[2];
+            const emelCell = row.cells[3];
+            const jabatanCell = row.cells[4];
+            const perananBadge = row.cells[5].querySelector('.badge');
+
+            if (!idStafCell || !namaCell || !emelCell) return;
+
+            const idStaf = idStafCell.textContent.toLowerCase();
+            const nama = namaCell.textContent.toLowerCase();
+            const emel = emelCell.textContent.toLowerCase();
+            const jabatan = jabatanCell.textContent.toLowerCase();
+            const peranan = perananBadge ? perananBadge.textContent : '';
+
+            // Check search match
+            const matchesSearch = searchText === '' ||
+                                idStaf.includes(searchText) ||
+                                nama.includes(searchText) ||
+                                emel.includes(searchText) ||
+                                jabatan.includes(searchText);
+
+            // Check peranan filter
+            const matchesPeranan = perananText === 'Semua' || peranan === perananText;
+
+            // Show/hide row
+            if (matchesSearch && matchesPeranan) {
+                row.style.display = '';
+                visibleCount++;
+
+                // Update Bil. column to show correct numbering
+                bilCell.textContent = visibleCount;
+
+                // Highlight matching text
+                if (searchText && searchText.length > 0) {
+                    highlightText(idStafCell, searchText);
+                    highlightText(namaCell, searchText);
+                    highlightText(emelCell, searchText);
+                    highlightText(jabatanCell, searchText);
+                } else {
+                    // Remove highlights when search is cleared
+                    [idStafCell, namaCell, emelCell, jabatanCell].forEach(cell => {
+                        cell.innerHTML = cell.textContent;
+                    });
+                }
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show "no results" message if needed
+        const existingNoResult = tableBody.querySelector('.no-results-row');
+        if (existingNoResult) {
+            existingNoResult.remove();
+        }
+
+        if (visibleCount === 0) {
+            const noResultRow = document.createElement('tr');
+            noResultRow.className = 'no-results-row';
+            noResultRow.innerHTML = '<td colspan="7" class="text-center text-muted py-4">Tiada padanan ditemui.</td>';
+            tableBody.appendChild(noResultRow);
+        }
+
+        // Update pagination info
+        updatePaginationInfo(visibleCount);
+    }
+
+    function updatePaginationInfo(visibleCount) {
+        const paginationInfo = document.querySelector('.card-footer small');
+        if (paginationInfo && visibleCount > 0) {
+            paginationInfo.textContent = `Showing ${visibleCount} of ${visibleCount} entries`;
+        } else if (paginationInfo) {
+            paginationInfo.textContent = 'Showing 0 entries';
+        }
+    }
+
+    // Event listeners
+    searchInput.addEventListener('keyup', filterTable);
+    searchInput.addEventListener('input', filterTable);
+    perananFilter.addEventListener('change', filterTable);
+});
+</script>
 
 <?php
 $stmt->close();

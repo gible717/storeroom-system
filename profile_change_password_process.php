@@ -53,6 +53,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
+    // IMPORTANT: Check if new password is same as current password
+    if (password_verify($new_password, $user['kata_laluan'])) {
+        header("Location: $change_pass_page?error=" . urlencode("Kata laluan baru tidak boleh sama dengan kata laluan semasa anda. Sila gunakan kata laluan yang berbeza."));
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
+
     // Update password
     $new_password_hashed = password_hash($new_password, PASSWORD_DEFAULT);
     $stmt = $conn->prepare("UPDATE staf SET kata_laluan = ?, is_first_login = 0 WHERE ID_staf = ?");

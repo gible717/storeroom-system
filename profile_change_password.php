@@ -46,6 +46,12 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
 <!-- Password Form -->
 <div class="card shadow-sm border-0 password-card" style="border-radius: 1rem;">
     <div class="card-body p-4 p-md-5">
+        <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($_GET['error']); ?>
+            </div>
+        <?php endif; ?>
+
         <form action="profile_change_password_process.php" method="POST">
 
             <div class="mb-3">
@@ -64,6 +70,7 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
                         placeholder="Masukkan kata laluan baru..." required>
                     <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('new_password', this)"></i>
                 </div>
+                <div id="newPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
                 <div class="form-text">*Kata laluan mestilah sekurang-kurangnya 8 aksara</div>
             </div>
 
@@ -74,6 +81,7 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
                         placeholder="Sahkan kata laluan baru..." required>
                     <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('confirm_password', this)"></i>
                 </div>
+                <div id="confirmPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
             </div>
 
             <div class="text-end mt-4">
@@ -98,6 +106,133 @@ function togglePassword(fieldId, icon) {
         icon.classList.add('bi-eye-slash');
     }
 }
+
+// Real-time validation for new password field
+let checkTimeout;
+const newPasswordInput = document.getElementById('new_password');
+const newPasswordFeedback = document.getElementById('newPasswordFeedback');
+
+newPasswordInput.addEventListener('input', function() {
+    const password = this.value;
+
+    // Clear previous timeout
+    clearTimeout(checkTimeout);
+
+    // Reset feedback if empty
+    if (password.length === 0) {
+        this.classList.remove('is-invalid', 'is-valid');
+        newPasswordFeedback.style.display = 'none';
+        return;
+    }
+
+    // Check minimum length (8 characters for profile change)
+    if (password.length < 8) {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+        newPasswordFeedback.textContent = 'Kata laluan mestilah sekurang-kurangnya 8 aksara.';
+        newPasswordFeedback.style.display = 'block';
+        return;
+    }
+
+    // Debounce AJAX call (wait 500ms after user stops typing)
+    checkTimeout = setTimeout(function() {
+        // Check if password matches current password via AJAX
+        const formData = new FormData();
+        formData.append('password', password);
+
+        fetch('check_current_password.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.matches === true) {
+                newPasswordInput.classList.add('is-invalid');
+                newPasswordInput.classList.remove('is-valid');
+                newPasswordFeedback.textContent = 'Kata laluan baru tidak boleh sama dengan kata laluan semasa anda.';
+                newPasswordFeedback.style.display = 'block';
+            } else {
+                newPasswordInput.classList.remove('is-invalid');
+                newPasswordInput.classList.add('is-valid');
+                newPasswordFeedback.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking password:', error);
+        });
+    }, 500);
+});
+
+// Real-time validation for confirm password field
+const confirmPasswordInput = document.getElementById('confirm_password');
+const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
+
+confirmPasswordInput.addEventListener('input', function() {
+    const newPassword = newPasswordInput.value;
+    const confirmPassword = this.value;
+
+    // Reset feedback if empty
+    if (confirmPassword.length === 0) {
+        this.classList.remove('is-invalid', 'is-valid');
+        confirmPasswordFeedback.style.display = 'none';
+        return;
+    }
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+        confirmPasswordFeedback.textContent = 'Kata laluan tidak sepadan. Sila semak semula.';
+        confirmPasswordFeedback.style.display = 'block';
+    } else {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        confirmPasswordFeedback.style.display = 'none';
+    }
+});
+
+// Also validate confirm password when new password changes
+newPasswordInput.addEventListener('input', function() {
+    const confirmPassword = confirmPasswordInput.value;
+    if (confirmPassword.length > 0) {
+        // Trigger validation on confirm password field
+        confirmPasswordInput.dispatchEvent(new Event('input'));
+    }
+});
+
+// Form validation on submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const newPassword = newPasswordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+
+    // Check if new password field has error
+    if (newPasswordInput.classList.contains('is-invalid')) {
+        e.preventDefault();
+        alert('Sila betulkan ralat pada kata laluan baru.');
+        return false;
+    }
+
+    // Check if confirm password field has error
+    if (confirmPasswordInput.classList.contains('is-invalid')) {
+        e.preventDefault();
+        alert('Sila betulkan ralat pada pengesahan kata laluan.');
+        return false;
+    }
+
+    // Double-check passwords match
+    if (newPassword !== confirmPassword) {
+        e.preventDefault();
+        alert('Kata laluan tidak sepadan! Sila semak semula.');
+        return false;
+    }
+
+    // Double-check minimum length
+    if (newPassword.length < 8) {
+        e.preventDefault();
+        alert('Kata laluan mestilah sekurang-kurangnya 8 aksara.');
+        return false;
+    }
+});
 </script>
 
 <?php
