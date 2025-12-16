@@ -33,18 +33,25 @@ $total_rows = $users->num_rows;
 <div class="mb-4">
     <div class="row g-3 justify-content-between">
         <div class="col-md-auto">
-            <select id="perananFilter" class="form-select">
-                <option value="Semua">Semua Peranan</option>
-                <option value="Admin">Admin</option>
-                <option value="Staf">Staf</option>
-            </select>
+            <div class="d-flex gap-2">
+                <select id="perananFilter" class="form-select">
+                    <option value="Semua">Semua Peranan</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Staf">Staf</option>
+                </select>
+
+                <!-- Clear Filters Button -->
+                <button id="clearFiltersBtn" class="btn btn-sm btn-outline-secondary" style="display: none;">
+                    <i class="bi bi-x-circle me-1"></i>Kosongkan <span id="filterCount" class="badge bg-secondary ms-1"></span>
+                </button>
+            </div>
         </div>
         <div class="col-12 col-md-3">
             <div class="input-group">
-                <span class="input-group-text bg-light border-0">
+                <span class="input-group-text bg-white">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" id="searchInput" class="form-control bg-light border-0"
+                <input type="text" id="searchInput" class="form-control bg-white"
                     placeholder="Cari ID Staf, Nama, Emel...">
             </div>
         </div>
@@ -245,10 +252,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Check if filters are active and update Clear button
+    function updateClearButton() {
+        const clearBtn = document.getElementById('clearFiltersBtn');
+        const filterCountBadge = document.getElementById('filterCount');
+        let activeCount = 0;
+
+        if (searchInput.value.trim()) activeCount++;
+        if (perananFilter.value !== 'Semua') activeCount++;
+
+        if (activeCount > 0) {
+            clearBtn.style.display = 'inline-block';
+            filterCountBadge.textContent = activeCount;
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    // Clear all filters
+    document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+        searchInput.value = '';
+        perananFilter.value = 'Semua';
+        filterTable();
+        updateClearButton();
+    });
+
     // Event listeners
     searchInput.addEventListener('keyup', filterTable);
-    searchInput.addEventListener('input', filterTable);
-    perananFilter.addEventListener('change', filterTable);
+    searchInput.addEventListener('input', function() {
+        filterTable();
+        updateClearButton();
+    });
+    perananFilter.addEventListener('change', function() {
+        filterTable();
+        updateClearButton();
+    });
 });
 </script>
 

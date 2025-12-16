@@ -292,6 +292,6 @@ $conn->close();
     
     <div class="no-print text-center mb-3" style="padding-top: 20px;">
         <button onclick="window.print()" class="btn btn-primary">Cetak Dokumen</button>
-        <a href="request_list.php" class="btn btn-secondary">Kembali</a>
+        <a href="manage_requests.php" class="btn btn-secondary">Kembali</a>
     </div>
 </html>

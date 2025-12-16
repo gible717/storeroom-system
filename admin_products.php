@@ -73,16 +73,21 @@ $total_rows = $result->num_rows;
                         <option value="Stok Rendah">Stok Rendah</option>
                         <option value="Kehabisan Stok">Kehabisan Stok</option>
                     </select>
+
+                    <!-- Clear Filters Button -->
+                    <button id="clearFiltersBtn" class="btn btn-sm btn-outline-secondary" style="display: none;">
+                        <i class="bi bi-x-circle me-1"></i>Kosongkan <span id="filterCount" class="badge bg-secondary ms-1"></span>
+                    </button>
                 </div>
             </div>
 
             <!-- Right side - Search & Actions -->
             <div class="col-auto d-flex align-items-center gap-2">
                 <div class="input-group" style="width: 250px;">
-                    <span class="input-group-text bg-light border-0">
+                    <span class="input-group-text bg-white">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" id="searchInput" class="form-control bg-light border-0"
+                    <input type="text" id="searchInput" class="form-control bg-white"
                         placeholder="Cari Kod, Nama Produk...">
                 </div>
                 <a href="admin_category.php" class="btn btn-outline-secondary"><i class="bi bi-tags-fill me-1"></i> Urus Kategori</a>
@@ -278,12 +283,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Check if filters are active and update Clear button
+    function updateClearButton() {
+        const clearBtn = document.getElementById('clearFiltersBtn');
+        const filterCountBadge = document.getElementById('filterCount');
+        let activeCount = 0;
+
+        if (searchInput.value.trim()) activeCount++;
+        if (kategoriFilter.value) activeCount++;
+        if (pembekalFilter.value) activeCount++;
+        if (statusFilter.value) activeCount++;
+
+        if (activeCount > 0) {
+            clearBtn.style.display = 'inline-block';
+            filterCountBadge.textContent = activeCount;
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    // Clear all filters
+    document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+        searchInput.value = '';
+        kategoriFilter.value = '';
+        pembekalFilter.value = '';
+        statusFilter.value = '';
+        filterTable();
+        updateClearButton();
+    });
+
     // Event listeners
     searchInput.addEventListener('keyup', filterTable);
-    searchInput.addEventListener('input', filterTable);
-    kategoriFilter.addEventListener('change', filterTable);
-    pembekalFilter.addEventListener('change', filterTable);
-    statusFilter.addEventListener('change', filterTable);
+    searchInput.addEventListener('input', function() {
+        filterTable();
+        updateClearButton();
+    });
+    kategoriFilter.addEventListener('change', function() {
+        filterTable();
+        updateClearButton();
+    });
+    pembekalFilter.addEventListener('change', function() {
+        filterTable();
+        updateClearButton();
+    });
+    statusFilter.addEventListener('change', function() {
+        filterTable();
+        updateClearButton();
+    });
 });
 </script>
 
