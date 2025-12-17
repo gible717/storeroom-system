@@ -1,7 +1,7 @@
 <?php
-// report_requests.php - Requests report dashboard
+// report_requests.php - Department-focused requests analytics
 
-$pageTitle = "Ringkasan Permohonan";
+$pageTitle = "Analisis Permohonan";
 require 'admin_header.php';
 
 // Fetch categories for dropdown filter
@@ -11,7 +11,6 @@ $kategori_result = $conn->query($kategori_sql);
 // Filter logic
 $tarikh_mula = $_GET['mula'] ?? date('Y-m-01');
 $tarikh_akhir = $_GET['akhir'] ?? date('Y-m-d');
-$status_filter = $_GET['status'] ?? 'Semua';
 $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Build the WHERE clause for filters
@@ -19,150 +18,190 @@ $where_clause = " WHERE DATE(p.tarikh_mohon) BETWEEN ? AND ? ";
 $params = [$tarikh_mula, $tarikh_akhir];
 $types = "ss";
 
-if ($status_filter !== 'Semua') {
-    $where_clause .= " AND p.status = ? ";
-    $params[] = $status_filter;
-    $types .= "s";
-}
-
 if ($kategori_filter !== 'Semua') {
     $where_clause .= " AND b.kategori = ? ";
     $params[] = $kategori_filter;
     $types .= "s";
 }
 
-// --- SQL Queries for Summary Cards ---
-$sql_cards = "SELECT
+// --- Get Top 10 Departments by Request Volume ---
+$sql_top_departments = "SELECT
+    j.nama_jabatan,
     COUNT(DISTINCT p.ID_permohonan) AS jumlah_permohonan,
-    COALESCE(SUM(CASE WHEN p.status = 'Baru' THEN 1 ELSE 0 END), 0) AS jumlah_pending,
-    COALESCE(SUM(CASE WHEN p.status = 'Diluluskan' OR p.status = 'Diterima' THEN 1 ELSE 0 END), 0) AS jumlah_lulus,
-    COALESCE(SUM(CASE WHEN p.status = 'Ditolak' THEN 1 ELSE 0 END), 0) AS jumlah_tolak
+    COALESCE(SUM(CASE WHEN p.status = 'Diluluskan' OR p.status = 'Diterima' THEN 1 ELSE 0 END), 0) AS diluluskan,
+    COALESCE(SUM(CASE WHEN p.status = 'Ditolak' THEN 1 ELSE 0 END), 0) AS ditolak,
+    COALESCE(SUM(CASE WHEN p.status = 'Baru' THEN 1 ELSE 0 END), 0) AS pending,
+    ROUND(
+        (COALESCE(SUM(CASE WHEN p.status = 'Diluluskan' OR p.status = 'Diterima' THEN 1 ELSE 0 END), 0) /
+        NULLIF(COUNT(DISTINCT p.ID_permohonan), 0)) * 100,
+    1) AS kadar_kelulusan
 FROM permohonan p
 LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-LEFT JOIN barang b ON pb.no_kod = b.no_kod" . $where_clause;
-$stmt_cards = $conn->prepare($sql_cards);
-$stmt_cards->bind_param($types, ...$params);
-$stmt_cards->execute();
-$cards = $stmt_cards->get_result()->fetch_assoc();
+LEFT JOIN barang b ON pb.no_kod = b.no_kod
+LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
+$where_clause
+GROUP BY j.ID_jabatan, j.nama_jabatan
+ORDER BY jumlah_permohonan DESC
+LIMIT 10";
 
-// Ensure all values are set (in case of empty result)
-$cards['jumlah_permohonan'] = $cards['jumlah_permohonan'] ?? 0;
-$cards['jumlah_pending'] = $cards['jumlah_pending'] ?? 0;
-$cards['jumlah_lulus'] = $cards['jumlah_lulus'] ?? 0;
-$cards['jumlah_tolak'] = $cards['jumlah_tolak'] ?? 0;
+$stmt_top_dept = $conn->prepare($sql_top_departments);
+$stmt_top_dept->bind_param($types, ...$params);
+$stmt_top_dept->execute();
+$top_dept_result = $stmt_top_dept->get_result();
 
-// --- SQL for Chart 1: Pecahan Status (Pie Chart) ---
-$sql_status_chart = "SELECT p.status, COUNT(DISTINCT p.ID_permohonan) AS jumlah
-                    FROM permohonan p
-                    LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-                    LEFT JOIN barang b ON pb.no_kod = b.no_kod
-                    $where_clause
-                    GROUP BY p.status";
-$stmt_status_chart = $conn->prepare($sql_status_chart);
-$stmt_status_chart->bind_param($types, ...$params);
-$stmt_status_chart->execute();
-$status_chart_result = $stmt_status_chart->get_result();
+$dept_data = [];
+$dept_labels = [];
+$dept_requests = [];
+$dept_approved = [];
+$dept_rejected = [];
+$dept_pending = [];
 
-$status_labels = [];
-$status_data = [];
-while ($row = $status_chart_result->fetch_assoc()) {
-    $status_labels[] = $row['status'];
-    $status_data[] = $row['jumlah'];
+while ($row = $top_dept_result->fetch_assoc()) {
+    $dept_data[] = $row;
+    $dept_labels[] = $row['nama_jabatan'] ?? 'Tiada Jabatan';
+    $dept_requests[] = $row['jumlah_permohonan'];
+    $dept_approved[] = $row['diluluskan'];
+    $dept_rejected[] = $row['ditolak'];
+    $dept_pending[] = $row['pending'];
 }
 
-// --- SQL for Chart 2: Permohonan per bulan (Bar Chart) ---
-// Note: This query groups by month/year for the date range
-$sql_monthly = "SELECT
-                DATE_FORMAT(p.tarikh_mohon, '%Y-%m') AS 'bulan',
-                COUNT(DISTINCT p.ID_permohonan) AS 'jumlah'
-                FROM permohonan p
-                LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-                LEFT JOIN barang b ON pb.no_kod = b.no_kod
-                $where_clause
-                GROUP BY DATE_FORMAT(p.tarikh_mohon, '%Y-%m')
-                ORDER BY bulan ASC";
-$stmt_monthly = $conn->prepare($sql_monthly);
-$stmt_monthly->bind_param($types, ...$params);
+// --- Get Monthly Trend for Top 5 Departments ---
+$sql_monthly_trend = "SELECT
+    j.nama_jabatan,
+    DATE_FORMAT(p.tarikh_mohon, '%Y-%m') AS bulan,
+    COUNT(DISTINCT p.ID_permohonan) AS jumlah
+FROM permohonan p
+LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+LEFT JOIN barang b ON pb.no_kod = b.no_kod
+LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
+$where_clause
+AND j.nama_jabatan IN (" . implode(',', array_fill(0, min(5, count($dept_labels)), '?')) . ")
+GROUP BY j.nama_jabatan, DATE_FORMAT(p.tarikh_mohon, '%Y-%m')
+ORDER BY bulan ASC";
+
+// Prepare parameters for monthly trend (add top 5 department names)
+$monthly_params = $params;
+$monthly_types = $types;
+for ($i = 0; $i < min(5, count($dept_labels)); $i++) {
+    $monthly_params[] = $dept_labels[$i];
+    $monthly_types .= "s";
+}
+
+$stmt_monthly = $conn->prepare($sql_monthly_trend);
+$stmt_monthly->bind_param($monthly_types, ...$monthly_params);
 $stmt_monthly->execute();
 $monthly_result = $stmt_monthly->get_result();
 
-// Store results in associative array
-$monthly_data_raw = [];
+// Organize monthly data by department
+$monthly_by_dept = [];
 while ($row = $monthly_result->fetch_assoc()) {
-    $monthly_data_raw[$row['bulan']] = $row['jumlah'];
+    $dept_name = $row['nama_jabatan'];
+    $month = $row['bulan'];
+    if (!isset($monthly_by_dept[$dept_name])) {
+        $monthly_by_dept[$dept_name] = [];
+    }
+    $monthly_by_dept[$dept_name][$month] = $row['jumlah'];
 }
 
-// Malay month names
+// Get all months in the date range
+$start = new DateTime($tarikh_mula);
+$end = new DateTime($tarikh_akhir);
+$interval = new DateInterval('P1M');
+$period = new DatePeriod($start, $interval, $end);
+
 $months_malay = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
-
-// Get current year from date range
-$current_year = date('Y', strtotime($tarikh_mula));
-
-// Generate all 12 months with Malay names and data
 $monthly_labels = [];
-$monthly_data = [];
-for ($m = 1; $m <= 12; $m++) {
-    $monthly_labels[] = $months_malay[$m - 1];
-    $month_key = sprintf('%d-%02d', $current_year, $m);
-    $monthly_data[] = $monthly_data_raw[$month_key] ?? 0; // 0 if no data for that month
+$all_months = [];
+
+foreach ($period as $date) {
+    $month_key = $date->format('Y-m');
+    $all_months[] = $month_key;
+    $month_num = (int)$date->format('m');
+    $monthly_labels[] = $months_malay[$month_num - 1] . ' ' . $date->format('Y');
 }
 
-// --- Prepare Data for JavaScript ---
-$status_chart_labels = $status_labels;
-$status_chart_data = $status_data;
-$monthly_chart_labels = $monthly_labels;
-$monthly_chart_data = $monthly_data;
-?>
-<style>
-    /* Styles for the summary cards */
-    .stat-card {
-        background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 0.75rem;
-        padding: 1.5rem; display: flex; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+// Prepare datasets for line chart (top 5 departments)
+$monthly_datasets = [];
+$colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+for ($i = 0; $i < min(5, count($dept_labels)); $i++) {
+    $dept_name = $dept_labels[$i];
+    $data = [];
+    foreach ($all_months as $month) {
+        $data[] = $monthly_by_dept[$dept_name][$month] ?? 0;
     }
-    .stat-card-icon {
-        font-size: 2rem; padding: 1.25rem; border-radius: 50%; display: inline-flex;
-        align-items: center; justify-content: center; margin-right: 1.25rem;
-    }
-    .stat-card-icon.bg-primary-light {color: #4f46e5; }
-    .stat-card-icon.bg-success-light {color: #10b981; }
-    .stat-card-icon.bg-danger-light { color: #ef4444; }
-    .stat-card-icon.bg-warning-light {color: #f59e0b; }
-    .stat-card-info h6 { color: #6c757d; font-size: 0.9rem; margin-bottom: 0.25rem; }
-    .stat-card-info h4 { margin-bottom: 0; font-weight: 700; }
+    $monthly_datasets[] = [
+        'label' => $dept_name,
+        'data' => $data,
+        'borderColor' => $colors[$i],
+        'backgroundColor' => $colors[$i],
+        'tension' => 0.4
+    ];
+}
 
-    /* Clickable card styles */
-    .stat-card-link {
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        transition: all 0.3s;
-    }
-    .stat-card-link:hover .stat-card {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-        cursor: pointer;
-    }
-    .stat-card-link.active .stat-card {
-        border: 2px solid #4f46e5;
-        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.2);
-    }
+// --- Get overall summary stats ---
+// Count total requests for the period
+$sql_total_requests = "SELECT COUNT(DISTINCT p.ID_permohonan) AS total_requests
+FROM permohonan p
+LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+LEFT JOIN barang b ON pb.no_kod = b.no_kod
+LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
+$where_clause";
+
+$stmt_requests = $conn->prepare($sql_total_requests);
+$stmt_requests->bind_param($types, ...$params);
+$stmt_requests->execute();
+$total_requests = $stmt_requests->get_result()->fetch_assoc()['total_requests'];
+
+// Count ALL departments from jabatan table
+$sql_total_depts = "SELECT COUNT(*) AS total_departments FROM jabatan";
+$total_departments = $conn->query($sql_total_depts)->fetch_assoc()['total_departments'];
+
+// Calculate average per department (including departments with 0 requests)
+$avg_per_dept = $total_departments > 0 ? round($total_requests / $total_departments, 1) : 0;
+
+$summary = [
+    'total_requests' => $total_requests,
+    'total_departments' => $total_departments,
+    'avg_per_dept' => $avg_per_dept
+];
+?>
+
+<style>
+.stat-card {
+    background: #fff; border: 1px solid #e9ecef; border-radius: 0.75rem;
+    padding: 1.5rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.stat-card-icon {
+    font-size: 2.5rem; width: 70px; height: 70px; display: flex;
+    align-items: center; justify-content: center; border-radius: 0.5rem; margin-right: 1.25rem;
+}
+.stat-card-icon.bg-primary-light { color: #4f46e5; }
+.stat-card-icon.bg-success-light { color: #10b981; }
+.stat-card-icon.bg-info-light { color: #3b82f6; }
+.stat-card-info h6 { color: #6c757d; font-size: 0.875rem; margin-bottom: 0.25rem; }
+.stat-card-info h4 { margin-bottom: 0; font-weight: 700; font-size: 2rem; color: #1f2937; }
+
+.dept-table { font-size: 0.9rem; }
+.dept-table th { background-color: #f8f9fa; font-weight: 600; }
+.approval-rate-high { color: #10b981; font-weight: 600; }
+.approval-rate-medium { color: #f59e0b; font-weight: 600; }
+.approval-rate-low { color: #ef4444; font-weight: 600; }
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="admin_reports.php" class="text-dark" title="Kembali">
         <i class="bi bi-arrow-left fs-4"></i>
     </a>
-    <h3 class="mb-0 fw-bold">Graf Visual Permohonan</h3>
-    <a href="report_requests_view.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=<?php echo urlencode($status_filter); ?>&kategori=<?php echo urlencode($kategori_filter); ?>" class="btn btn-success" target="_blank">
-        <i class="bi bi-printer me-2"></i>Cetak Laporan
-    </a>
+    <h3 class="mb-0 fw-bold">Analisis Mengikut Jabatan</h3>
+    <div></div>
 </div>
 
-<div class="card shadow-sm border-0" style="border-radius: 1rem;">
+<!-- Filter Card -->
+<div class="card shadow-sm border-0 mb-4" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <h5 class="mb-3 fw-bold">Tapisan Permohonan</h5>
-
-        <!-- Custom Filter Form -->
+        <h5 class="mb-3 fw-bold">Tapisan Tempoh</h5>
         <form action="report_requests.php" method="GET" id="filterForm">
             <div class="row g-3">
                 <div class="col-md-3">
@@ -173,22 +212,11 @@ $monthly_chart_data = $monthly_data;
                     <label for="akhir" class="form-label fw-semibold">Hingga Tarikh</label>
                     <input type="date" class="form-control" id="akhir" name="akhir" value="<?php echo htmlspecialchars($tarikh_akhir); ?>" required>
                 </div>
-                <div class="col-md-2">
-                    <label for="status" class="form-label fw-semibold">Status</label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="Semua" <?php echo ($status_filter === 'Semua') ? 'selected' : ''; ?>>Semua Status</option>
-                        <option value="Baru" <?php echo ($status_filter === 'Baru') ? 'selected' : ''; ?>>Baru</option>
-                        <option value="Diluluskan" <?php echo ($status_filter === 'Diluluskan') ? 'selected' : ''; ?>>Diluluskan</option>
-                        <option value="Ditolak" <?php echo ($status_filter === 'Ditolak') ? 'selected' : ''; ?>>Ditolak</option>
-                        <option value="Diterima" <?php echo ($status_filter === 'Diterima') ? 'selected' : ''; ?>>Diterima</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="kategori" class="form-label fw-semibold">Kategori</label>
+                <div class="col-md-4">
+                    <label for="kategori" class="form-label fw-semibold">Kategori Item</label>
                     <select class="form-select" id="kategori" name="kategori">
                         <option value="Semua" <?php echo ($kategori_filter === 'Semua') ? 'selected' : ''; ?>>Semua Kategori</option>
                         <?php
-                        // Reset pointer to beginning
                         $kategori_result->data_seek(0);
                         while ($kategori = $kategori_result->fetch_assoc()):
                         ?>
@@ -198,9 +226,9 @@ $monthly_chart_data = $monthly_data;
                         <?php endwhile; ?>
                     </select>
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
+                <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">
-                        Tapis
+                        <i class="bi bi-funnel-fill me-1"></i>Tapis
                     </button>
                 </div>
             </div>
@@ -208,77 +236,57 @@ $monthly_chart_data = $monthly_data;
     </div>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+<!-- Summary Cards -->
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">
-        Ringkasan Data
-        <small class="text-muted fs-6">(<?php echo formatMalayDate($tarikh_mula); ?> - <?php echo formatMalayDate($tarikh_akhir); ?>
-        <?php if ($status_filter !== 'Semua'): ?>
-            | Status: <?php echo htmlspecialchars($status_filter); ?>
-        <?php endif; ?>
-        <?php if ($kategori_filter !== 'Semua'): ?>
-            | Kategori: <?php echo htmlspecialchars($kategori_filter); ?>
-        <?php endif; ?>)</small>
+        Ringkasan
+        <small class="text-muted fs-6">(<?php echo formatMalayDate($tarikh_mula); ?> - <?php echo formatMalayDate($tarikh_akhir); ?>)</small>
     </h5>
-    <?php if ($status_filter !== 'Semua' || $kategori_filter !== 'Semua' || $tarikh_mula !== date('Y-m-01') || $tarikh_akhir !== date('Y-m-d')): ?>
+    <?php if ($kategori_filter !== 'Semua' || $tarikh_mula !== date('Y-m-01') || $tarikh_akhir !== date('Y-m-d')): ?>
         <a href="report_requests.php" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-x-circle me-1"></i>Reset Penapis
         </a>
     <?php endif; ?>
 </div>
-<div class="row g-4">
-    <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Semua&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Semua') ? 'active' : ''; ?>">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
-                <div class="stat-card-info">
-                    <h6>Semua Permohonan</h6>
-                    <h4><?php echo htmlspecialchars($cards['jumlah_permohonan']); ?></h4>
-                </div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
+            <div class="stat-card-info">
+                <h6>Jumlah Permohonan</h6>
+                <h4><?php echo number_format($summary['total_requests'] ?? 0); ?></h4>
             </div>
-        </a>
+        </div>
     </div>
-    <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Diluluskan&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Diluluskan') ? 'active' : ''; ?>">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-success-light"><i class="bi bi-check-circle"></i></div>
-                <div class="stat-card-info">
-                    <h6>Diluluskan</h6>
-                    <h4><?php echo htmlspecialchars($cards['jumlah_lulus']); ?></h4>
-                </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon bg-success-light"><i class="bi bi-building"></i></div>
+            <div class="stat-card-info">
+                <h6>Jumlah Jabatan</h6>
+                <h4><?php echo number_format($summary['total_departments'] ?? 0); ?></h4>
             </div>
-        </a>
+        </div>
     </div>
-    <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Ditolak&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Ditolak') ? 'active' : ''; ?>">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-danger-light"><i class="bi bi-x-circle"></i></div>
-                <div class="stat-card-info">
-                    <h6>Ditolak</h6>
-                    <h4><?php echo htmlspecialchars($cards['jumlah_tolak']); ?></h4>
-                </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon bg-info-light"><i class="bi bi-graph-up"></i></div>
+            <div class="stat-card-info">
+                <h6>Purata per Jabatan</h6>
+                <h4><?php echo number_format($summary['avg_per_dept'] ?? 0, 1); ?></h4>
             </div>
-        </a>
-    </div>
-    <div class="col-md-3">
-        <a href="report_requests.php?mula=<?php echo urlencode($tarikh_mula); ?>&akhir=<?php echo urlencode($tarikh_akhir); ?>&status=Baru&kategori=<?php echo urlencode($kategori_filter); ?>" class="stat-card-link <?php echo ($status_filter == 'Baru') ? 'active' : ''; ?>">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-warning-light"><i class="bi bi-hourglass-split"></i></div>
-                <div class="stat-card-info">
-                    <h6>Belum Diproses</h6>
-                    <h4><?php echo htmlspecialchars($cards['jumlah_pending']); ?></h4>
-                </div>
-            </div>
-        </a>
+        </div>
     </div>
 </div>
 
-<div class="row g-4 mt-3">
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold">Pecahan Status Permohonan</h6>
-                <div style="height: 350px;">
-                    <canvas id="statusChart"></canvas>
+                <h6 class="card-title fw-bold mb-3">Top 10 Jumlah Permohonan mengikut Jabatan</h6>
+                <div style="height: 400px;">
+                    <canvas id="topDepartmentsChart"></canvas>
                 </div>
             </div>
         </div>
@@ -286,82 +294,222 @@ $monthly_chart_data = $monthly_data;
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold">Permohonan per bulan</h6>
-                <div style="height: 350px;">
-                    <canvas id="monthlyChart"></canvas>
+                <h6 class="card-title fw-bold mb-3">Status Permohonan Mengikut Jabatan</h6>
+                <div style="height: 400px;">
+                    <canvas id="departmentStatusChart"></canvas>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Trend Chart -->
+<?php if (count($monthly_datasets) > 0): ?>
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+            <div class="card-body p-4">
+                <h6 class="card-title fw-bold mb-3">Top 5 Trend Bulanan mengikut Jabatan</h6>
+                <div style="height: 350px;">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Department Summary Table -->
+<div class="card shadow-sm border-0" style="border-radius: 1rem;">
+    <div class="card-body p-4">
+        <h5 class="mb-3 fw-bold">Jadual Ringkasan Jabatan</h5>
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered dept-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;" class="text-center">Bil.</th>
+                        <th>Nama Jabatan</th>
+                        <th class="text-center">Jumlah Permohonan</th>
+                        <th class="text-center">Diluluskan</th>
+                        <th class="text-center">Ditolak</th>
+                        <th class="text-center">Belum Diproses</th>
+                        <th class="text-center">Kadar Kelulusan (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (count($dept_data) > 0): ?>
+                        <?php
+                        $bil = 1;
+                        foreach ($dept_data as $dept):
+                            $approval_rate = $dept['kadar_kelulusan'];
+                            $rate_class = '';
+                            if ($approval_rate >= 80) {
+                                $rate_class = 'approval-rate-high';
+                            } elseif ($approval_rate >= 50) {
+                                $rate_class = 'approval-rate-medium';
+                            } else {
+                                $rate_class = 'approval-rate-low';
+                            }
+                        ?>
+                            <tr>
+                                <td class="text-center"><?php echo $bil++; ?></td>
+                                <td><?php echo htmlspecialchars($dept['nama_jabatan'] ?? 'Tiada Jabatan'); ?></td>
+                                <td class="text-center fw-bold"><?php echo number_format($dept['jumlah_permohonan']); ?></td>
+                                <td class="text-center text-success"><?php echo number_format($dept['diluluskan']); ?></td>
+                                <td class="text-center text-danger"><?php echo number_format($dept['ditolak']); ?></td>
+                                <td class="text-center text-warning"><?php echo number_format($dept['pending']); ?></td>
+                                <td class="text-center <?php echo $rate_class; ?>"><?php echo number_format($approval_rate, 1); ?>%</td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                <strong>Tiada data untuk tempoh yang dipilih</strong>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Data from PHP
-    const statusLabels = <?php echo json_encode($status_chart_labels); ?>;
-    const statusData = <?php echo json_encode($status_chart_data); ?>;
-    const monthlyLabels = <?php echo json_encode($monthly_chart_labels); ?>;
-    const monthlyData = <?php echo json_encode($monthly_chart_data); ?>;
+    // Data from PHP
+    const deptLabels = <?php echo json_encode($dept_labels); ?>;
+    const deptRequests = <?php echo json_encode($dept_requests); ?>;
+    const deptApproved = <?php echo json_encode($dept_approved); ?>;
+    const deptRejected = <?php echo json_encode($dept_rejected); ?>;
+    const deptPending = <?php echo json_encode($dept_pending); ?>;
+    const monthlyLabels = <?php echo json_encode($monthly_labels); ?>;
+    const monthlyDatasets = <?php echo json_encode($monthly_datasets); ?>;
 
-    // 2. Status Chart (Pie Chart) with dynamic color mapping
-    const statusCtx = document.getElementById('statusChart');
-    if (statusCtx) {
-        // Map colors based on status name
-        const statusColors = statusLabels.map(status => {
-            if (status === 'Diluluskan' || status === 'Selesai') return '#10b981'; // Green
-            if (status === 'Ditolak') return '#ef4444'; // Red
-            if (status === 'Baru') return '#f59e0b'; // Yellow/Orange
-            return '#3b82f6'; // Blue (default)
-        });
-
-        new Chart(statusCtx.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: statusLabels,
-                datasets: [{
-                    data: statusData,
-                    backgroundColor: statusColors,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-
-    // 3. Monthly Chart (Bar Chart)
-    const monthlyCtx = document.getElementById('monthlyChart');
-    if (monthlyCtx) {
-        new Chart(monthlyCtx.getContext('2d'), {
+    // Chart 1: Top Departments - Horizontal Bar Chart
+    const topDeptCtx = document.getElementById('topDepartmentsChart');
+    if (topDeptCtx && deptLabels.length > 0) {
+        new Chart(topDeptCtx.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: monthlyLabels,
+                labels: deptLabels,
                 datasets: [{
                     label: 'Jumlah Permohonan',
-                    data: monthlyData,
-                    backgroundColor: '#4f46e5', // Indigo
+                    data: deptRequests,
+                    backgroundColor: '#4f46e5',
                     borderColor: '#4338ca',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 2: Department Status - Stacked Bar Chart
+    const deptStatusCtx = document.getElementById('departmentStatusChart');
+    if (deptStatusCtx && deptLabels.length > 0) {
+        new Chart(deptStatusCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: deptLabels,
+                datasets: [
+                    {
+                        label: 'Diluluskan',
+                        data: deptApproved,
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Ditolak',
+                        data: deptRejected,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Pending',
+                        data: deptPending,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 3: Monthly Trend - Line Chart
+    const monthlyCtx = document.getElementById('monthlyTrendChart');
+    if (monthlyCtx && monthlyDatasets.length > 0) {
+        new Chart(monthlyCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: monthlyDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + ' permohonan';
+                            }
+                        }
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            stepSize: 1
+                            stepSize: 1,
+                            precision: 0
                         }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
                     }
                 }
             }
@@ -370,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php 
+<?php
 $conn->close();
-require 'admin_footer.php'; 
+require 'admin_footer.php';
 ?>

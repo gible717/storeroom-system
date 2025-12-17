@@ -266,8 +266,8 @@ while ($row = $top_items_result->fetch_assoc()) {
     <div class="col-md-4">
         <div class="report-action-card">
             <i class="bi bi-graph-up text-primary"></i>
-            <h5>Laporan Analisis Terperinci</h5>
-            <p>Statistik permohonan staf, kadar kelulusan, trend bulanan dan analisis penggunaan mengikut tempoh</p>
+            <h5>Analisis Mengikut Jabatan</h5>
+            <p>Infografik permohonan mengikut jabatan: jumlah permohonan, kadar kelulusan dan trend bulanan</p>
             <a href="report_requests.php" class="btn btn-primary btn-sm">Lihat Analisis</a>
         </div>
     </div>

@@ -34,16 +34,23 @@ if (!$id_permohonan || !$action || !$id_pemohon) {
     exit;
 }
 
-// Prevent admin from approving their own request
+// Prevent admin from approving/rejecting their own request
 if ($id_pemohon === $id_pelulus) {
+    // Customize message based on action
+    if ($action === 'approve') {
+        $error_message = "Anda tidak boleh meluluskan permohonan anda sendiri. Kelulusan mesti dibuat oleh admin lain.";
+    } else {
+        $error_message = "Anda tidak boleh menolak permohonan anda sendiri. Penolakan mesti dibuat oleh admin lain.";
+    }
+
     // Check if request is AJAX
     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => "Anda tidak boleh meluluskan permohonan anda sendiri. Permohonan mesti diluluskan oleh admin lain."]);
+        echo json_encode(['success' => false, 'message' => $error_message]);
         exit;
     }
 
-    $_SESSION['error_msg'] = "Anda tidak boleh meluluskan permohonan anda sendiri. Permohonan mesti diluluskan oleh admin lain.";
+    $_SESSION['error_msg'] = $error_message;
     header('Location: request_review.php?id=' . $id_permohonan);
     exit;
 }
