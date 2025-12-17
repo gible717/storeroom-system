@@ -96,6 +96,9 @@ function send_telegram_notification($message, $keyboard = null) {
  * @return string - Formatted message
  */
 function format_new_request_notification($id_permohonan, $nama_pemohon, $jawatan_pemohon, $item_count, $catatan = '') {
+    // Set timezone to Malaysia
+    date_default_timezone_set('Asia/Kuala_Lumpur');
+
     $message = "🔔 <b>PERMOHONAN BARU</b>\n\n";
     $message .= "📋 ID Permohonan: <b>#{$id_permohonan}</b>\n";
     $message .= "👤 Pemohon: {$nama_pemohon}\n";
@@ -142,6 +145,9 @@ function send_new_request_notification($id_permohonan, $nama_pemohon, $jawatan_p
  * @return string - Formatted message
  */
 function format_monthly_restock_reminder() {
+    // Set timezone to Malaysia
+    date_default_timezone_set('Asia/Kuala_Lumpur');
+
     $message = "📅 <b>PERINGATAN STOK BULANAN</b>\n\n";
     $message .= "🔔 Ini adalah peringatan untuk menyemak dan membuat permohonan stok bulanan.\n\n";
     $message .= "📋 Sila semak:\n";
@@ -160,6 +166,9 @@ function format_monthly_restock_reminder() {
  * @return bool - True if should send reminder today
  */
 function should_send_monthly_reminder() {
+    // Set timezone to Malaysia
+    date_default_timezone_set('Asia/Kuala_Lumpur');
+
     // Get current day of month (1-31)
     $day_of_month = (int)date('j');
 

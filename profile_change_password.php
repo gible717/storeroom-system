@@ -25,9 +25,45 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
     .password-wrapper { position: relative; }
     .password-wrapper .form-control { padding-right: 3rem; }
     .password-toggle {
-        position: absolute; top: 50%; right: 1rem;
-        transform: translateY(-50%); cursor: pointer; color: #6c757d;
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
     }
+
+    /* For fields with validation */
+    .password-wrapper-with-validation {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .password-wrapper-with-validation .password-input-container {
+        position: relative;
+        flex: 1;
+    }
+    .password-wrapper-with-validation .password-input-container .form-control {
+        padding-right: 3rem;
+        background-image: none !important;
+    }
+    .password-wrapper-with-validation .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+    }
+    .validation-icon {
+        font-size: 1.25rem;
+        min-width: 1.5rem;
+        text-align: center;
+    }
+    .validation-icon.valid { color: #198754; }
+    .validation-icon.invalid { color: #dc3545; }
 </style>
 
 <!-- Page Header -->
@@ -65,23 +101,29 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
 
             <div class="mb-3">
                 <label for="new_password" class="form-label">Kata Laluan Baru</label>
-                <div class="password-wrapper">
-                    <input type="password" class="form-control" id="new_password" name="new_password"
-                        placeholder="Masukkan kata laluan baru..." required>
-                    <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('new_password', this)"></i>
+                <div class="password-wrapper-with-validation">
+                    <div class="password-input-container">
+                        <input type="password" class="form-control" id="new_password" name="new_password"
+                            placeholder="Masukkan kata laluan baru..." required>
+                        <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('new_password', this)"></i>
+                    </div>
+                    <span id="newPasswordIcon" class="validation-icon"></span>
                 </div>
-                <div id="newPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
+                <div id="newPasswordFeedback" class="invalid-feedback"></div>
                 <div class="form-text">*Kata laluan mestilah sekurang-kurangnya 8 aksara</div>
             </div>
 
             <div class="mb-3">
                 <label for="confirm_password" class="form-label">Sahkan Kata Laluan Baru</label>
-                <div class="password-wrapper">
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                        placeholder="Sahkan kata laluan baru..." required>
-                    <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('confirm_password', this)"></i>
+                <div class="password-wrapper-with-validation">
+                    <div class="password-input-container">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                            placeholder="Sahkan kata laluan baru..." required>
+                        <i class="bi bi-eye-slash password-toggle" onclick="togglePassword('confirm_password', this)"></i>
+                    </div>
+                    <span id="confirmPasswordIcon" class="validation-icon"></span>
                 </div>
-                <div id="confirmPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
+                <div id="confirmPasswordFeedback" class="invalid-feedback"></div>
             </div>
 
             <div class="text-end mt-4">
@@ -111,6 +153,7 @@ function togglePassword(fieldId, icon) {
 let checkTimeout;
 const newPasswordInput = document.getElementById('new_password');
 const newPasswordFeedback = document.getElementById('newPasswordFeedback');
+const newPasswordIcon = document.getElementById('newPasswordIcon');
 
 newPasswordInput.addEventListener('input', function() {
     const password = this.value;
@@ -121,7 +164,9 @@ newPasswordInput.addEventListener('input', function() {
     // Reset feedback if empty
     if (password.length === 0) {
         this.classList.remove('is-invalid', 'is-valid');
-        newPasswordFeedback.style.display = 'none';
+        newPasswordFeedback.textContent = '';
+        newPasswordIcon.className = 'validation-icon';
+        newPasswordIcon.innerHTML = '';
         return;
     }
 
@@ -130,7 +175,8 @@ newPasswordInput.addEventListener('input', function() {
         this.classList.add('is-invalid');
         this.classList.remove('is-valid');
         newPasswordFeedback.textContent = 'Kata laluan mestilah sekurang-kurangnya 8 aksara.';
-        newPasswordFeedback.style.display = 'block';
+        newPasswordIcon.className = 'validation-icon invalid';
+        newPasswordIcon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
         return;
     }
 
@@ -150,11 +196,14 @@ newPasswordInput.addEventListener('input', function() {
                 newPasswordInput.classList.add('is-invalid');
                 newPasswordInput.classList.remove('is-valid');
                 newPasswordFeedback.textContent = 'Kata laluan baru tidak boleh sama dengan kata laluan semasa anda.';
-                newPasswordFeedback.style.display = 'block';
+                newPasswordIcon.className = 'validation-icon invalid';
+                newPasswordIcon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
             } else {
                 newPasswordInput.classList.remove('is-invalid');
                 newPasswordInput.classList.add('is-valid');
-                newPasswordFeedback.style.display = 'none';
+                newPasswordFeedback.textContent = '';
+                newPasswordIcon.className = 'validation-icon valid';
+                newPasswordIcon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
             }
         })
         .catch(error => {
@@ -166,6 +215,7 @@ newPasswordInput.addEventListener('input', function() {
 // Real-time validation for confirm password field
 const confirmPasswordInput = document.getElementById('confirm_password');
 const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
+const confirmPasswordIcon = document.getElementById('confirmPasswordIcon');
 
 confirmPasswordInput.addEventListener('input', function() {
     const newPassword = newPasswordInput.value;
@@ -174,7 +224,9 @@ confirmPasswordInput.addEventListener('input', function() {
     // Reset feedback if empty
     if (confirmPassword.length === 0) {
         this.classList.remove('is-invalid', 'is-valid');
-        confirmPasswordFeedback.style.display = 'none';
+        confirmPasswordFeedback.textContent = '';
+        confirmPasswordIcon.className = 'validation-icon';
+        confirmPasswordIcon.innerHTML = '';
         return;
     }
 
@@ -183,11 +235,14 @@ confirmPasswordInput.addEventListener('input', function() {
         this.classList.add('is-invalid');
         this.classList.remove('is-valid');
         confirmPasswordFeedback.textContent = 'Kata laluan tidak sepadan. Sila semak semula.';
-        confirmPasswordFeedback.style.display = 'block';
+        confirmPasswordIcon.className = 'validation-icon invalid';
+        confirmPasswordIcon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
     } else {
         this.classList.remove('is-invalid');
         this.classList.add('is-valid');
-        confirmPasswordFeedback.style.display = 'none';
+        confirmPasswordFeedback.textContent = '';
+        confirmPasswordIcon.className = 'validation-icon valid';
+        confirmPasswordIcon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
     }
 });
 
