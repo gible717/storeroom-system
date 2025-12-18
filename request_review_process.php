@@ -1,5 +1,34 @@
 <?php
-// request_review_process.php - Handle request approval/rejection
+/**
+ * Request Review Processing
+ *
+ * PURPOSE:
+ * Handles admin approval or rejection of staff requests.
+ * Updates stock levels and logs transactions when approving.
+ *
+ * WORKFLOW (APPROVAL):
+ * 1. Validate admin is not approving their own request
+ * 2. Begin database transaction
+ * 3. For each item: Check stock, update barang.baki_semasa
+ * 4. Update permohonan_barang.kuantiti_lulus
+ * 5. Log to transaksi_stok (jenis='Keluar')
+ * 6. Update permohonan.status to 'Diluluskan'
+ * 7. Commit transaction
+ *
+ * WORKFLOW (REJECTION):
+ * 1. Validate admin is not rejecting their own request
+ * 2. Update permohonan.status to 'Ditolak'
+ * 3. No stock changes or transaction logs
+ *
+ * INPUT: POST data with id_permohonan, action (approve/reject), items array
+ * OUTPUT: Redirect to manage_requests.php or JSON response (AJAX)
+ *
+ * TABLES AFFECTED:
+ * - permohonan (UPDATE status, ID_pelulus, tarikh_lulus)
+ * - permohonan_barang (UPDATE kuantiti_lulus)
+ * - barang (UPDATE baki_semasa - on approval only)
+ * - transaksi_stok (INSERT transaction log - on approval only)
+ */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

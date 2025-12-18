@@ -1,5 +1,27 @@
 <?php
-// kewps8_form_process.php - Handle KEW.PS-8 form submission (AJAX)
+/**
+ * KEW.PS-8 Form Processing (AJAX)
+ *
+ * PURPOSE:
+ * Handles staff request submission for inventory items.
+ * Creates request header in 'permohonan' table and detail lines in 'permohonan_barang'.
+ *
+ * WORKFLOW:
+ * 1. Validate session and cart items
+ * 2. Get staff details from database
+ * 3. Begin database transaction
+ * 4. Insert request header (status = 'Baru')
+ * 5. Insert request items from cart
+ * 6. Send Telegram notification to admin
+ * 7. Commit transaction and clear cart
+ *
+ * INPUT: Cart items from $_SESSION['cart'], staff ID from session
+ * OUTPUT: JSON response with success/error message and request ID
+ *
+ * TABLES AFFECTED:
+ * - permohonan (INSERT new request)
+ * - permohonan_barang (INSERT request items)
+ */
 
 session_start();
 require_once __DIR__ . '/db.php';

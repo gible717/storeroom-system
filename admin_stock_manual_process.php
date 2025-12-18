@@ -1,5 +1,29 @@
 <?php
-// admin_stock_manual_process.php - Process stock update
+/**
+ * Manual Stock Adjustment Processing
+ *
+ * PURPOSE:
+ * Handles manual stock IN adjustments by admin.
+ * Used for restocking from suppliers or manual inventory corrections.
+ *
+ * WORKFLOW:
+ * 1. Validate input (quantity > 0, product exists)
+ * 2. Begin database transaction
+ * 3. UPDATE barang.baki_semasa (increase by quantity)
+ * 4. Get updated balance for accurate logging
+ * 5. INSERT transaction log to transaksi_stok (jenis='Masuk')
+ * 6. Commit transaction and redirect
+ *
+ * INPUT: POST data with ID_produk, jumlah_masuk, no_dokumen (supplier doc reference)
+ * OUTPUT: Redirect to admin_products.php with success/error message
+ *
+ * TABLES AFFECTED:
+ * - barang (UPDATE baki_semasa)
+ * - transaksi_stok (INSERT transaction log with no request reference)
+ *
+ * NOTE: This process is separate from request approval.
+ *       ID_rujukan_permohonan will be NULL as this is manual adjustment.
+ */
 
 require_once 'admin_auth_check.php';
 
@@ -10,12 +34,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $jumlah_masuk = (int)$_POST['jumlah_masuk'];
     $no_dokumen = $conn->real_escape_string($_POST['no_dokumen']);
     $id_staf = $userID;
-    $jenis_transaksi = 'Stok_Masuk';
-    $tarikh_transaksi = date('Y-m-d H:i:s');
-
-    // Set null for price fields (not applicable for stock in)
-    $harga_seunit = null;
-    $jumlah_harga = null;
 
     // Validate input
     if ($jumlah_masuk <= 0 || empty($id_produk)) {
@@ -33,21 +51,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_update->execute();
         $stmt_update->close();
 
-        // Insert transaction record
-        $sql_insert_transaksi = "INSERT INTO transaksi_inventori
-                                (ID_produk, ID_staf, jenis_transaksi, jumlah_transaksi, tarikh_transaksi, harga_seunit, jumlah_harga, no_dokumen)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // Get the stock balance after transaction for logging
+        $sql_get_baki = "SELECT baki_semasa FROM barang WHERE no_kod = ?";
+        $stmt_baki = $conn->prepare($sql_get_baki);
+        $stmt_baki->bind_param("s", $id_produk);
+        $stmt_baki->execute();
+        $result_baki = $stmt_baki->get_result();
+        $baki_selepas = $result_baki->fetch_assoc()['baki_semasa'];
+        $stmt_baki->close();
+
+        // Insert transaction record into transaksi_stok
+        $sql_insert_transaksi = "INSERT INTO transaksi_stok
+                                (no_kod, jenis_transaksi, kuantiti, baki_selepas_transaksi, tarikh_transaksi, terima_dari_keluar_kepada, ID_pegawai)
+                                VALUES (?, 'Masuk', ?, ?, NOW(), ?, ?)";
 
         $stmt_insert = $conn->prepare($sql_insert_transaksi);
-        $stmt_insert->bind_param("sssissds",
+        $stmt_insert->bind_param("siiss",
             $id_produk,
-            $id_staf,
-            $jenis_transaksi,
             $jumlah_masuk,
-            $tarikh_transaksi,
-            $harga_seunit,
-            $jumlah_harga,
-            $no_dokumen
+            $baki_selepas,
+            $no_dokumen,
+            $id_staf
         );
 
         $stmt_insert->execute();
@@ -55,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $conn->commit();
 
-        header("Location: admin_stock_manual.php?success=Stok berjaya dikemaskini!");
+        header("Location: admin_products.php?success=Stok berjaya dikemaskini!");
         exit;
 
     } catch (Exception $e) {
