@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/db.php';
 
 // Check if user is logged in and is an Admin
-if (!isset($_SESSION['ID_staf']) || $_SESSION['peranan'] != 'Admin') {
+if (!isset($_SESSION['ID_staf']) || $_SESSION['is_admin'] != 1) {
     header('Location: login.php');
     exit;
 }

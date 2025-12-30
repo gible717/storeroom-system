@@ -16,7 +16,8 @@ Primary table for all system users (both staff and admin)
 - `jawatan` (VARCHAR) - Position/Job title
 - `ID_jabatan` (INT) - FOREIGN KEY → jabatan.ID_jabatan
 - `gambar_profil` (VARCHAR) - Profile picture path
-- `is_admin` (TINYINT) - Admin flag (0=Staff, 1=Admin)
+- `is_admin` (TINYINT) - Role indicator: 0=Staff, 1=Admin
+- `is_first_login` (TINYINT) - First login flag: 0=No, 1=Yes
 - `created_at` (DATETIME) - Account creation timestamp
 
 **Relationships:**
@@ -77,18 +78,15 @@ Header table for stock requests (KEW.PS-8 form)
 **Columns:**
 - `ID_permohonan` (INT) - PRIMARY KEY AUTO_INCREMENT - Request ID
 - `tarikh_mohon` (DATE) - Request date
-- `masa_mohon` (DATETIME) - Request timestamp
-- `status` (ENUM: 'Baru', 'Diluluskan', 'Ditolak') - Request status
+- `status` (VARCHAR: 'Baru', 'Diluluskan', 'Ditolak', 'Diterima') - Request status
 - `ID_pemohon` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Requester ID
-- `nama_pemohon` (VARCHAR) - Requester name (denormalized)
-- `jawatan_pemohon` (VARCHAR) - Requester position (denormalized)
+- `nama_pemohon` (VARCHAR) - Requester name (denormalized for history)
+- `jawatan_pemohon` (VARCHAR) - Requester position (denormalized for history)
 - `ID_jabatan` (INT) - FOREIGN KEY → jabatan.ID_jabatan - Department ID
 - `catatan` (TEXT) - Notes/remarks
 - `ID_pelulus` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Approver ID
-- `nama_pelulus` (VARCHAR) - Approver name
-- `jawatan_pelulus` (VARCHAR) - Approver position
-- `tarikh_lulus` (DATE) - Approval date
-- `catatan_pelulus` (TEXT) - Approver notes
+- `tarikh_lulus` (DATETIME) - Approval/rejection datetime
+- `created_at` (TIMESTAMP) - Record creation timestamp
 
 **Relationships:**
 - One request belongs to ONE staff (pemohon/requester)
@@ -102,16 +100,38 @@ Header table for stock requests (KEW.PS-8 form)
 Detail table for requested items (many-to-many junction table)
 
 **Columns:**
-- `ID_permohonan_barang` (INT) - PRIMARY KEY AUTO_INCREMENT - Request item ID
+- `ID` (INT) - PRIMARY KEY AUTO_INCREMENT - Request item ID
 - `ID_permohonan` (INT) - FOREIGN KEY → permohonan.ID_permohonan - Request ID
 - `no_kod` (VARCHAR) - FOREIGN KEY → barang.no_kod - Product code
 - `kuantiti_mohon` (INT) - Quantity requested
-- `kuantiti_lulus` (INT) - Quantity approved (nullable)
+- `kuantiti_lulus` (INT) - Quantity approved (default 0)
 
 **Relationships:**
 - Many request items belong to ONE request (permohonan)
 - Many request items reference ONE product (barang)
 - **JUNCTION TABLE** linking permohonan ↔ barang (Many-to-Many)
+
+---
+
+### 7. **transaksi_stok** (Stock Transaction Log)
+Audit trail for all stock movements (in/out)
+
+**Columns:**
+- `ID_transaksi` (INT) - PRIMARY KEY AUTO_INCREMENT - Transaction ID
+- `no_kod` (VARCHAR) - FOREIGN KEY → barang.no_kod - Product code
+- `jenis_transaksi` (VARCHAR: 'Masuk', 'Keluar') - Transaction type (In/Out)
+- `kuantiti` (INT) - Quantity moved
+- `baki_selepas_transaksi` (INT) - Balance after transaction
+- `ID_rujukan_permohonan` (INT) - FOREIGN KEY → permohonan.ID_permohonan (nullable) - Related request
+- `ID_pegawai` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Officer who processed
+- `terima_dari_keluar_kepada` (VARCHAR) - Department/unit reference
+- `tarikh_transaksi` (DATETIME) - Transaction datetime
+- `catatan` (TEXT) - Transaction notes
+
+**Relationships:**
+- One transaction references ONE product (barang)
+- One transaction may reference ONE request (optional for manual adjustments)
+- One transaction is processed by ONE officer (staf)
 
 ---
 
@@ -124,10 +144,13 @@ erDiagram
 
     staf ||--o{ permohonan : "creates (as pemohon)"
     staf ||--o{ permohonan : "approves (as pelulus)"
+    staf ||--o{ transaksi_stok : "processes (as pegawai)"
 
     permohonan ||--o{ permohonan_barang : "contains"
+    permohonan ||--o{ transaksi_stok : "generates"
 
     barang ||--o{ permohonan_barang : "requested in"
+    barang ||--o{ transaksi_stok : "has movements"
 
     KATEGORI ||--o{ barang : "categorizes"
 
@@ -146,6 +169,7 @@ erDiagram
         INT ID_jabatan FK
         VARCHAR gambar_profil
         TINYINT is_admin "0=Staff 1=Admin"
+        TINYINT is_first_login "0=No 1=Yes"
         DATETIME created_at
     }
 
@@ -156,7 +180,7 @@ erDiagram
         DECIMAL harga_seunit "Price"
         VARCHAR nama_pembekal "Supplier"
         INT baki_semasa "Current Stock"
-        VARCHAR kategori
+        VARCHAR kategori "Denormalized"
         INT ID_kategori FK
         DATETIME created_at
     }
@@ -169,26 +193,36 @@ erDiagram
     permohonan {
         INT ID_permohonan PK "Auto Increment"
         DATE tarikh_mohon
-        DATETIME masa_mohon
-        ENUM status "Baru Diluluskan Ditolak"
+        VARCHAR status "Baru Diluluskan Ditolak Diterima"
         VARCHAR ID_pemohon FK "Requester"
-        VARCHAR nama_pemohon
-        VARCHAR jawatan_pemohon
+        VARCHAR nama_pemohon "Denormalized"
+        VARCHAR jawatan_pemohon "Denormalized"
         INT ID_jabatan FK
         TEXT catatan "Notes"
         VARCHAR ID_pelulus FK "Approver"
-        VARCHAR nama_pelulus
-        VARCHAR jawatan_pelulus
-        DATE tarikh_lulus
-        TEXT catatan_pelulus
+        DATETIME tarikh_lulus
+        TIMESTAMP created_at
     }
 
     permohonan_barang {
-        INT ID_permohonan_barang PK "Auto Increment"
+        INT ID PK "Auto Increment"
         INT ID_permohonan FK
         VARCHAR no_kod FK
         INT kuantiti_mohon "Qty Requested"
         INT kuantiti_lulus "Qty Approved"
+    }
+
+    transaksi_stok {
+        INT ID_transaksi PK "Auto Increment"
+        VARCHAR no_kod FK
+        VARCHAR jenis_transaksi "Masuk or Keluar"
+        INT kuantiti
+        INT baki_selepas_transaksi
+        INT ID_rujukan_permohonan FK "Nullable"
+        VARCHAR ID_pegawai FK "Officer"
+        VARCHAR terima_dari_keluar_kepada
+        DATETIME tarikh_transaksi
+        TEXT catatan
     }
 ```
 
@@ -225,6 +259,18 @@ erDiagram
 7. **KATEGORI → barang** (1:N)
    - One category contains many products
    - FK: `barang.ID_kategori` → `KATEGORI.ID_kategori`
+
+8. **barang → transaksi_stok** (1:N)
+   - One product has many stock movement records
+   - FK: `transaksi_stok.no_kod` → `barang.no_kod`
+
+9. **permohonan → transaksi_stok** (1:N)
+   - One request generates many stock transactions (optional relationship)
+   - FK: `transaksi_stok.ID_rujukan_permohonan` → `permohonan.ID_permohonan` (nullable)
+
+10. **staf → transaksi_stok (as pegawai)** (1:N)
+   - One officer processes many stock transactions
+   - FK: `transaksi_stok.ID_pegawai` → `staf.ID_staf`
 
 ### **M:N (Many-to-Many) Relationships:**
 
@@ -266,8 +312,11 @@ jabatan (1) ──────< (N) staf
 jabatan (1) ──────< (N) permohonan
 staf (1) ──────< (N) permohonan (as pemohon)
 staf (1) ──────< (N) permohonan (as pelulus)
+staf (1) ──────< (N) transaksi_stok (as pegawai)
 permohonan (1) ──────< (N) permohonan_barang
+permohonan (1) ──────< (N) transaksi_stok (optional)
 barang (1) ──────< (N) permohonan_barang
+barang (1) ──────< (N) transaksi_stok
 KATEGORI (1) ──────< (N) barang
 ```
 
@@ -278,13 +327,31 @@ KATEGORI (1) ──────< (N) barang
 1. **Every staff member must belong to one department** (mandatory relationship)
 2. **Only admins (is_admin=1) can approve requests** (pelulus)
 3. **Requests start with status 'Baru'** (new)
-4. **Approved requests update stock levels** (baki_semasa)
+4. **Approved requests update stock levels** (baki_semasa) and create stock transactions
 5. **One request can contain multiple items** (master-detail pattern)
 6. **Staff can be both requesters and approvers** (self-referencing on staf table)
-7. **Departments can be deleted only if no staff assigned** (referential integrity)
+7. **All stock movements are logged** in transaksi_stok table (audit trail)
+8. **ID_pegawai tracks the officer who processed the transaction** (different from pemohon/pelulus)
+9. **Stock transactions can be manual or request-based** (ID_rujukan_permohonan nullable)
 
 ---
 
-**Generated:** 2025-12-16
-**Database:** storeroom_db
+## Foreign Key Constraints
+
+**Database-level FK constraints implemented (30 December 2025):**
+
+1. `fk_barang_kategori`: barang.ID_kategori → KATEGORI.ID_kategori (ON DELETE RESTRICT)
+2. `fk_staf_jabatan`: staf.ID_jabatan → jabatan.ID_jabatan (ON DELETE SET NULL)
+3. `fk_permohonan_jabatan`: permohonan.ID_jabatan → jabatan.ID_jabatan (ON DELETE SET NULL)
+4. `fk_permohonan_pemohon`: permohonan.ID_pemohon → staf.ID_staf (ON DELETE RESTRICT)
+5. `fk_permohonan_pelulus`: permohonan.ID_pelulus → staf.ID_staf (ON DELETE RESTRICT)
+6. `fk_pb_barang`: permohonan_barang.no_kod → barang.no_kod (ON DELETE RESTRICT)
+7. `fk_pb_permohonan`: permohonan_barang.ID_permohonan → permohonan.ID_permohonan (ON DELETE CASCADE)
+8. `fk_transaksi_stok_barang`: transaksi_stok.no_kod → barang.no_kod (ON DELETE RESTRICT)
+
+---
+
+**Generated:** 30 December 2025
+**Database:** storeroom_db (7 tables, 8 FK constraints)
 **System:** Sistem Pengurusan Bilik Stor dan Inventori MPK
+**Status:** Production-Ready, Cleaned & Optimized

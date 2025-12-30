@@ -1,6 +1,7 @@
 # DATABASE SCHEMA & DATA FLOW ANALYSIS
 **Sistem Pengurusan Bilik Stor dan Inventori - MPK**
-**Date:** 17 December 2025
+**Date:** 30 December 2025
+**Status:** PRODUCTION - Cleaned & Optimized
 
 ---
 
@@ -16,7 +17,7 @@
 | ID_staf | VARCHAR | PRIMARY KEY | Staff ID (e.g., A001, S001) |
 | nama | VARCHAR | NOT NULL | Full name |
 | kata_laluan | VARCHAR | NOT NULL | Hashed password |
-| peranan | ENUM/VARCHAR | NOT NULL | Role: 'Admin' or 'Staf' |
+| is_admin | TINYINT | NOT NULL DEFAULT 0 | Role indicator: 0=Staff, 1=Admin |
 | emel | VARCHAR | UNIQUE | Email address |
 | no_telefon | VARCHAR | | Phone number |
 | jawatan | VARCHAR | | Job position |
@@ -147,12 +148,15 @@
 | kuantiti | INT | NOT NULL | Quantity moved |
 | baki_selepas_transaksi | INT | NOT NULL | Balance after transaction |
 | ID_rujukan_permohonan | INT | FOREIGN KEY → permohonan | Related request ID (nullable) |
-| catatan | TEXT | | Transaction notes |
+| ID_pegawai | VARCHAR | FOREIGN KEY → staf | Officer who processed transaction |
+| terima_dari_keluar_kepada | VARCHAR | | Department/unit reference |
 | tarikh_transaksi | DATETIME | NOT NULL | Transaction datetime |
+| catatan | TEXT | | Transaction notes |
 
 **Relationships:**
 - `transaksi_stok.no_kod` → `barang.no_kod` (many-to-one)
 - `transaksi_stok.ID_rujukan_permohonan` → `permohonan.ID_permohonan` (many-to-one, optional)
+- `transaksi_stok.ID_pegawai` → `staf.ID_staf` (many-to-one)
 
 **Transaction Types:**
 - 'Masuk' - Stock in (restock, manual additions)
@@ -210,7 +214,7 @@
                │ ID_staf (PK)    │────▶│ID_jabatan(PK)│◄───────────┘
                │ nama            │ N:1 │nama_jabatan │
                │ kata_laluan     │     └─────────────┘
-               │ peranan         │
+               │ is_admin        │
                │ emel            │
                │ no_telefon      │
                │ jawatan         │
@@ -687,10 +691,10 @@ transaksi_stok (NEW RECORD)
 | transaksi_stok | ✅ Yes | ID_transaksi | no_kod → barang<br>ID_rujukan_permohonan → permohonan (nullable) | Audit log |
 
 **Findings:**
-- ✅ All core tables implemented
+- ✅ All core tables implemented (7 tables total)
 - ✅ Relationships properly maintained in queries
 - ✅ Foreign keys used correctly in JOIN statements
-- ⚠️ No explicit FOREIGN KEY constraints visible (relies on application logic)
+- ✅ Database-level FOREIGN KEY constraints implemented (8 constraints)
 
 ---
 
@@ -807,25 +811,23 @@ barang:
 
 ---
 
-#### ⚠️ **Issue 3: No Database-Level Constraints**
+#### ✅ **Issue 3: Database-Level Constraints**
 **Location:** All tables
-**Problem:** No explicit FOREIGN KEY constraints defined in database
+**Status:** IMPLEMENTED (30 December 2025)
 
-**Current State:** Application-level integrity only
-**Impact:** Medium - Risk of orphaned records if data modified outside application
-**Recommendation:**
+**Current State:** 8 Foreign Key constraints implemented
+**Impact:** Data integrity enforced at database level
+**Constraints Added:**
 ```sql
-ALTER TABLE staf
-ADD CONSTRAINT fk_staf_jabatan
-FOREIGN KEY (ID_jabatan) REFERENCES jabatan(ID_jabatan)
-ON DELETE SET NULL;
-
-ALTER TABLE permohonan
-ADD CONSTRAINT fk_permohonan_pemohon
-FOREIGN KEY (ID_pemohon) REFERENCES staf(ID_staf)
-ON DELETE RESTRICT;
-
--- Add for all FK relationships
+-- ✅ IMPLEMENTED
+fk_barang_kategori (barang.ID_kategori → KATEGORI.ID_kategori)
+fk_staf_jabatan (staf.ID_jabatan → jabatan.ID_jabatan) - ON DELETE SET NULL
+fk_permohonan_jabatan (permohonan.ID_jabatan → jabatan.ID_jabatan) - ON DELETE SET NULL
+fk_permohonan_pemohon (permohonan.ID_pemohon → staf.ID_staf) - ON DELETE RESTRICT
+fk_permohonan_pelulus (permohonan.ID_pelulus → staf.ID_staf) - ON DELETE RESTRICT
+fk_pb_barang (permohonan_barang.no_kod → barang.no_kod) - ON DELETE RESTRICT
+fk_pb_permohonan (permohonan_barang.ID_permohonan → permohonan.ID_permohonan) - ON DELETE CASCADE
+fk_transaksi_stok_barang (transaksi_stok.no_kod → barang.no_kod) - ON DELETE RESTRICT
 ```
 
 ---
@@ -856,18 +858,20 @@ Most tables have `created_at` or equivalent tracking
 
 ## 5. FINAL VERDICT
 
-### ERD Alignment: ✅ **95% ACCURATE**
+### ERD Alignment: ✅ **100% ACCURATE**
 
 **Matches:**
-- ✅ All entities exist and are properly related
+- ✅ All entities exist and are properly related (7 tables)
 - ✅ Primary keys correctly defined
 - ✅ Foreign key relationships maintained in code
+- ✅ Database-level FK constraints implemented (8 constraints)
 - ✅ Junction table (permohonan_barang) properly implemented
 - ✅ Audit trail (transaksi_stok) complete
+- ✅ Cleaned structure: removed unused tables (produk) and columns
 
-**Minor Issues:**
-- ⚠️ No database-level FK constraints (application-level only)
-- ⚠️ Some denormalization (acceptable for performance/audit)
+**Design Decisions:**
+- ✅ Intentional denormalization (acceptable for performance/audit)
+- ✅ ID_pegawai in transaksi_stok (semantic clarity for approver role)
 
 ---
 
@@ -898,17 +902,25 @@ Most tables have `created_at` or equivalent tracking
 4. **Transactions:** Proper use of database transactions for critical operations
 5. **Security:** Prevention of self-approval, session management, password hashing
 
-### Recommendations for Perfect Alignment:
-1. Add database-level FOREIGN KEY constraints
-2. Document the denormalization strategy (historical vs. current data)
-3. Consider soft deletes for critical tables
-4. Add database triggers for automatic `kategori` text updates if needed
+### Database Optimization Completed (30 December 2025):
+1. ✅ Added database-level FOREIGN KEY constraints (8 constraints)
+2. ✅ Removed unused `produk` table
+3. ✅ Removed unused columns: `barang.lokasi_simpanan`, `barang.gambar_produk`, `staf.is_superadmin`, `staf.peranan`
+4. ✅ Cleaned up duplicate FK constraints
+5. ✅ Verified data integrity (0 orphaned records)
+6. ✅ Standardized role management on `is_admin` column only
+
+### Future Enhancements (Optional):
+1. Consider soft deletes for critical tables (`deleted_at` columns)
+2. Add database triggers for automatic `kategori` text updates if needed
+3. Implement audit logging triggers for critical table changes
 
 **Overall Assessment: EXCELLENT** ✅
-The system demonstrates solid database design principles and proper implementation of data flows.
+The system demonstrates solid database design principles, proper implementation of data flows, and professional database structure optimized for clarity and maintainability.
 
 ---
 
-**Report Generated:** 17 December 2025
-**Database:** storeroom_db
+**Report Generated:** 30 December 2025
+**Database:** storeroom_db (7 tables, 8 FK constraints)
 **System:** Sistem Pengurusan Bilik Stor dan Inventori - Majlis Perbandaran Kangar
+**Status:** Production-Ready, Cleaned & Optimized

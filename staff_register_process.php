@@ -62,19 +62,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Hash the password securely
     $hashed_password = password_hash($kata_laluan, PASSWORD_BCRYPT);
-    
-    // Set the default role
-    $peranan = 'Staf';
+
+    // Set the default role (staff registration always creates non-admin users)
+    $is_admin = 0;
     $is_first_login = 0;
 
-   // THIS IS THE FIX
-    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, peranan, is_first_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO staf (ID_staf, nama, emel, ID_jabatan, kata_laluan, is_admin, is_first_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    
-    // === IMPORTANT: CHECK THIS LINE ===
-    // This assumes ID_jabatan is an INTEGER (i). 
-    // THIS IS THE FIX: Add "i" for the integer and the $is_first_login variable
-    $stmt->bind_param("sssissi", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $peranan, $is_first_login);
+    $stmt->bind_param("sssisii", $id_staf, $nama, $emel, $id_jabatan, $hashed_password, $is_admin, $is_first_login);
     if ($stmt->execute()) {
         // Success! Return JSON response for AJAX
         echo json_encode([

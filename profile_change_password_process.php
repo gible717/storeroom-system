@@ -11,10 +11,10 @@ if (!isset($_SESSION['ID_staf'])) {
 }
 
 $user_id = $_SESSION['ID_staf'];
-$user_role = $_SESSION['peranan'];
+$is_admin = $_SESSION['is_admin'] ?? 0;
 
 // Set redirect paths
-$profile_page = ($user_role == 'Admin') ? 'admin_profile.php' : 'staff_profile.php';
+$profile_page = ($is_admin == 1) ? 'admin_profile.php' : 'staff_profile.php';
 $change_pass_page = 'profile_change_password.php';
 
 // Handle POST

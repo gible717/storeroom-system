@@ -3,10 +3,7 @@ session_start();
 require 'db.php';
 
 // Verify admin access
-$is_admin = (isset($_SESSION['peranan']) && $_SESSION['peranan'] == 'Admin') ||
-            (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1);
-
-if (!isset($_SESSION['ID_staf']) || !$is_admin) {
+if (!isset($_SESSION['ID_staf']) || $_SESSION['is_admin'] != 1) {
     die("Akses ditolak. Sila log masuk sebagai admin.");
 }
 

@@ -99,7 +99,7 @@ $requests = $stmt->get_result();
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
-                    <tr>
+                    <tr> 
                         <th>ID Permohonan</th>
                         <th>Tarikh Mohon</th>
                         <th>Nama Staf</th>

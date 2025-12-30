@@ -103,6 +103,8 @@ graph TB
         D3[("D3: barang")]
         D4[("D4: jabatan")]
         D5[("D5: permohonan_barang")]
+        D6[("D6: transaksi_stok")]
+        D7[("D7: KATEGORI")]
     end
 
     %% Authentication Flows
@@ -196,23 +198,25 @@ graph TB
 - **Input:** Approval decision (approve/reject)
 - **Processing:**
   - Update request status
-  - If approved: Deduct stock from barang.baki_semasa
-  - Record approver details (ID_pelulus, nama_pelulus)
+  - If approved:
+    - Deduct stock from barang.baki_semasa
+    - Create stock transaction records (transaksi_stok)
+  - Record approver details (ID_pelulus)
   - Set approval date (tarikh_lulus)
   - Generate receipt (KEW.PS-8 print)
-- **Output:** Updated request, updated stock levels
-- **Data Stores:** D2 (permohonan), D3 (barang), D5 (permohonan_barang)
+- **Output:** Updated request, updated stock levels, audit trail
+- **Data Stores:** D2 (permohonan), D3 (barang), D5 (permohonan_barang), D6 (transaksi_stok)
 
 #### **4.0 Inventory Management**
 - **Input:** Product CRUD operations, manual stock updates
 - **Processing:**
   - Add/edit/delete products
-  - Update stock levels manually
+  - Update stock levels manually (create transaksi_stok record)
   - Check for low stock (≤10 units)
   - Categorize products
   - Track suppliers
-- **Output:** Updated inventory, low stock alerts
-- **Data Stores:** D3 (barang)
+- **Output:** Updated inventory, low stock alerts, audit trail
+- **Data Stores:** D3 (barang), D6 (transaksi_stok), D7 (KATEGORI)
 
 #### **5.0 Reporting System**
 - **Input:** Report parameters (date range, category, department)
@@ -364,6 +368,8 @@ graph TB
 | D3 | barang | Product/inventory master | ~200-500 items |
 | D4 | jabatan | Departments/units | ~10-20 depts |
 | D5 | permohonan_barang | Request detail items | ~300-1500/year |
+| D6 | transaksi_stok | Stock transaction audit log | ~500-2000/year |
+| D7 | KATEGORI | Product categories | ~10-30 categories |
 
 ### Key Data Flows:
 
@@ -412,6 +418,7 @@ graph TB
 
 ---
 
-**Generated:** 2025-12-16
-**Database:** storeroom_db
+**Generated:** 30 December 2025
+**Database:** storeroom_db (7 tables, 8 FK constraints)
 **System:** Sistem Pengurusan Bilik Stor dan Inventori MPK
+**Status:** Production-Ready, Cleaned & Optimized
