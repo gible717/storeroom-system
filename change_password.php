@@ -53,16 +53,16 @@ if ($_SESSION['is_admin'] == 1) {
 
                     <form action="change_password_process.php" method="POST" id="passwordForm">
                         <div class="mb-3">
-                            <label for="new_password" class="form-label">Kata Laluan Baru</label>
+                            <label for="new_password" class="form-label">Kata Laluan Baru <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Masukkan kata laluan baru..." required>
                                 <span class="input-group-text" id="toggleNewPassword" style="cursor: pointer;"><i class="bi bi-eye-slash-fill"></i></span>
                             </div>
-                            <small class="form-text text-muted">*Kata laluan mestilah sekurang-kurangnya 8 aksara</small>
+                            <small class="form-text text-muted">Kata laluan mestilah sekurang-kurangnya 8 aksara</small>
                         </div>
 
                         <div class="mb-4">
-                            <label for="confirm_password" class="form-label">Sahkan Kata Laluan Baru</label>
+                            <label for="confirm_password" class="form-label">Sahkan Kata Laluan Baru <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Sahkan kata laluan baru..." required>
                                 <span class="input-group-text" id="toggleConfirmPassword" style="cursor: pointer;"><i class="bi bi-eye-slash-fill"></i></span>

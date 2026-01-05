@@ -151,7 +151,7 @@ function getInitials($name) {
             </div>
 
             <div class="mb-3">
-                <label for="nama" class="form-label">Nama Penuh</label>
+                <label for="nama" class="form-label">Nama Penuh <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="nama" name="nama" value="<?php echo htmlspecialchars($user['nama']); ?>" required>
             </div>
 
@@ -161,7 +161,7 @@ function getInitials($name) {
             </div>
 
             <div class="mb-3">
-                <label for="emel" class="form-label">Emel</label>
+                <label for="emel" class="form-label">Emel <span class="text-danger">*</span></label>
                 <input type="email" class="form-control" id="emel" name="emel" value="<?php echo htmlspecialchars($user['emel']); ?>" required>
             </div>
 

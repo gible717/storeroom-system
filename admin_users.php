@@ -16,6 +16,28 @@ $users = $stmt->get_result();
 $total_rows = $users->num_rows;
 ?>
 
+<style>
+/* Role badges - matching new status pill styling */
+.role-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-admin {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.role-staf {
+    background: #e2e3e5;
+    color: #41464b;
+}
+</style>
+
 <!-- Page Header -->
 <div class="text-center mb-3">
     <h3 class="mb-0 fw-bold">Senarai Pengguna</h3>
@@ -89,9 +111,9 @@ $total_rows = $users->num_rows;
                                 <td>
                                     <?php
                                     if ($user['is_admin'] == 1) {
-                                        echo '<span class="badge bg-primary">Admin</span>';
+                                        echo '<span class="role-badge role-admin">Admin</span>';
                                     } else {
-                                        echo '<span class="badge bg-secondary">Staf</span>';
+                                        echo '<span class="role-badge role-staf">Staf</span>';
                                     }
                                     ?>
                                 </td>

@@ -29,6 +29,31 @@ $total_rows = $result->num_rows;
 .text-view { color: #667EEA; }
 .text-edit { color: #64748B; }
 .text-delete { color: #DC2626; }
+
+/* Stock status badges - matching new status pill styling */
+.stock-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stock-mencukupi {
+    background: #d1e7dd;
+    color: #0a3622;
+}
+
+.stock-rendah {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.stock-habis {
+    background: #f8d7da;
+    color: #58151c;
+}
 </style>
 
 <div class="container-fluid">
@@ -131,9 +156,9 @@ $total_rows = $result->num_rows;
                                     <td>
                                         <?php
                                         $stok = (int)$row['stok_semasa'];
-                                        if ($stok > 10) echo '<span class="badge bg-success">Stok Mencukupi</span>';
-                                        elseif ($stok > 0) echo '<span class="badge bg-warning">Stok Rendah</span>';
-                                        else echo '<span class="badge bg-danger">Kehabisan Stok</span>';
+                                        if ($stok > 10) echo '<span class="stock-badge stock-mencukupi">Stok Mencukupi</span>';
+                                        elseif ($stok > 0) echo '<span class="stock-badge stock-rendah">Stok Rendah</span>';
+                                        else echo '<span class="stock-badge stock-habis">Kehabisan Stok</span>';
                                         ?>
                                     </td>
                                     <td>

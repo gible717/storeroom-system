@@ -5,45 +5,71 @@ require 'admin_header.php';
 ?>
 
 <style>
-/* Glowing animation for "Baru" status badge */
+/* Glowing animation for "Baru" status badge - text only */
 @keyframes pulse-glow {
-    0% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); transform: scale(1); }
-    50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6); transform: scale(1.05); }
-    100% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); transform: scale(1); }
-}
-.badge-glow { animation: pulse-glow 2s ease-in-out infinite; font-weight: 600; }
-
-/* Hover effect for clickable Pantau Stok card */
-.card[role="button"]:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-.card[role="button"]:hover .bi-exclamation-triangle-fill {
-    opacity: 1 !important;
+    0% {
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6), 0 0 40px rgba(255, 193, 7, 0.4);
+    }
+    100% {
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
+    }
 }
 
-/* Show "Klik untuk lihat" text on hover */
-.card[role="button"] .hover-text {
-    opacity: 0.15;
-    transition: opacity 0.3s;
-}
-.card[role="button"]:hover .hover-text {
-    opacity: 1;
+/* Status badges */
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Glowing animation for stock warning number (red) */
+.status-baru {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.status-baru-recent {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.status-diluluskan { background: #d1e7dd; color: #0a3622; }
+.status-ditolak { background: #f8d7da; color: #58151c; }
+
+/* Stock status badges - matching status pill styling */
+.stock-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stock-rendah {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.stock-habis {
+    background: #f8d7da;
+    color: #58151c;
+}
+
+/* Glowing animation for stock warning number (red) - text-shadow only, no movement */
 @keyframes stock-warning-glow {
     0% {
         text-shadow: 0 0 5px rgba(220, 53, 69, 0.5), 0 0 10px rgba(220, 53, 69, 0.3);
-        transform: scale(1);
     }
     50% {
         text-shadow: 0 0 20px rgba(220, 53, 69, 0.8), 0 0 30px rgba(220, 53, 69, 0.6), 0 0 40px rgba(220, 53, 69, 0.4);
-        transform: scale(1.05);
     }
     100% {
         text-shadow: 0 0 5px rgba(220, 53, 69, 0.5), 0 0 10px rgba(220, 53, 69, 0.3);
-        transform: scale(1);
     }
 }
 .stock-warning-active {
@@ -54,19 +80,16 @@ require 'admin_header.php';
     color: #198754 !important;
 }
 
-/* Glowing animation for pending requests number (yellow) */
+/* Glowing animation for pending requests number (yellow) - text-shadow only, no movement */
 @keyframes pending-warning-glow {
     0% {
         text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
-        transform: scale(1);
     }
     50% {
         text-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6), 0 0 40px rgba(255, 193, 7, 0.4);
-        transform: scale(1.05);
     }
     100% {
         text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
-        transform: scale(1);
     }
 }
 .pending-warning-active {
@@ -75,6 +98,110 @@ require 'admin_header.php';
 }
 .pending-warning-safe {
     color: #198754 !important;
+}
+
+/* Enhanced request list item styles */
+.request-list-item {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    padding: 1rem 0.5rem;
+}
+.request-list-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #0d6efd;
+}
+
+/* Stat card styles */
+.admin-stat-card {
+    border: none;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    width: 220px;
+    overflow: hidden;
+}
+
+.admin-stat-card .card-body {
+    padding: 1.5rem 1.25rem;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.admin-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    z-index: 1;
+}
+
+.admin-stat-card .stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+.admin-stat-card .stat-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    opacity: 0.15;
+}
+
+.admin-stat-card .hover-text {
+    opacity: 0;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    transition: opacity 0.3s;
+}
+
+.admin-stat-card:hover .hover-text {
+    opacity: 1;
+}
+
+/* Color themes for stat cards */
+.admin-stat-primary::before { background: #0d6efd; }
+.admin-stat-primary .stat-number { color: #0d6efd; }
+.admin-stat-primary .stat-icon { color: #0d6efd; }
+
+.admin-stat-warning::before { background: #ffc107; }
+.admin-stat-warning .stat-number { color: #ffc107; }
+.admin-stat-warning .stat-icon { color: #ffc107; }
+
+.admin-stat-danger::before { background: #dc3545; }
+.admin-stat-danger .stat-number { color: #dc3545; }
+.admin-stat-danger .stat-icon { color: #dc3545; }
+
+/* Apply glow animation classes to stat card numbers */
+.admin-stat-card .pending-warning-active {
+    animation: pending-warning-glow 2s ease-in-out infinite;
+}
+
+.admin-stat-card .stock-warning-active {
+    animation: stock-warning-glow 2s ease-in-out infinite;
 }
 </style>
 
@@ -155,6 +282,19 @@ $low_stock_sql = "SELECT no_kod AS ID_produk, perihal_stok AS nama_produk, baki_
                   ORDER BY baki_semasa ASC, perihal_stok ASC";
 $low_stock_items = $conn->query($low_stock_sql);
 
+// Get pending requests details (status = 'Baru' for modal)
+$pending_sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, s.nama,
+                    COUNT(pb.ID_permohonan_barang) AS bilangan_item,
+                    GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
+                FROM permohonan p
+                JOIN staf s ON p.ID_pemohon = s.ID_staf
+                LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+                LEFT JOIN barang b ON pb.no_kod = b.no_kod
+                WHERE p.status = 'Baru'
+                GROUP BY p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, s.nama
+                ORDER BY p.ID_permohonan DESC";
+$pending_requests = $conn->query($pending_sql);
+
 // Get recent requests
 $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status, s.nama,
                     COUNT(pb.ID_permohonan_barang) AS bilangan_item,
@@ -174,44 +314,36 @@ $recent_requests = $conn->query($sql_requests);
 </div>
 
 <!-- Stats Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
+<div class="row g-3 mb-4 justify-content-center">
+    <div class="col-auto">
         <a href="admin_products.php" class="text-decoration-none">
-            <div class="card shadow-sm h-100" role="button" style="cursor: pointer; transition: all 0.3s;">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-box-seam-fill fs-1 text-primary opacity-50 me-4"></i>
-                    <div class="text-center flex-grow-1">
-                        <h5 class="card-title text-muted fw-bold">Jumlah Produk</h5>
-                        <p class="card-text fs-2 fw-bold mb-0"><?php echo $jumlahProduk; ?></p>
-                        <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
-                    </div>
+            <div class="card admin-stat-card admin-stat-primary">
+                <div class="card-body position-relative">
+                    <p class="stat-label fw-bold">Jumlah Produk</p>
+                    <p class="stat-number"><?php echo $jumlahProduk; ?></p>
+                    <small class="hover-text">Klik untuk lihat</small>
+                    <i class="bi bi-box-seam-fill stat-icon"></i>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-4">
-        <a href="manage_requests.php" class="text-decoration-none">
-            <div class="card shadow-sm h-100" role="button" style="cursor: pointer; transition: all 0.3s;">
-                <div class="card-body d-flex align-items-center">
-                    <i class="bi bi-clock-history fs-1 text-warning opacity-50 me-4"></i>
-                    <div class="text-center flex-grow-1">
-                        <h5 class="card-title text-muted fw-bold">Permohonan Tertunda</h5>
-                        <p class="card-text fs-2 fw-bold mb-0" id="pendingRequestNumber" data-pending-count="<?php echo $tertunda; ?>"><?php echo $tertunda; ?></p>
-                        <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
-                    </div>
-                </div>
+    <div class="col-auto">
+        <div class="card admin-stat-card admin-stat-warning" data-bs-toggle="modal" data-bs-target="#pendingRequestModal">
+            <div class="card-body position-relative">
+                <p class="stat-label fw-bold">Permohonan Tertunda</p>
+                <p class="stat-number" id="pendingRequestNumber" data-pending-count="<?php echo $tertunda; ?>"><?php echo $tertunda; ?></p>
+                <small class="hover-text">Klik untuk lihat</small>
+                <i class="bi bi-clock-history stat-icon"></i>
             </div>
-        </a>
+        </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100" role="button" data-bs-toggle="modal" data-bs-target="#stockWarningModal" style="cursor: pointer; transition: all 0.3s;">
-            <div class="card-body d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle-fill fs-1 text-danger opacity-75 me-4"></i>
-                <div class="text-center flex-grow-1">
-                    <h5 class="card-title text-muted fw-bold">Pantau Stok</h5>
-                    <p class="card-text fs-2 fw-bold mb-0" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>"><?php echo $stokRendah; ?></p>
-                    <small class="text-muted d-block mt-1 hover-text">Klik untuk lihat</small>
-                </div>
+    <div class="col-auto">
+        <div class="card admin-stat-card admin-stat-danger" data-bs-toggle="modal" data-bs-target="#stockWarningModal">
+            <div class="card-body position-relative">
+                <p class="stat-label fw-bold">Pantau Stok</p>
+                <p class="stat-number" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>"><?php echo $stokRendah; ?></p>
+                <small class="hover-text">Klik untuk lihat</small>
+                <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
             </div>
         </div>
     </div>
@@ -220,34 +352,62 @@ $recent_requests = $conn->query($sql_requests);
 <!-- Recent Requests -->
 <div class="card shadow-sm">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Permohonan Terkini</h5>
-        <a href="manage_requests.php" class="text-decoration-none">Lihat Semua &rarr;</a>
+        <h5 class="mb-0 fw-bold">Permohonan Terkini</h5>
+        <a href="manage_requests.php">
+            Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+        </a>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="list-group list-group-flush">
             <?php if ($recent_requests && $recent_requests->num_rows > 0): ?>
-                <?php while($req = $recent_requests->fetch_assoc()): ?>
-                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                    <div class="flex-grow-1">
-                        <strong><?php echo htmlspecialchars($req['senarai_barang'] ?? 'Tiada Item'); ?></strong>
-                        <small class="text-muted d-block">
-                            <?php echo htmlspecialchars($req['nama']); ?> - <?php echo smart_time_display($req['masa_mohon'], $req['tarikh_mohon']); ?>
+                <?php while($req = $recent_requests->fetch_assoc()):
+                    // Truncate item names if too long
+                    $item_names = $req['senarai_barang'] ?? 'Tiada Item';
+                    if (strlen($item_names) > 60) {
+                        $item_names = substr($item_names, 0, 57) . '...';
+                    }
+                ?>
+                <div class="list-group-item request-list-item d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1 me-3">
+                        <div class="d-flex align-items-center gap-2 mb-2 fw-semibold">
+                            <span><?php echo htmlspecialchars($item_names); ?></span>
+                            <?php if ($req['bilangan_item'] > 1): ?>
+                                <span class="badge bg-secondary"><?php echo $req['bilangan_item']; ?> item</span>
+                            <?php endif; ?>
+                        </div>
+                        <small class="text-muted">
+                            <?php echo htmlspecialchars($req['nama']); ?>
+                            <span class="mx-2">•</span>
+                            <?php echo smart_time_display($req['masa_mohon'], $req['tarikh_mohon']); ?>
                         </small>
                     </div>
-                    <span class="fw-bold me-4"><?php echo htmlspecialchars($req['bilangan_item']); ?> item</span>
-                    <?php
-                        $status = htmlspecialchars($req['status']);
-                        $badge_class = 'bg-secondary';
-                        $glow_class = '';
-                        if ($status === 'Diluluskan') $badge_class = 'bg-success';
-                        elseif ($status === 'Baru') { $badge_class = 'bg-warning text-dark'; $glow_class = 'badge-glow'; }
-                        elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
-                    ?>
-                    <span class="badge <?php echo $badge_class . ' ' . $glow_class; ?>"><?php echo $status; ?></span>
+                    <div class="d-flex align-items-start" style="margin-left: -80px;">
+                        <?php
+                            $status = htmlspecialchars($req['status']);
+                            $badge_class = 'status-badge';
+                            if ($status === 'Diluluskan') $badge_class .= ' status-diluluskan';
+                            elseif ($status === 'Baru') {
+                                $badge_class .= ' status-baru status-baru-recent';
+                                // Add timestamp data attribute
+                                $request_timestamp = strtotime($req['tarikh_mohon'] . ' ' . $req['masa_mohon']);
+                                echo '<span class="' . $badge_class . '" data-request-time="' . $request_timestamp . '">' . $status . '</span>';
+                            } elseif ($status === 'Ditolak') {
+                                $badge_class .= ' status-ditolak';
+                                echo '<span class="' . $badge_class . '">' . $status . '</span>';
+                            } else {
+                                echo '<span class="' . $badge_class . '">' . $status . '</span>';
+                            }
+                        ?>
+                        <?php if ($status !== 'Baru'): ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <?php endwhile; ?>
             <?php else: ?>
-                <p class="text-muted text-center my-3">Tiada permohonan terkini.</p>
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 opacity-25 d-block mb-3"></i>
+                    <p class="mb-0">Tiada permohonan terkini.</p>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -259,7 +419,7 @@ $recent_requests = $conn->query($sql_requests);
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="stockWarningModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Pantau Stok - Stok Rendah & Habis
+                    Pantau Stok - Stok Rendah & Habis
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -275,9 +435,8 @@ $recent_requests = $conn->query($sql_requests);
                         $low_stock_items->data_seek(0); // Reset pointer to beginning
                         while($item = $low_stock_items->fetch_assoc()):
                             $is_out_of_stock = $item['stok_semasa'] == 0;
-                            $badge_class = $is_out_of_stock ? 'bg-danger' : 'bg-warning text-dark';
+                            $badge_class = $is_out_of_stock ? 'stock-badge stock-habis' : 'stock-badge stock-rendah';
                             $badge_text = $is_out_of_stock ? 'Stok Habis' : 'Stok Rendah';
-                            $icon = $is_out_of_stock ? 'bi-x-circle-fill' : 'bi-exclamation-circle-fill';
                         ?>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="flex-grow-1">
@@ -292,7 +451,7 @@ $recent_requests = $conn->query($sql_requests);
                                 </small>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge <?php echo $badge_class; ?>"><?php echo $badge_text; ?></span>
+                                <span class="<?php echo $badge_class; ?>"><?php echo $badge_text; ?></span>
                                 <a href="admin_stock_manual.php" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-plus-circle-fill me-1"></i>Kemaskini
                                 </a>
@@ -314,6 +473,78 @@ $recent_requests = $conn->query($sql_requests);
                 <a href="admin_products.php" class="btn btn-secondary">
                     <i class="bi bi-box-seam me-2"></i>Urus Produk
                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Request Modal -->
+<div class="modal fade" id="pendingRequestModal" tabindex="-1" aria-labelledby="pendingRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="pendingRequestModalLabel">
+                    Permohonan Tertunda
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <?php if ($pending_requests && $pending_requests->num_rows > 0): ?>
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Terdapat <strong><?php echo $tertunda; ?> permohonan</strong> yang menunggu tindakan anda.
+                    </div>
+
+                    <div class="list-group">
+                        <?php
+                        $pending_requests->data_seek(0); // Reset pointer to beginning
+                        while($req = $pending_requests->fetch_assoc()):
+                            // Truncate item names if too long
+                            $item_names = $req['senarai_barang'] ?? 'Tiada Item';
+                            if (strlen($item_names) > 80) {
+                                $item_names = substr($item_names, 0, 77) . '...';
+                            }
+                        ?>
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <a href="manage_requests.php" class="btn btn-link p-0 fw-bold text-decoration-none me-2">
+                                        #<?php echo htmlspecialchars($req['ID_permohonan']); ?>
+                                    </a>
+                                    <span class="badge bg-secondary"><?php echo $req['bilangan_item']; ?> item</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-person-fill me-1"></i><?php echo htmlspecialchars($req['nama']); ?>
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-calendar-event me-1"></i><?php echo smart_time_display($req['masa_mohon'], $req['tarikh_mohon']); ?>
+                                    </small>
+                                </div>
+                                <small class="text-dark">
+                                    <strong>Item:</strong> <?php echo htmlspecialchars($item_names); ?>
+                                </small>
+                            </div>
+                            <div class="text-end ms-3">
+                                <a href="manage_requests.php" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-eye-fill me-1"></i>Lihat
+                                </a>
+                            </div>
+                        </div>
+                        <?php endwhile; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-success text-center" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Tiada permohonan tertunda!</strong> Semua permohonan telah diproses.
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <a href="manage_requests.php" class="btn btn-primary">
+                    <i class="bi bi-list-check me-2"></i>Urus Semua Permohonan
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -387,8 +618,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // When pending requests card is clicked, reset the session timer
-    pendingNumberEl.closest('a').addEventListener('click', function() {
+    // When pending request modal is opened, reset the session timer
+    const pendingModal = document.getElementById('pendingRequestModal');
+    pendingModal.addEventListener('shown.bs.modal', function() {
         localStorage.setItem(pendingSessionKey, Date.now().toString());
         pendingNumberEl.classList.remove('pending-warning-active');
         if (pendingCount > 0) {
@@ -405,6 +637,27 @@ document.addEventListener('DOMContentLoaded', function() {
         checkStockWarningStatus();
         checkPendingRequestStatus();
     }, 60000);
+
+    // Handle 5-minute glow for "Baru" status badges in Permohonan Terkini
+    const baruBadges = document.querySelectorAll('.status-baru-recent');
+    const glowDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    baruBadges.forEach(badge => {
+        const requestTime = parseInt(badge.getAttribute('data-request-time')) * 1000; // Convert to milliseconds
+        const currentTime = Date.now();
+        const timeDiff = currentTime - requestTime;
+
+        if (timeDiff > glowDuration) {
+            // Request is older than 5 minutes, remove glow animation
+            badge.classList.remove('status-baru-recent');
+        } else {
+            // Request is within 5 minutes, schedule removal of glow
+            const remainingTime = glowDuration - timeDiff;
+            setTimeout(function() {
+                badge.classList.remove('status-baru-recent');
+            }, remainingTime);
+        }
+    });
 });
 </script>
 

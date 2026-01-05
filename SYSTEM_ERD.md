@@ -135,10 +135,21 @@ Audit trail for all stock movements (in/out)
 
 ---
 
-## ERD Diagram (Mermaid Syntax)
+## ERD Diagram - Crow's Foot Notation
+
+### Crow's Foot Notation Legend:
+```
+||   One (and only one)
+|o   Zero or one
+}o   Zero or many (optional)
+}{   One or many (mandatory)
+```
+
+### ERD Diagram (Crow's Foot)
 
 ```mermaid
 erDiagram
+    %% One-to-Many Relationships
     jabatan ||--o{ staf : "employs"
     jabatan ||--o{ permohonan : "makes requests from"
 
@@ -146,14 +157,15 @@ erDiagram
     staf ||--o{ permohonan : "approves (as pelulus)"
     staf ||--o{ transaksi_stok : "processes (as pegawai)"
 
-    permohonan ||--o{ permohonan_barang : "contains"
+    KATEGORI ||--o{ barang : "categorizes"
+
+    permohonan ||--}{ permohonan_barang : "contains"
     permohonan ||--o{ transaksi_stok : "generates"
 
     barang ||--o{ permohonan_barang : "requested in"
-    barang ||--o{ transaksi_stok : "has movements"
+    barang ||--}{ transaksi_stok : "has movements"
 
-    KATEGORI ||--o{ barang : "categorizes"
-
+    %% Entity Definitions
     jabatan {
         INT ID_jabatan PK
         VARCHAR nama_jabatan
@@ -163,44 +175,44 @@ erDiagram
     staf {
         VARCHAR ID_staf PK "Employee Number"
         VARCHAR nama
-        VARCHAR emel
+        VARCHAR emel UNIQUE
         VARCHAR kata_laluan "Hashed"
         VARCHAR jawatan
         INT ID_jabatan FK
         VARCHAR gambar_profil
-        TINYINT is_admin "0=Staff 1=Admin"
-        TINYINT is_first_login "0=No 1=Yes"
-        DATETIME created_at
-    }
-
-    barang {
-        VARCHAR no_kod PK "Product Code"
-        VARCHAR perihal_stok "Description"
-        VARCHAR unit_pengukuran "Unit"
-        DECIMAL harga_seunit "Price"
-        VARCHAR nama_pembekal "Supplier"
-        INT baki_semasa "Current Stock"
-        VARCHAR kategori "Denormalized"
-        INT ID_kategori FK
+        TINYINT is_admin "0=Staff, 1=Admin"
+        TINYINT is_first_login "0=No, 1=Yes"
         DATETIME created_at
     }
 
     KATEGORI {
         INT ID_kategori PK
-        VARCHAR nama_kategori
+        VARCHAR nama_kategori UNIQUE
+    }
+
+    barang {
+        VARCHAR no_kod PK "Product Code"
+        VARCHAR perihal_stok "Description"
+        INT ID_kategori FK
+        VARCHAR kategori "Denormalized"
+        VARCHAR unit_pengukuran "Unit"
+        DECIMAL harga_seunit "Price"
+        VARCHAR nama_pembekal "Supplier"
+        INT baki_semasa "Current Stock"
+        DATETIME created_at
     }
 
     permohonan {
         INT ID_permohonan PK "Auto Increment"
         DATE tarikh_mohon
-        VARCHAR status "Baru Diluluskan Ditolak Diterima"
+        VARCHAR status "Baru|Diluluskan|Ditolak|Diterima"
         VARCHAR ID_pemohon FK "Requester"
         VARCHAR nama_pemohon "Denormalized"
         VARCHAR jawatan_pemohon "Denormalized"
         INT ID_jabatan FK
         TEXT catatan "Notes"
-        VARCHAR ID_pelulus FK "Approver"
-        DATETIME tarikh_lulus
+        VARCHAR ID_pelulus FK "Approver (nullable)"
+        DATETIME tarikh_lulus "Nullable"
         TIMESTAMP created_at
     }
 
@@ -215,7 +227,7 @@ erDiagram
     transaksi_stok {
         INT ID_transaksi PK "Auto Increment"
         VARCHAR no_kod FK
-        VARCHAR jenis_transaksi "Masuk or Keluar"
+        VARCHAR jenis_transaksi "Masuk|Keluar"
         INT kuantiti
         INT baki_selepas_transaksi
         INT ID_rujukan_permohonan FK "Nullable"
@@ -224,6 +236,108 @@ erDiagram
         DATETIME tarikh_transaksi
         TEXT catatan
     }
+```
+
+---
+
+## Visual ERD - Crow's Foot Notation (Text-Based)
+
+```
+┌─────────────────────────┐
+│       KATEGORI          │
+│─────────────────────────│
+│ PK  ID_kategori (INT)   │
+│     nama_kategori       │
+└───────────┬─────────────┘
+            │
+            │ 1
+            │
+            ○ categorizes
+            │
+            │ N
+            │
+┌───────────┴─────────────┐           ┌─────────────────────────┐
+│        barang           │           │       jabatan           │
+│─────────────────────────│           │─────────────────────────│
+│ PK  no_kod (VARCHAR)    │           │ PK  ID_jabatan (INT)    │
+│     perihal_stok        │           │     nama_jabatan        │
+│ FK  ID_kategori         │           │     created_at          │
+│     kategori (denorm)   │           └───────┬────────┬────────┘
+│     unit_pengukuran     │                   │        │
+│     harga_seunit        │                   │ 1      │ 1
+│     nama_pembekal       │                   │        │
+│     baki_semasa         │                   ○        ○ employs / requests from
+│     created_at          │                   │        │
+└──────┬──────────┬───────┘                   │ N      │ N
+       │          │                           │        │
+       │ 1        │ 1                  ┌──────┴────────┴──────────────────────┐
+       │          │                    │              staf                     │
+       ○          ○ has movements      │───────────────────────────────────────│
+       │          │                    │ PK  ID_staf (VARCHAR)                 │
+       │ N        │ N                  │     nama                              │
+       │          │                    │     emel (UNIQUE)                     │
+┌──────┴──────┐   │                    │     kata_laluan (hashed)              │
+│ permohonan_ │   │                    │     jawatan                           │
+│   barang    │   │                    │ FK  ID_jabatan                        │
+│─────────────│   │                    │     gambar_profil                     │
+│ PK  ID      │   │                    │     is_admin (0/1)                    │
+│ FK  ID_perm │   │                    │     is_first_login (0/1)              │
+│ FK  no_kod  │   │                    │     created_at                        │
+│ kuantiti_m  │   │                    └──────┬────────┬───────────────────┬───┘
+│ kuantiti_l  │   │                           │        │                   │
+└──────┬──────┘   │                           │        │                   │
+       │          │                           │ 1      │ 1                 │ 1
+       │ N        │                           │        │                   │
+       │          │                           ○ creates○ approves          ○ processes
+       │          │                           │        │                   │
+       │ 1        │                           │ N      │ N                 │ N
+       │          │                           │        │                   │
+┌──────┴──────────┴───────────────────────────┴────────┴───────┐           │
+│                      permohonan                               │           │
+│───────────────────────────────────────────────────────────────│           │
+│ PK  ID_permohonan (INT AUTO_INCREMENT)                        │           │
+│     tarikh_mohon                                              │           │
+│     status (Baru|Diluluskan|Ditolak|Diterima)                │           │
+│ FK  ID_pemohon → staf.ID_staf (requester)                    │           │
+│     nama_pemohon (denormalized)                               │           │
+│     jawatan_pemohon (denormalized)                            │           │
+│ FK  ID_jabatan → jabatan.ID_jabatan                           │           │
+│     catatan                                                   │           │
+│ FK  ID_pelulus → staf.ID_staf (approver, nullable)           │           │
+│     tarikh_lulus                                              │           │
+│     created_at                                                │           │
+└───────────────────────────────┬───────────────────────────────┘           │
+                                │                                           │
+                                │ 1                                         │
+                                │                                           │
+                                ○ generates                                 │
+                                │                                           │
+                                │ N                                         │
+                                │                                           │
+                    ┌───────────┴───────────────────────────────────────────┘
+                    │
+┌───────────────────┴─────────────────────┐
+│          transaksi_stok                 │
+│─────────────────────────────────────────│
+│ PK  ID_transaksi (INT AUTO_INCREMENT)   │
+│ FK  no_kod → barang.no_kod              │
+│     jenis_transaksi (Masuk|Keluar)      │
+│     kuantiti                            │
+│     baki_selepas_transaksi              │
+│ FK  ID_rujukan_permohonan (nullable)    │
+│ FK  ID_pegawai → staf.ID_staf           │
+│     terima_dari_keluar_kepada           │
+│     tarikh_transaksi                    │
+│     catatan                             │
+└─────────────────────────────────────────┘
+
+Legend:
+───── Relationship line
+  │   Connection
+  ○   Zero or more (optional, can be NULL)
+  ●   One or more (mandatory)
+  1   One (exactly one)
+  N   Many (zero or more)
 ```
 
 ---
@@ -286,22 +400,50 @@ erDiagram
 
 ## Database Normalization
 
-**Current Form: 2NF (Second Normal Form)**
+**Current Form: 2NF (Second Normal Form) - Intentional Design Decision**
 
-### Why 2NF?
-- ✅ All non-key attributes depend on the primary key
-- ✅ No partial dependencies exist
-- ⚠️ Some denormalization exists (nama_pemohon, jawatan_pemohon stored in permohonan)
+### Why 2NF (Not 3NF)?
+- ✅ All tables are in 1NF (atomic values, no repeating groups)
+- ✅ All non-key attributes depend on the primary key (2NF satisfied)
+- ⚠️ **Intentional denormalization** exists in `permohonan` table:
+  - `nama_pemohon` (duplicates `staf.nama`)
+  - `jawatan_pemohon` (duplicates `staf.jawatan`)
+  - These violate 3NF because they depend on `ID_pemohon`, not directly on `ID_permohonan`
 
-### Denormalization Reasons:
-- **Historical Data Preservation**: Stores requester's name/position at time of request
-- **Performance**: Avoids joins when displaying request history
-- **Data Integrity**: Preserves original request details even if staff record changes
+### Why Denormalization is Required:
+
+#### 1. **Historical Data Preservation (Regulatory Compliance)**
+KEW.PS-8 is a government form that must show **exact details at the time of request**:
+- If staff name changes (marriage, corrections): old requests show original name
+- If staff gets promoted: old requests show original position
+- If staff leaves organization: their historical requests remain intact
+
+**Example:**
+```
+15 Jan 2025: Request #123 by "Ahmad Faiz, Pembantu Tadbir"
+1 Mar 2025: Ahmad promoted to "Penolong Pegawai Tadbir"
+Printing request #123: Still shows "Pembantu Tadbir" ✅ (correct)
+```
+
+#### 2. **Audit Trail Requirements**
+- Government audits require proof of who made the request and their position **at that specific time**
+- Denormalized data provides immutable historical records
+- Protects against data loss if staff records are modified or deleted
+
+#### 3. **Performance Optimization**
+- Avoids JOIN operations when displaying request history, reports, and printing forms
+- Faster queries for frequently accessed request data
 
 ### Could be 3NF if:
 - Remove `nama_pemohon`, `jawatan_pemohon` from `permohonan` (always JOIN with staf)
-- Remove `nama_pelulus`, `jawatan_pelulus` from `permohonan` (always JOIN with staf)
-- **Trade-off**: Performance vs strict normalization
+- **Trade-off**: Strict normalization vs Business requirements
+- **Decision**: We choose 2NF because **regulatory compliance and historical accuracy** are more important than strict normalization
+
+### Why This is Good Design:
+This is an example of **pragmatic denormalization** - intentionally violating 3NF for valid business reasons. Industry best practice supports denormalization when:
+1. Historical snapshots are required for legal/audit purposes
+2. Performance gains are significant
+3. Data consistency is maintained through application logic
 
 ---
 

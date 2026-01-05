@@ -8,7 +8,7 @@
     <div class="container">
         <div class="text-center">
             <small class="text-muted">
-                © 2025 Majlis Perbandaran Kangar, Perlis.
+                &copy; <?php echo date('Y'); ?> Unit Teknologi Maklumat, Majlis Perbandaran Kangar.
             </small>
         </div>
     </div>

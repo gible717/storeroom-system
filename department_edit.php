@@ -45,7 +45,7 @@ $stmt_edit->close();
             <input type="hidden" name="id_jabatan" value="<?php echo $edit_id; ?>">
 
             <div class="mb-3">
-                <label for="nama_jabatan" class="form-label">Nama Jabatan</label>
+                <label for="nama_jabatan" class="form-label">Nama Jabatan <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="nama_jabatan" name="nama_jabatan"
                     value="<?php echo htmlspecialchars($edit_name); ?>" required>
             </div>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Datang - Sistem Pengurusan Stor MPK</title>
+    <title>InventStor - Halaman Utama</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -155,8 +155,8 @@
 
             <img src="assets/img/logo.png" alt="Logo" class="logo">
 
-            <h1 class="mb-3">Sistem Pengurusan Bilik Stor dan Inventori</h1>
-            <p class="lead">Selamat datang ke portal dalaman rasmi.</p>
+            <h1 class="mb-3">InventStor</h1>
+            <p class="lead">Sistem Pengurusan Bilik Stor dan Inventori</p>
 
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
                 <a href="login.php" class="btn btn-primary btn-lg">
@@ -173,7 +173,7 @@
         <footer class="footer">
             <div class="container">
                 <p class="mb-0">
-                    &copy; <?php echo date('Y'); ?> Majlis Perbandaran Kangar.
+                    &copy; <?php echo date('Y'); ?> Unit Teknologi Maklumat, Majlis Perbandaran Kangar.
                 </p>
             </div>
         </footer>

@@ -12,7 +12,7 @@ $jabatan_result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akaun Baru - Sistem Pengurusan Stor</title>
+    <title>Daftar Akaun Baru - InventStor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -113,7 +113,7 @@ $jabatan_result = $conn->query($sql);
 
             <div class="form-header">
                                 <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
-                <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+                <h5 class="fw-bold mb-0">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h5>
             </div>
 
             <!-- Divider Line -->

@@ -23,20 +23,20 @@ $kategori_result = $conn->query($kategori_sql);
 
                 <!-- Product Name -->
                 <div class="mb-3">
-                    <label for="nama_produk" class="form-label">Nama Produk</label>
+                    <label for="nama_produk" class="form-label">Nama Produk <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="nama_produk" name="nama_produk" required>
                 </div>
 
                 <!-- Product ID & Category -->
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="id_produk" class="form-label">ID Produk / SKU</label>
+                        <label for="id_produk" class="form-label">ID Produk / SKU <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="id_produk" name="id_produk" required>
                         <div class="form-text">Kod unik untuk produk ini. Contoh: A4-PAPER-001</div>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="ID_kategori" class="form-label">Kategori</label>
+                        <label for="ID_kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select class="form-select" id="ID_kategori" name="ID_kategori" required>
                             <option value="">-- Sila Pilih Kategori --</option>
                             <?php
@@ -69,7 +69,7 @@ $kategori_result = $conn->query($kategori_sql);
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="stok_semasa" class="form-label">Kuantiti Stok Awal</label>
+                        <label for="stok_semasa" class="form-label">Kuantiti Stok Awal <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="stok_semasa" name="stok_semasa" value="0" min="0" required>
                     </div>
                 </div>

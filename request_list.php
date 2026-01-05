@@ -64,11 +64,42 @@ require 'staff_header.php';
 
 <style>
 .highlight {
-    background-color: rgba(255, 224, 46, 1); 
+    background-color: rgba(255, 224, 46, 1);
     font-weight: bold;
     border-radius: 3px;
     padding: 0 2px;
 }
+
+/* Glowing animation for "Baru" status badge - text only */
+@keyframes pulse-glow {
+    0% {
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 0 30px rgba(255, 193, 7, 0.6), 0 0 40px rgba(255, 193, 7, 0.4);
+    }
+    100% {
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.5), 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+}
+
+/* Status badges */
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-baru {
+    background: #fff3cd;
+    color: #997404;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+.status-diluluskan { background: #d1e7dd; color: #0a3622; }
+.status-ditolak { background: #f8d7da; color: #58151c; }
 </style>
     
     <?php if (isset($_SESSION['success_msg'])): ?>
@@ -166,13 +197,12 @@ require 'staff_header.php';
                                         <td class="status-cell text-center">
                                             <?php
                                             $status = htmlspecialchars($row['status']);
-                                            $badge_class = 'bg-secondary';
-                                            if ($status === 'Diluluskan') $badge_class = 'bg-success';
-                                            elseif ($status === 'Ditolak') $badge_class = 'bg-danger';
-                                            elseif ($status === 'Baru') $badge_class = 'bg-warning text-dark';
-                                            elseif ($status === 'Selesai') $badge_class = 'bg-primary';
+                                            $badge_class = 'status-badge';
+                                            if ($status === 'Diluluskan') $badge_class .= ' status-diluluskan';
+                                            elseif ($status === 'Ditolak') $badge_class .= ' status-ditolak';
+                                            elseif ($status === 'Baru') $badge_class .= ' status-baru';
                                             ?>
-                                            <span class="badge <?php echo $badge_class; ?>"><?php echo $status; ?></span>
+                                            <span class="<?php echo $badge_class; ?>"><?php echo $status; ?></span>
                                         </td>
                                         
                                         <td class="text-center">

@@ -18,7 +18,7 @@ if (isset($_SESSION['ID_staf'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Masuk - Sistem Pengurusan Stor</title>
+    <title>Log Masuk - InventStor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -103,15 +103,16 @@ if (isset($_SESSION['ID_staf'])) {
         <div class="form-section" style="position: relative;">
             <!-- Home button at top right -->
             <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama"
-               style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
+                style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
                 <i class="bi bi-house-fill fs-4"></i>
             </a>
 
             <div style="width: 100%; max-width: 420px;">
+                <!-- <h3 class="text-center mb-4 fw-bold" style="color: #4f46e5;">Log Masuk</h3> -->
                 <div class="login-card" style="margin: 0;">
                 <div class="form-header">
                     <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
-                    <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+                    <h5 class="fw-bold mb-0">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h5>
                 </div>
 
                 <?php if (isset($_GET['error'])): ?>
@@ -128,11 +129,11 @@ if (isset($_SESSION['ID_staf'])) {
 
                 <form action="login_process.php" method="POST">
                     <div class="mb-3">
-                        <label for="ID_staf" class="form-label">ID Staf</label>
+                        <label for="ID_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no. gaji" required>
                     </div>
                     <div class="mb-3">
-                        <label for="katalaluan" class="form-label">Kata Laluan</label>
+                        <label for="katalaluan" class="form-label">Kata Laluan <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <input type="password" class="form-control" id="katalaluan" name="katalaluan" placeholder="Masukkan kata laluan" required>
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tunjuk atau sembunyikan kata laluan"><i class="bi bi-eye-slash"></i></button>

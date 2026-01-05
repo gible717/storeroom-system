@@ -128,7 +128,7 @@ $back_link = (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) ? 'man
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
-                            <label for="item_select" class="form-label">*Perihal Stok</label>
+                            <label for="item_select" class="form-label">Perihal Stok <span class="text-danger">*</span></label>
                             <select class="form-select" id="item_select">
                                 <option value="" selected disabled>--- Pilih Barang ---</option>
                                 <?php foreach ($barang_list as $item): ?>
@@ -141,7 +141,7 @@ $back_link = (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) ? 'man
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="item_quantity" class="form-label">*Kuantiti Dimohon</label>
+                            <label for="item_quantity" class="form-label">Kuantiti Dimohon <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="item_quantity" value="1" min="1">
                         </div>
                     </div>

@@ -266,15 +266,22 @@ $header_user_initials = substr($initials, 0, 2);
         }
 
         .btn-logout {
-            background-color: #ffe5e5;
-            color: #dc3545;
+            background: #f8d7da;
+            color: #58151c;
             border: none;
             font-weight: 600;
-            padding: 0.375rem 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
         }
         .btn-logout:hover {
-            background-color: #f8d7da;
-            color: #842029;
+            background-color: #f1aeb5;
+            color: #58151c;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
         }
 
         .skip-link {

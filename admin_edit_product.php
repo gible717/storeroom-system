@@ -43,7 +43,7 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
 
                 <!-- Product Name -->
                 <div class="mb-3">
-                    <label for="nama_produk" class="form-label">Nama Produk</label>
+                    <label for="nama_produk" class="form-label">Nama Produk <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="nama_produk" name="nama_produk" value="<?php echo htmlspecialchars($product['nama_produk']); ?>" required>
                 </div>
 
@@ -56,7 +56,7 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                     </div>
 
                     <div class="col-md-6">
-                        <label for="ID_kategori" class="form-label">Kategori</label>
+                        <label for="ID_kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
                         <select class="form-select" id="ID_kategori" name="ID_kategori" required>
                             <option value="">-- Sila Pilih Kategori --</option>
                             <?php
@@ -90,7 +90,7 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="stok_semasa" class="form-label">Kuantiti Stok Semasa</label>
+                        <label for="stok_semasa" class="form-label">Kuantiti Stok Semasa <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="stok_semasa" name="stok_semasa" value="<?php echo htmlspecialchars($product['stok_semasa']); ?>" min="0" required>
                     </div>
                 </div>

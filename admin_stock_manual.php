@@ -36,7 +36,7 @@ $products_result = $conn->query($products_sql);
 
                         <!-- Product Select -->
                         <div class="mb-4">
-                            <label for="id_produk" class="form-label fw-bold">Nama Item</label>
+                            <label for="id_produk" class="form-label fw-bold">Nama Item <span class="text-danger">*</span></label>
                             <select class="form-select form-control-lg" id="ID_produk" name="ID_produk" required onchange="updateStokSemasa()">
                                 <option value="">-- Sila Pilih Item --</option>
                                 <?php if ($products_result && $products_result->num_rows > 0): ?>
@@ -65,7 +65,7 @@ $products_result = $conn->query($products_sql);
 
                             <!-- Quantity Input -->
                             <div class="col-md-6">
-                                <label for="jumlah_masuk" class="form-label fw-bold">Kuantiti Masuk</label>
+                                <label for="jumlah_masuk" class="form-label fw-bold">Kuantiti Masuk <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-lg">
                                     <input type="number" class="form-control" id="jumlah_masuk" name="jumlah_masuk" value="1" min="1" required>
                                     <span class="input-group-text">Unit</span>

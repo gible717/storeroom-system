@@ -25,7 +25,7 @@ require 'admin_header.php';
             <input type="hidden" name="action" value="add">
 
             <div class="mb-3">
-                <label for="nama_jabatan" class="form-label">Nama Jabatan</label>
+                <label for="nama_jabatan" class="form-label">Nama Jabatan <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="nama_jabatan" name="nama_jabatan"
                     placeholder="Cth: Jabatan Kewangan" required>
             </div>
