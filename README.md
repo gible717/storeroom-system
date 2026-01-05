@@ -15,12 +15,16 @@ Web-based inventory management system designed for government storeroom operatio
 - 📝 Create inventory requests (KEW.PS-8 form)
 - 👀 View and track own requests
 - ✏️ Edit pending requests before approval
+- 💬 **View admin remarks** on approved/rejected requests
 - 🔔 Receive Telegram notifications for request status updates
 - 👤 Manage personal profile and change password
 
 ### For Administrators
-- ✅ Review and approve/reject staff requests
+- ✅ Review and approve/reject staff requests with remarks/notes
 - 📊 Comprehensive dashboard with real-time statistics
+  - 🎯 **Quick action modals** for pending requests and stock warnings
+  - ⚡ **Smart glow indicators** with 5-minute timers for new requests
+  - 📱 **Mobile-responsive stat cards** with hover effects
 - 📦 Complete inventory management (CRUD operations)
 - 🔄 Manual stock adjustments (restock, corrections)
 - 👥 User and department management
@@ -137,6 +141,38 @@ The system uses **7 core tables**:
 6. **Access the System**
    - Navigate to `http://localhost/storeroom/` (or your configured URL)
    - Use default credentials to login
+
+---
+
+## 🎨 UI/UX Features
+
+### Unified Design System
+- **Status Pills** - Consistent rounded pill badges across all pages
+  - Soft pastel colors for better readability
+  - Glowing animation for "Baru" (new) status with 5-minute timer
+  - Applied to: Request status, stock status, user roles
+
+### Admin Dashboard Enhancements
+- **Interactive Modal Popups**
+  - Pending Requests modal with filterable list
+  - Stock Warning modal showing low/out-of-stock items
+  - Click-to-view design for quick insights
+
+- **Smart Visual Indicators**
+  - Glow effects on stat cards for new/critical items
+  - 15-minute session-based glow tracking
+  - Color-coded top borders on stat cards
+
+### Staff Features
+- **Admin Remarks Visibility**
+  - View admin's comments/notes on approved or rejected requests
+  - Displayed directly in request list for transparency
+  - Helps staff understand approval decisions
+
+### Responsive Design
+- Mobile-friendly stat cards with hover animations
+- Compact layouts with optimal spacing
+- Bootstrap 5 grid system for all screen sizes
 
 ---
 

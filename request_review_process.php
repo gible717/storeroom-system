@@ -55,6 +55,7 @@ $id_pelulus = $_SESSION['ID_staf'];
 $action = $_POST['action'] ?? null;
 $items = $_POST['items'] ?? [];
 $tarikh_lulus = date('Y-m-d H:i:s');
+$admin_remarks = trim($_POST['catatan_pelulus'] ?? ''); // Admin's remarks/notes (from catatan_pelulus field)
 
 // Validate data
 if (!$id_permohonan || !$action || !$id_pemohon) {
@@ -86,12 +87,24 @@ if ($id_pemohon === $id_pelulus) {
 
 // Handle rejection
 if ($action === 'reject') {
+    // Get admin's name and position for logging
+    $stmt_admin = $conn->prepare("SELECT nama, jawatan FROM staf WHERE ID_staf = ?");
+    $stmt_admin->bind_param("s", $id_pelulus);
+    $stmt_admin->execute();
+    $admin_data = $stmt_admin->get_result()->fetch_assoc();
+    $nama_pelulus = $admin_data['nama'];
+    $jawatan_pelulus = $admin_data['jawatan'];
+    $stmt_admin->close();
+
     $stmt = $conn->prepare("UPDATE permohonan
                             SET status = 'Ditolak',
                                 ID_pelulus = ?,
-                                tarikh_lulus = ?
+                                nama_pelulus = ?,
+                                jawatan_pelulus = ?,
+                                tarikh_lulus = ?,
+                                catatan_admin = ?
                             WHERE ID_permohonan = ? AND status = 'Baru'");
-    $stmt->bind_param("ssi", $id_pelulus, $tarikh_lulus, $id_permohonan);
+    $stmt->bind_param("sssssi", $id_pelulus, $nama_pelulus, $jawatan_pelulus, $tarikh_lulus, $admin_remarks, $id_permohonan);
     $stmt->execute();
 
     // Check if request is AJAX
@@ -167,12 +180,25 @@ if ($action === 'approve') {
 
         // Update request header
         $final_status = $at_least_one_item_approved ? 'Diluluskan' : 'Ditolak';
+
+        // Get admin's name and position for logging
+        $stmt_admin = $conn->prepare("SELECT nama, jawatan FROM staf WHERE ID_staf = ?");
+        $stmt_admin->bind_param("s", $id_pelulus);
+        $stmt_admin->execute();
+        $admin_data = $stmt_admin->get_result()->fetch_assoc();
+        $nama_pelulus = $admin_data['nama'];
+        $jawatan_pelulus = $admin_data['jawatan'];
+        $stmt_admin->close();
+
         $stmt_update_header = $conn->prepare("UPDATE permohonan
                                             SET status = ?,
                                                 ID_pelulus = ?,
-                                                tarikh_lulus = ?
+                                                nama_pelulus = ?,
+                                                jawatan_pelulus = ?,
+                                                tarikh_lulus = ?,
+                                                catatan_admin = ?
                                             WHERE ID_permohonan = ? AND status = 'Baru'");
-        $stmt_update_header->bind_param("sssi", $final_status, $id_pelulus, $tarikh_lulus, $id_permohonan);
+        $stmt_update_header->bind_param("ssssssi", $final_status, $id_pelulus, $nama_pelulus, $jawatan_pelulus, $tarikh_lulus, $admin_remarks, $id_permohonan);
         $stmt_update_header->execute();
 
         // Commit transaction

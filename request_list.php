@@ -36,6 +36,7 @@ $sql = "SELECT
             p.ID_permohonan,
             p.tarikh_mohon,
             p.status,
+            p.catatan_admin,
             COUNT(DISTINCT pb.ID_permohonan_barang) AS bilangan_item,
             GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS senarai_barang
         FROM
@@ -47,7 +48,7 @@ $sql = "SELECT
         WHERE
             p.ID_pemohon = ? $kategori_condition
         GROUP BY
-            p.ID_permohonan
+            p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin
         ORDER BY
             p.ID_permohonan DESC";
 
@@ -204,9 +205,13 @@ require 'staff_header.php';
                                             ?>
                                             <span class="<?php echo $badge_class; ?>"><?php echo $status; ?></span>
                                         </td>
-                                        
+
                                         <td class="text-center">
-                                            <?php if ($row['status'] === 'Baru'): ?>
+                                            <?php
+                                            $catatan_admin = trim($row['catatan_admin'] ?? '');
+
+                                            if ($row['status'] === 'Baru'): ?>
+
                                                 <a href="request_edit.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-warning btn-sm" title="Kemaskini">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
@@ -225,6 +230,13 @@ require 'staff_header.php';
                                                     <i class="bi bi-printer-fill"></i>
                                                 </a>
                                             
+                                            <?php elseif (!empty($catatan_admin)): ?>
+                                                <div>
+                                                    <small class="text-muted d-block">
+                                                        <strong>Catatan:</strong><br>
+                                                        <em><?php echo htmlspecialchars($catatan_admin); ?></em>
+                                                    </small>
+                                                </div>
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
@@ -264,6 +276,12 @@ require 'staff_header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize Bootstrap popovers for remarks
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const tableBody = document.querySelector('#requestTable tbody');

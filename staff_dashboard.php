@@ -446,7 +446,6 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
             <div class="card-body position-relative">
                 <p class="stat-number"><?php echo $stats_jumlah; ?></p>
                 <p class="stat-label">Jumlah</p>
-                <i class="bi bi-clipboard-data stat-icon"></i>
             </div>
         </div>
     </div>
@@ -458,7 +457,7 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold" id="requestsModalLabel">
-                    <i class="bi bi-clipboard-check me-2"></i><span id="modalStatusTitle">Permohonan</span>
+                    <span id="modalStatusTitle">Permohonan</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -524,7 +523,8 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
 <script>
 function showRequestsByStatus(status, label, colorTheme) {
     // Update modal title
-    document.getElementById('modalStatusTitle').textContent = 'Permohonan ' + label;
+    const title = label === 'Jumlah' ? 'Jumlah Permohonan' : 'Permohonan ' + label;
+    document.getElementById('modalStatusTitle').textContent = title;
 
     // Show loading state
     document.getElementById('modalContent').innerHTML = `

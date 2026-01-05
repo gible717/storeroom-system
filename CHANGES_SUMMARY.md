@@ -1,0 +1,210 @@
+# Summary of Changes - Admin Remarks Feature
+**Date**: 5 January 2026
+
+---
+
+## 📊 Database Schema Changes
+
+### Modified Table: `permohonan`
+
+Added 3 new columns:
+
+```sql
+ALTER TABLE permohonan
+ADD COLUMN nama_pelulus VARCHAR(255) NULL
+COMMENT 'Name of the approver/reviewer'
+AFTER ID_pelulus;
+
+ALTER TABLE permohonan
+ADD COLUMN jawatan_pelulus VARCHAR(100) NULL
+COMMENT 'Position/title of the approver/reviewer'
+AFTER nama_pelulus;
+
+ALTER TABLE permohonan
+ADD COLUMN catatan_admin TEXT NULL
+COMMENT 'Admin remarks/notes for approval or rejection'
+AFTER catatan;
+```
+
+---
+
+## 📝 Modified Files
+
+### 1. **PHP Application Files**
+
+#### ✅ `request_review_process.php`
+- **Purpose**: Process approval/rejection
+- **Changes**:
+  - Capture `catatan_pelulus` from form (line 58)
+  - Fetch approver name and position from `staf` table
+  - Save all 3 new fields to database for both approval and rejection
+- **Lines Modified**: 58, 88-108, 171-202
+
+#### ✅ `request_list.php` (Staff View)
+- **Purpose**: Display staff's own requests
+- **Changes**:
+  - Added `p.catatan_admin` to SQL SELECT and GROUP BY
+  - Display admin remarks in Tindakan column
+  - Only show if catatan exists (otherwise show "-")
+- **Lines Modified**: 35-53 (SQL), 210-243 (display logic)
+
+#### ✅ `manage_requests.php` (Admin View)
+- **Purpose**: Display all requests for admin
+- **Changes**:
+  - Added `p.catatan_admin` to SQL SELECT and GROUP BY
+  - Display admin remarks in Tindakan column
+  - Same display logic as staff view
+- **Lines Modified**: 47-55 (SQL), 157-185 (display logic)
+
+#### ℹ️ `request_review.php` (Admin Form)
+- **Note**: Already had the textarea field `catatan_pelulus` (line 138-140)
+- **No changes needed** - form was already correct
+
+---
+
+### 2. **Documentation Files**
+
+#### ✅ `SYSTEM_ERD.md`
+- **Changes**: Updated `permohonan` table definition
+- **Added**:
+  - `catatan_admin` (TEXT) - Admin's remarks/notes for approval or rejection
+  - `nama_pelulus` (VARCHAR) - Approver name (denormalized for audit trail)
+  - `jawatan_pelulus` (VARCHAR) - Approver position (denormalized for audit trail)
+  - Added notes explaining denormalization rationale
+- **Lines Modified**: 75-102
+
+#### ✅ `SYSTEM_DFD.md`
+- **Changes**: Updated process 3.0 (Approval Processing)
+- **Added**:
+  - Input: optional admin remarks (catatan_admin)
+  - Processing: Fetch and save approver details
+  - Output: admin feedback
+  - Data Store: D1 (staf - read approver info)
+- **Lines Modified**: 197-210
+
+#### ✅ `README.md`
+- **Note**: Already updated in previous session
+- **Contains**: Mention of admin remarks feature in features list
+
+#### ✅ `ADMIN_REMARKS_IMPLEMENTATION.md` (NEW)
+- **Purpose**: Comprehensive implementation documentation
+- **Contains**:
+  - Database schema with SQL
+  - All code changes with line numbers
+  - ERD update instructions
+  - Testing checklist
+  - Security considerations
+  - Future enhancement ideas
+
+---
+
+## 🗑️ Files Reverted/Deleted
+
+### Reverted (Back to Original):
+- `kewps8_approval.php`
+- `kewps8_approval_process.php`
+
+### Deleted (Debug/Test Files):
+- `debug_catatan.php`
+- `check_columns.php`
+- `test_update_catatan.php`
+- `check_request_40.php`
+- `create_test_request_with_remarks.php`
+- `final_test_catatan.php`
+- `test_form_submit.php`
+- `check_error_log.php`
+- `run_migration.php`
+- `DEBUG_INSTRUCTIONS.txt`
+- `add_pelulus_columns.sql` (SQL already executed)
+- `add_catatan_admin_column.sql` (SQL already executed)
+
+---
+
+## 🎯 Feature Summary
+
+### What It Does:
+- Allows admins to add optional remarks when approving or rejecting requests
+- Remarks are stored in database for audit trail
+- Staff can view admin's feedback on their requests
+- Admins can also view remarks on all requests
+
+### User Experience:
+**Admin Side:**
+1. Review request in `request_review.php`
+2. Optionally enter remarks in "Catatan Pelulus" textarea
+3. Click Approve or Reject
+4. Remarks saved to database
+
+**Staff Side:**
+1. View their requests in `request_list.php`
+2. See admin remarks below action buttons (if any)
+3. Understand why request was approved/rejected
+
+---
+
+## ✅ Testing Completed
+
+- [x] Database migration successful
+- [x] Admin can enter and save remarks
+- [x] Remarks save correctly on approval
+- [x] Remarks save correctly on rejection
+- [x] Staff can view remarks
+- [x] Admin can view remarks
+- [x] Empty remarks handled (shows "-")
+- [x] HTML/XSS safe (htmlspecialchars used)
+- [x] SQL injection safe (prepared statements)
+
+---
+
+## 📋 Files NOT Changed
+
+These files remain unchanged because they are not part of the approval workflow:
+- `kewps8_approval.php` - Reverted (not used in current system)
+- `kewps8_approval_process.php` - Reverted (not used in current system)
+- `kewps8_print.php` - Receipt generation (could be enhanced later to show remarks)
+- All other system files
+
+---
+
+## 🔄 Git Status
+
+To see all changes in git:
+```bash
+git status
+git diff HEAD
+```
+
+To commit these changes:
+```bash
+git add request_review_process.php request_list.php manage_requests.php SYSTEM_ERD.md SYSTEM_DFD.md ADMIN_REMARKS_IMPLEMENTATION.md CHANGES_SUMMARY.md
+git commit -m "feat: Add admin remarks feature for request approval/rejection transparency
+
+- Add 3 new columns to permohonan table: nama_pelulus, jawatan_pelulus, catatan_admin
+- Update request_review_process.php to capture and save admin remarks
+- Display admin remarks in both staff and admin request list views
+- Update ERD and DFD documentation
+- Add comprehensive implementation documentation"
+```
+
+---
+
+## 📊 For Your Report
+
+### Database Changes:
+- **1 table modified**: `permohonan`
+- **3 columns added**: `nama_pelulus`, `jawatan_pelulus`, `catatan_admin`
+
+### Code Changes:
+- **3 PHP files modified**: `request_review_process.php`, `request_list.php`, `manage_requests.php`
+- **~100 lines of code** added (excluding comments)
+
+### Documentation Updates:
+- **2 existing docs updated**: `SYSTEM_ERD.md`, `SYSTEM_DFD.md`
+- **2 new docs created**: `ADMIN_REMARKS_IMPLEMENTATION.md`, `CHANGES_SUMMARY.md`
+
+### Purpose:
+Enhance transparency in the approval process by allowing admins to provide feedback/reasons when approving or rejecting stock requests.
+
+---
+
+**End of Summary**

@@ -195,17 +195,19 @@ graph TB
 - **Data Stores:** D1 (staf), D2 (permohonan), D3 (barang), D4 (jabatan), D5 (permohonan_barang)
 
 #### **3.0 Approval Processing**
-- **Input:** Approval decision (approve/reject)
+- **Input:** Approval decision (approve/reject), optional admin remarks (catatan_admin)
 - **Processing:**
+  - Fetch approver details (nama_pelulus, jawatan_pelulus) from staf table
   - Update request status
   - If approved:
     - Deduct stock from barang.baki_semasa
     - Create stock transaction records (transaksi_stok)
-  - Record approver details (ID_pelulus)
+  - Record approver details (ID_pelulus, nama_pelulus, jawatan_pelulus)
+  - Save admin remarks (catatan_admin) for transparency
   - Set approval date (tarikh_lulus)
   - Generate receipt (KEW.PS-8 print)
-- **Output:** Updated request, updated stock levels, audit trail
-- **Data Stores:** D2 (permohonan), D3 (barang), D5 (permohonan_barang), D6 (transaksi_stok)
+- **Output:** Updated request, updated stock levels, audit trail, admin feedback
+- **Data Stores:** D1 (staf - read approver info), D2 (permohonan), D3 (barang), D5 (permohonan_barang), D6 (transaksi_stok)
 
 #### **4.0 Inventory Management**
 - **Input:** Product CRUD operations, manual stock updates

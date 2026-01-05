@@ -44,7 +44,7 @@ $kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL
 $kategori_result = $conn->query($kategori_sql);
 
 // Get all requests with item details and category info
-$sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
+$sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, s.nama,
             COUNT(pb.ID_permohonan_barang) AS bilangan_item,
             GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS senarai_barang,
             GROUP_CONCAT(DISTINCT b.kategori SEPARATOR ', ') AS kategori_list
@@ -52,7 +52,7 @@ $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, s.nama,
         JOIN staf s ON p.ID_pemohon = s.ID_staf
         LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
         LEFT JOIN barang b ON pb.no_kod = b.no_kod
-        GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, s.nama
+        GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, s.nama
         ORDER BY
         CASE p.status
             WHEN 'Baru' THEN 1
@@ -156,6 +156,8 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                                 <td class="text-center">
                                     <?php
                                     $status = trim($row['status']);
+                                    $catatan_admin = trim($row['catatan_admin'] ?? '');
+
                                     if ($status === 'Baru'):
                                     ?>
                                         <a href="request_review.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-primary btn-sm" title="Semak Permohonan">
@@ -170,6 +172,14 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                                             <i class="bi bi-printer-fill"></i>
                                         </a>
 
+                                    <?php elseif (!empty($catatan_admin)): ?>
+                                        <div>
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-chat-left-text-fill me-1"></i>
+                                                <strong>Catatan:</strong><br>
+                                                <em><?php echo htmlspecialchars($catatan_admin); ?></em>
+                                            </small>
+                                        </div>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>

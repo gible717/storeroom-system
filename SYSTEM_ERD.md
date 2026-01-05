@@ -83,8 +83,11 @@ Header table for stock requests (KEW.PS-8 form)
 - `nama_pemohon` (VARCHAR) - Requester name (denormalized for history)
 - `jawatan_pemohon` (VARCHAR) - Requester position (denormalized for history)
 - `ID_jabatan` (INT) - FOREIGN KEY → jabatan.ID_jabatan - Department ID
-- `catatan` (TEXT) - Notes/remarks
+- `catatan` (TEXT) - Staff's notes/remarks on the request
+- `catatan_admin` (TEXT) - **NEW** Admin's remarks/notes for approval or rejection
 - `ID_pelulus` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Approver ID
+- `nama_pelulus` (VARCHAR) - **NEW** Approver name (denormalized for audit trail)
+- `jawatan_pelulus` (VARCHAR) - **NEW** Approver position (denormalized for audit trail)
 - `tarikh_lulus` (DATETIME) - Approval/rejection datetime
 - `created_at` (TIMESTAMP) - Record creation timestamp
 
@@ -93,6 +96,10 @@ Header table for stock requests (KEW.PS-8 form)
 - One request belongs to ONE department
 - One request has MANY request items (permohonan_barang)
 - One request can be approved by ONE admin (pelulus/approver)
+
+**Notes:**
+- `nama_pelulus` and `jawatan_pelulus` are denormalized copies from the `staf` table at the time of approval to maintain historical accuracy
+- `catatan_admin` stores admin feedback/reasons for approval or rejection decisions
 
 ---
 
