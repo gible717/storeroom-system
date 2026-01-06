@@ -373,8 +373,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <h6 class="fw-bold">Maklumat Am</h6>
                             <p>
                                 <strong>Nama Pemohon:</strong> ${data.header.nama_pemohon || '-'}<br>
-                                <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}<br>
-                                <strong>Catatan:</strong> ${data.header.catatan || '-'}
+                                <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}
                             </p>
                             <hr>
                             <h6 class="fw-bold">Senarai Item (${data.items.length})</h6>
@@ -401,6 +400,30 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </tbody>
                             </table>
                         `;
+
+                        // Show staff's remarks if exists
+                        if (data.header.catatan && data.header.catatan.trim() !== '') {
+                            html += `
+                                <hr>
+                                <h6 class="fw-bold">Catatan Pemohon</h6>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-chat-left-text me-2"></i>
+                                    ${data.header.catatan.replace(/\n/g, '<br>')}
+                                </div>
+                            `;
+                        }
+
+                        // Show admin remarks if exists (for rejected/approved requests)
+                        if (data.header.catatan_admin && data.header.catatan_admin.trim() !== '') {
+                            html += `
+                                <hr>
+                                <h6 class="fw-bold">Catatan Pelulus</h6>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    ${data.header.catatan_admin.replace(/\n/g, '<br>')}
+                                </div>
+                            `;
+                        }
 
                         detailsModalBody.innerHTML = html;
 

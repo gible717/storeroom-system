@@ -13,14 +13,20 @@ Web-based inventory management system designed for government storeroom operatio
 
 ### For Staff (Staf)
 - 📝 Create inventory requests (KEW.PS-8 form)
+  - 🤖 **Smart jawatan autocomplete** - Auto-suggests position based on profile and history
+  - 💾 **Auto-save to session** - Form remembers your input if you navigate away
 - 👀 View and track own requests
 - ✏️ Edit pending requests before approval
-- 💬 **View admin remarks** on approved/rejected requests
-- 🔔 Receive Telegram notifications for request status updates
+- 💬 **Bidirectional remarks system** - View admin feedback AND your own notes
+  - 📝 Staff remarks labeled as "Catatan Pemohon (Anda)"
+  - 💼 Admin remarks labeled as "Catatan Pelulus"
+- 🔔 Smart Telegram notifications (only shows filled fields)
 - 👤 Manage personal profile and change password
 
 ### For Administrators
 - ✅ Review and approve/reject staff requests with remarks/notes
+  - 👁️ **View staff's original remarks** when reviewing
+  - 💬 **Add admin remarks** for transparency
 - 📊 Comprehensive dashboard with real-time statistics
   - 🎯 **Quick action modals** for pending requests and stock warnings
   - ⚡ **Smart glow indicators** with 5-minute timers for new requests
@@ -32,7 +38,7 @@ Web-based inventory management system designed for government storeroom operatio
   - Department-focused analytics
   - Inventory reports with stock movements
   - KEW.PS-3 stock card reports
-- 🔔 Telegram bot integration for instant notifications
+- 🔔 **Smart Telegram notifications** - Auto-hides empty optional fields
 - 📋 Complete audit trail via transaction logs
 
 ---
@@ -93,6 +99,33 @@ The system uses **7 core tables**:
 7. **transaksi_stok** - Stock transaction audit log
 
 **Full documentation:** See [DATABASE_SCHEMA_ANALYSIS.md](DATABASE_SCHEMA_ANALYSIS.md)
+
+---
+
+## 🎉 What's New (Version 2.1 - January 2026)
+
+### ✨ Latest Features
+
+1. **🔄 Bidirectional Remarks System**
+   - Staff and admin can now view each other's notes/remarks
+   - Transparent two-way communication
+   - Visual distinction with color-coded alerts
+
+2. **🤖 Smart Jawatan Autocomplete**
+   - Auto-suggests position based on user profile
+   - Learns from previous requests
+   - COALESCE fallback logic for data integrity
+
+3. **📱 Smarter Telegram Notifications**
+   - Auto-hides empty optional fields
+   - Cleaner, more professional messages
+   - Reduces notification clutter
+
+4. **🐛 Bug Fixes**
+   - Fixed missing "Diluluskan" status badge on admin dashboard
+   - Improved jawatan field consistency across pages
+
+📄 **Detailed documentation:** See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md)
 
 ---
 

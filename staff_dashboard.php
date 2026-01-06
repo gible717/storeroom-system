@@ -365,11 +365,13 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
 <div class="row mb-4">
     <div class="col-12">
         <div class="card recent-activity-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">Aktiviti Terkini</h5>
+                <a href="request_list.php">
+                    Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
             <div class="card-body">
-                <h5 class="card-title fw-bold mb-3">
-                    Aktiviti Terkini
-                </h5>
-
                 <?php if ($recent_result && $recent_result->num_rows > 0): ?>
                     <?php while ($activity = $recent_result->fetch_assoc()):
                         // Shorten item names if too long
@@ -395,12 +397,6 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
                             </span>
                         </div>
                     <?php endwhile; ?>
-
-                    <div class="text-center mt-3">
-                        <a href="request_list.php" class="btn btn-outline-primary btn-sm">
-                            Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    </div>
                 <?php else: ?>
                     <div class="empty-state">
                         <i class="bi bi-inbox"></i>
@@ -642,8 +638,7 @@ function showRequestDetails(requestId) {
                 let html = `
                     <h6 class="fw-bold">Maklumat Am</h6>
                     <p>
-                        <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}<br>
-                        <strong>Catatan:</strong> ${data.header.catatan || '-'}
+                        <strong>Jawatan:</strong> ${data.header.jawatan_pemohon || '-'}
                     </p>
                     <hr>
                     <h6 class="fw-bold">Senarai Item (${data.items.length})</h6>
@@ -670,6 +665,30 @@ function showRequestDetails(requestId) {
                         </tbody>
                     </table>
                 `;
+
+                // Show staff's own remarks if exists
+                if (data.header.catatan && data.header.catatan.trim() !== '') {
+                    html += `
+                        <hr>
+                        <h6 class="fw-bold">Catatan Pemohon (Anda)</h6>
+                        <div class="alert alert-info">
+                            <i class="bi bi-chat-left-text me-2"></i>
+                            ${data.header.catatan.replace(/\n/g, '<br>')}
+                        </div>
+                    `;
+                }
+
+                // Show admin remarks if exists
+                if (data.header.catatan_admin && data.header.catatan_admin.trim() !== '') {
+                    html += `
+                        <hr>
+                        <h6 class="fw-bold">Catatan Pelulus</h6>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-person-badge me-2"></i>
+                            ${data.header.catatan_admin.replace(/\n/g, '<br>')}
+                        </div>
+                    `;
+                }
 
                 detailsModalBody.innerHTML = html;
             } else {

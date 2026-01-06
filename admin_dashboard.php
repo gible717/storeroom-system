@@ -111,12 +111,12 @@ require 'admin_header.php';
     border-left-color: #0d6efd;
 }
 
-/* Stat card styles */
+/* Stat card styles - gradient action cards */
 .admin-stat-card {
     border: none;
     border-radius: 1rem;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
@@ -129,8 +129,8 @@ require 'admin_header.php';
 }
 
 .admin-stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
 .admin-stat-card::before {
@@ -139,15 +139,19 @@ require 'admin_header.php';
     top: 0;
     left: 0;
     width: 100%;
-    height: 4px;
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
-    z-index: 1;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.admin-stat-card:hover::before {
+    opacity: 1;
 }
 
 .admin-stat-card .stat-label {
     font-size: 0.875rem;
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.9);
     margin: 0 0 0.5rem 0;
     font-weight: 500;
     text-transform: uppercase;
@@ -159,6 +163,7 @@ require 'admin_header.php';
     font-weight: 700;
     margin: 0;
     line-height: 1;
+    color: white;
 }
 
 .admin-stat-card .stat-icon {
@@ -167,13 +172,14 @@ require 'admin_header.php';
     top: 50%;
     transform: translateY(-50%);
     font-size: 3rem;
-    opacity: 0.15;
+    opacity: 0.2;
+    color: white;
 }
 
 .admin-stat-card .hover-text {
     opacity: 0;
     font-size: 0.8rem;
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.85);
     margin-top: 0.5rem;
     transition: opacity 0.3s;
 }
@@ -182,18 +188,18 @@ require 'admin_header.php';
     opacity: 1;
 }
 
-/* Color themes for stat cards */
-.admin-stat-primary::before { background: #0d6efd; }
-.admin-stat-primary .stat-number { color: #0d6efd; }
-.admin-stat-primary .stat-icon { color: #0d6efd; }
+/* Gradient backgrounds for action cards */
+.admin-stat-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
 
-.admin-stat-warning::before { background: #ffc107; }
-.admin-stat-warning .stat-number { color: #ffc107; }
-.admin-stat-warning .stat-icon { color: #ffc107; }
+.admin-stat-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
 
-.admin-stat-danger::before { background: #dc3545; }
-.admin-stat-danger .stat-number { color: #dc3545; }
-.admin-stat-danger .stat-icon { color: #dc3545; }
+.admin-stat-danger {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
 
 /* Apply glow animation classes to stat card numbers */
 .admin-stat-card .pending-warning-active {
@@ -202,6 +208,47 @@ require 'admin_header.php';
 
 .admin-stat-card .stock-warning-active {
     animation: stock-warning-glow 2s ease-in-out infinite;
+}
+
+/* Mini stat cards - simple minimal style for additional info */
+.mini-stat-card {
+    border: none;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.mini-stat-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.mini-stat-card .card-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: #6c757d;
+}
+
+.mini-stat-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #212529;
+}
+
+.mini-stat-card .stat-title {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
 }
 </style>
 
@@ -274,6 +321,22 @@ $stokRendah = $stokRendah_result ? $stokRendah_result->fetch_assoc()['total'] : 
 // Calculate requests this month
 $pesananBulanIni_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE MONTH(tarikh_mohon) = MONTH(CURRENT_DATE()) AND YEAR(tarikh_mohon) = YEAR(CURRENT_DATE())");
 $pesananBulanIni = $pesananBulanIni_result ? $pesananBulanIni_result->fetch_assoc()['total'] : 0;
+
+// Mini stats for bottom section
+$monthlyRequests = $pesananBulanIni; // Reuse the monthly request count
+$totalUsers_result = $conn->query("SELECT COUNT(*) as total FROM staf");
+$totalUsers = $totalUsers_result ? $totalUsers_result->fetch_assoc()['total'] : 0;
+
+$totalDepartments_result = $conn->query("SELECT COUNT(*) as total FROM jabatan");
+$totalDepartments = $totalDepartments_result ? $totalDepartments_result->fetch_assoc()['total'] : 0;
+
+$approvalRate_result = $conn->query("SELECT
+    COUNT(*) as total_processed,
+    SUM(CASE WHEN status = 'Diluluskan' THEN 1 ELSE 0 END) as approved
+    FROM permohonan
+    WHERE status IN ('Diluluskan', 'Ditolak')");
+$approvalData = $approvalRate_result ? $approvalRate_result->fetch_assoc() : ['total_processed' => 0, 'approved' => 0];
+$approvalRate = $approvalData['total_processed'] > 0 ? round(($approvalData['approved'] / $approvalData['total_processed']) * 100) : 0;
 
 // Get low stock items details (all items with stock <= 10, no limit for modal)
 $low_stock_sql = "SELECT no_kod AS ID_produk, perihal_stok AS nama_produk, baki_semasa AS stok_semasa, unit_pengukuran
@@ -350,14 +413,16 @@ $recent_requests = $conn->query($sql_requests);
 </div>
 
 <!-- Recent Requests -->
-<div class="card shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold">Permohonan Terkini</h5>
-        <a href="manage_requests.php">
-            Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
-        </a>
-    </div>
-    <div class="card-body p-0">
+<div class="row mb-4">
+    <div class="col-lg-10 col-xl-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">Permohonan Terkini</h5>
+                <a href="manage_requests.php">
+                    Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
         <div class="list-group list-group-flush">
             <?php if ($recent_requests && $recent_requests->num_rows > 0): ?>
                 <?php while($req = $recent_requests->fetch_assoc()):
@@ -385,8 +450,10 @@ $recent_requests = $conn->query($sql_requests);
                         <?php
                             $status = htmlspecialchars($req['status']);
                             $badge_class = 'status-badge';
-                            if ($status === 'Diluluskan') $badge_class .= ' status-diluluskan';
-                            elseif ($status === 'Baru') {
+                            if ($status === 'Diluluskan') {
+                                $badge_class .= ' status-diluluskan';
+                                echo '<span class="' . $badge_class . '">' . $status . '</span>';
+                            } elseif ($status === 'Baru') {
                                 $badge_class .= ' status-baru status-baru-recent';
                                 // Add timestamp data attribute
                                 $request_timestamp = strtotime($req['tarikh_mohon'] . ' ' . $req['masa_mohon']);
@@ -409,6 +476,59 @@ $recent_requests = $conn->query($sql_requests);
                     <p class="mb-0">Tiada permohonan terkini.</p>
                 </div>
             <?php endif; ?>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mini Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-10 col-xl-8 mx-auto">
+        <div class="row g-3">
+            <!-- Total Users -->
+            <div class="col-6 col-md-3">
+                <div class="card mini-stat-card">
+                    <div class="card-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h3 class="stat-value"><?php echo $totalUsers; ?></h3>
+                    <p class="stat-title">Jumlah Pengguna</p>
+                </div>
+            </div>
+
+            <!-- Monthly Requests -->
+            <div class="col-6 col-md-3">
+                <div class="card mini-stat-card">
+                    <div class="card-icon">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <h3 class="stat-value"><?php echo $monthlyRequests; ?></h3>
+                    <p class="stat-title">Permohonan Bulan Ini</p>
+                </div>
+            </div>
+
+            <!-- Approval Rate -->
+            <div class="col-6 col-md-3">
+                <div class="card mini-stat-card">
+                    <div class="card-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h3 class="stat-value"><?php echo $approvalRate; ?>%</h3>
+                    <p class="stat-title">Kadar Kelulusan</p>
+                </div>
+            </div>
+
+            <!-- Active Departments -->
+            <div class="col-6 col-md-3">
+                <div class="card mini-stat-card">
+                    <div class="card-icon">
+                        <i class="bi bi-building-fill"></i>
+                    </div>
+                    <h3 class="stat-value"><?php echo $totalDepartments; ?></h3>
+                    <p class="stat-title">Jabatan Aktif</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -544,7 +664,6 @@ $recent_requests = $conn->query($sql_requests);
                 <a href="manage_requests.php" class="btn btn-primary">
                     <i class="bi bi-list-check me-2"></i>Urus Semua Permohonan
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

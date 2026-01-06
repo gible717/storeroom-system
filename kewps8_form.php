@@ -103,7 +103,17 @@ $back_link = (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) ? 'man
 
                     <div class="mb-4">
                         <label for="jawatan_input" class="form-label">Jawatan (Optional)</label>
-                        <input type="text" class="form-control" id="jawatan_input" value="" placeholder="Contoh: Pegawai Teknologi Maklumat">
+                        <input type="text"
+                               class="form-control"
+                               id="jawatan_input"
+                               list="jawatan_suggestions"
+                               value=""
+                               placeholder="Contoh: Pegawai Teknologi Maklumat"
+                               autocomplete="off">
+                        <datalist id="jawatan_suggestions"></datalist>
+                        <small class="form-text text-muted">
+                            <i class="bi bi-lightbulb"></i> Klik pada medan untuk lihat cadangan jawatan
+                        </small>
                     </div>
 
                     <!-- Category Filter (For Filtering Only) -->
@@ -224,6 +234,58 @@ document.addEventListener('DOMContentLoaded', function() {
     let isSubmitting = false;
     const hantarBtn = document.getElementById('hantar_btn');
     let currentStock = 0;
+
+    // --- Smart Jawatan Autocomplete ---
+    function loadJawatanSuggestions() {
+        // First, check if there's a jawatan in the cart/session
+        fetch('kewps8_cart_ajax.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'get' })
+        })
+        .then(response => response.json())
+        .then(cartData => {
+            // Restore jawatan from session if exists
+            if (cartData.success && cartData.jawatan) {
+                jawatanInput.value = cartData.jawatan;
+            }
+
+            // Then load suggestions
+            return fetch('get_jawatan_suggestions.php');
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.suggestions.length > 0) {
+                const datalist = document.getElementById('jawatan_suggestions');
+                datalist.innerHTML = '';
+
+                data.suggestions.forEach(suggestion => {
+                    const option = document.createElement('option');
+                    option.value = suggestion.value;
+                    option.textContent = suggestion.label;
+                    datalist.appendChild(option);
+                });
+
+                // Auto-fill with profile jawatan if field is still empty
+                const profileSuggestion = data.suggestions.find(s => s.source === 'profile');
+                if (profileSuggestion && !jawatanInput.value) {
+                    jawatanInput.value = profileSuggestion.value;
+                    jawatanInput.classList.add('text-muted');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading jawatan suggestions:', error);
+        });
+    }
+
+    // Load suggestions on page load
+    loadJawatanSuggestions();
+
+    // Remove muted style when user types
+    jawatanInput.addEventListener('input', function() {
+        this.classList.remove('text-muted');
+    });
 
     // --- 2. Check if cart has items (to enable Sahkan) ---
     checkCartStatus();

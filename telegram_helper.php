@@ -102,10 +102,16 @@ function format_new_request_notification($id_permohonan, $nama_pemohon, $jawatan
     $message = "🔔 <b>PERMOHONAN BARU</b>\n\n";
     $message .= "📋 ID Permohonan: <b>#{$id_permohonan}</b>\n";
     $message .= "👤 Pemohon: {$nama_pemohon}\n";
-    $message .= "💼 Jawatan: {$jawatan_pemohon}\n";
+
+    // Only show jawatan if not empty
+    if (!empty($jawatan_pemohon)) {
+        $message .= "💼 Jawatan: {$jawatan_pemohon}\n";
+    }
+
     $message .= "📦 Jumlah Item: {$item_count}\n";
     $message .= "📅 Tarikh: " . date('d/m/Y H:i') . "\n";
 
+    // Only show catatan if not empty
     if (!empty($catatan)) {
         $message .= "📝 Catatan: " . htmlspecialchars($catatan) . "\n";
     }

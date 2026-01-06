@@ -58,6 +58,7 @@ switch ($action) {
         $response['success'] = true;
         $response['cart'] = $_SESSION['cart'];
         $response['catatan'] = $_SESSION['request_catatan'];
+        $response['jawatan'] = $_SESSION['request_jawatan'] ?? '';
         break;
 
     // Get cart item count

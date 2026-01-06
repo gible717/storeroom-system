@@ -85,13 +85,18 @@ classDiagram
         +VARCHAR jawatan_pemohon
         +INT ID_jabatan FK
         +TEXT catatan
+        +TEXT catatan_admin
         +VARCHAR ID_pelulus FK
+        +VARCHAR nama_pelulus
+        +VARCHAR jawatan_pelulus
         +DATETIME tarikh_lulus
         +TIMESTAMP created_at
         +submit()
         +approve()
         +reject()
         +getItems()
+        +getJawatanSuggestions()
+        +displayWithCoalesce()
         +generateReceipt()
         +canBeDeleted()
     }

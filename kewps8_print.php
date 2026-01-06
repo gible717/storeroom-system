@@ -8,14 +8,16 @@ if (!$id_permohonan) {
 }
 
 // 2. Fetch Request Header
+// Use COALESCE: prefer jawatan from form, fallback to profile, or NULL if both empty
 $stmt_header = $conn->prepare("SELECT
                                 p.ID_permohonan, p.tarikh_mohon, p.tarikh_lulus,
-                                pemohon.nama AS nama_pemohon, pemohon.jawatan AS jawatan_pemohon,
+                                p.nama_pemohon,
+                                COALESCE(NULLIF(p.jawatan_pemohon, ''), pemohon.jawatan) AS jawatan_pemohon,
                                 j.nama_jabatan,
                                 pelulus.nama AS nama_pelulus
                             FROM permohonan p
                             JOIN staf pemohon ON p.ID_pemohon = pemohon.ID_staf
-                            LEFT JOIN jabatan j ON pemohon.ID_jabatan = j.ID_jabatan
+                            LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
                             LEFT JOIN staf pelulus ON p.ID_pelulus = pelulus.ID_staf
                             WHERE p.ID_permohonan = ?");
 $stmt_header->bind_param("i", $id_permohonan);

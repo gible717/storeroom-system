@@ -168,15 +168,19 @@ flowchart TD
     CartEmpty -->|No| ErrorNoItems[Error: Cart is empty]
     ErrorNoItems --> DisplayProducts
 
-    CartEmpty -->|Yes| EnterNotes[Optional: Enter catatan<br/>request notes]
+    CartEmpty -->|Yes| LoadJawatanSuggestions[Smart Jawatan Autocomplete:<br/>- AJAX fetch suggestions<br/>- Show profile jawatan<br/>- Show history jawatan]
+
+    LoadJawatanSuggestions --> EnterNotes[Optional: Enter catatan & jawatan<br/>request notes & position]
 
     EnterNotes --> SubmitRequest[Submit Request<br/>POST to staff_request_process.php]
 
     SubmitRequest --> BeginTransaction[BEGIN TRANSACTION]
 
-    BeginTransaction --> GetStaffInfo[Get staff info:<br/>- nama_pemohon<br/>- jawatan_pemohon<br/>- ID_jabatan]
+    BeginTransaction --> GetStaffInfo[Get staff info:<br/>- nama_pemohon<br/>- ID_jabatan]
 
-    GetStaffInfo --> InsertHeader[INSERT INTO permohonan:<br/>- tarikh_mohon = NOW<br/>- status = 'Baru'<br/>- ID_pemohon<br/>- catatan]
+    GetStaffInfo --> HandleJawatan[Smart Jawatan Handling:<br/>jawatan_pemohon = session.jawatan<br/>OR staf.jawatan fallback]
+
+    HandleJawatan --> InsertHeader[INSERT INTO permohonan:<br/>- tarikh_mohon = NOW<br/>- status = 'Baru'<br/>- ID_pemohon, nama_pemohon<br/>- jawatan_pemohon, catatan<br/>- ID_jabatan]
 
     InsertHeader --> GetRequestID[Get new<br/>ID_permohonan]
 
@@ -191,7 +195,7 @@ flowchart TD
 
     CommitTransaction --> ClearCart[Clear session cart]
 
-    ClearCart --> SendTelegram[Send Telegram notification<br/>to admin group]
+    ClearCart --> SendTelegram[Send Smart Telegram notification:<br/>- Show ID, nama, item count<br/>- Show jawatan IF not empty<br/>- Show catatan IF not empty]
 
     SendTelegram --> TelegramSent{Notification<br/>sent?}
 

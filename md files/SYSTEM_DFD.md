@@ -197,16 +197,18 @@ graph TB
 #### **3.0 Approval Processing**
 - **Input:** Approval decision (approve/reject), optional admin remarks (catatan_admin)
 - **Processing:**
+  - **View Staff Remarks:** Display catatan from staff (bidirectional communication)
+  - **Smart Jawatan Display:** Use COALESCE(NULLIF(p.jawatan_pemohon, ''), staf.jawatan)
   - Fetch approver details (nama_pelulus, jawatan_pelulus) from staf table
   - Update request status
   - If approved:
     - Deduct stock from barang.baki_semasa
     - Create stock transaction records (transaksi_stok)
   - Record approver details (ID_pelulus, nama_pelulus, jawatan_pelulus)
-  - Save admin remarks (catatan_admin) for transparency
+  - **Save admin remarks** (catatan_admin) for transparency and bidirectional communication
   - Set approval date (tarikh_lulus)
-  - Generate receipt (KEW.PS-8 print)
-- **Output:** Updated request, updated stock levels, audit trail, admin feedback
+  - Generate receipt (KEW.PS-8 print) with COALESCE jawatan logic
+- **Output:** Updated request, updated stock levels, audit trail, **bidirectional feedback**
 - **Data Stores:** D1 (staf - read approver info), D2 (permohonan), D3 (barang), D5 (permohonan_barang), D6 (transaksi_stok)
 
 #### **4.0 Inventory Management**
@@ -325,35 +327,60 @@ graph TB
 - **Input:** Add/remove product actions
 - **Output:** Session cart array
 - **Logic:**
+  - **Smart Jawatan Autocomplete** (AJAX Process 2.2a):
+    - Fetch jawatan from staf.jawatan (profile)
+    - Fetch recent jawatan from permohonan WHERE ID_pemohon (last 5)
+    - De-duplicate and return suggestions
+    - Auto-fill jawatan field on page load
   - Validate quantity requested
   - Check stock availability
-  - Store in session: no_kod, perihal_stok, kuantiti
+  - Store in session: no_kod, perihal_stok, kuantiti, catatan, jawatan
   - Allow cart modification before submission
 
+##### **2.2a Get Jawatan Suggestions (AJAX)**
+- **Input:** Staff ID from session
+- **Output:** Array of jawatan suggestions with labels
+- **Logic:**
+  1. Query staf.jawatan WHERE ID_staf = ? (profile jawatan)
+  2. Query DISTINCT jawatan_pemohon FROM permohonan WHERE ID_pemohon = ? LIMIT 5 (history)
+  3. Combine and de-duplicate
+  4. Label each: "(Profil Anda)" or "(Permohonan Lepas)"
+  5. Return JSON response
+
 #### **2.3 Submit Request**
-- **Input:** Final cart, optional notes (catatan)
+- **Input:** Final cart, optional notes (catatan), optional jawatan
 - **Output:** Request ID, receipt
 - **Logic:**
-  1. Begin transaction
-  2. Insert into permohonan (header)
+  1. **Smart Jawatan Handling:**
+     - Check session for jawatan (from autocomplete)
+     - If empty, fallback to staf.jawatan from profile
+     - Save to permohonan.jawatan_pemohon
+  2. Begin transaction
+  3. Insert into permohonan (header)
      - tarikh_mohon = today
      - status = 'Baru'
-     - ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan
-  3. Get new ID_permohonan
-  4. Insert into permohonan_barang (details)
+     - ID_pemohon, nama_pemohon, jawatan_pemohon, ID_jabatan, catatan
+  4. Get new ID_permohonan
+  5. Insert into permohonan_barang (details)
      - Loop through cart items
      - Insert: ID_permohonan, no_kod, kuantiti_mohon
-  5. Commit transaction
-  6. Trigger Telegram notification (Process 6.0)
-  7. Clear session cart
+  6. Commit transaction
+  7. **Smart Telegram Notification** (Process 6.0)
+     - Only include jawatan if not empty
+     - Only include catatan if not empty
+  8. Clear session cart, catatan, and jawatan
 
 #### **2.4 View Request History**
 - **Input:** Staff ID from session
-- **Output:** List of requests with status
+- **Output:** List of requests with status, **bidirectional remarks**
 - **Logic:**
   - Query: SELECT * FROM permohonan WHERE ID_pemohon = ?
   - JOIN with permohonan_barang and barang
+  - **Smart Jawatan Display:** Use COALESCE(NULLIF(p.jawatan_pemohon, ''), staf.jawatan)
   - Display: ID_permohonan, tarikh_mohon, status, items list
+  - **Bidirectional Remarks:**
+    - Show staff's own catatan (labeled "Catatan Pemohon")
+    - Show admin's catatan_admin (labeled "Catatan Pelulus") if exists
   - Group by request ID
   - Show approval details if status = 'Diluluskan'
 

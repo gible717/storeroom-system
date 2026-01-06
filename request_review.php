@@ -14,10 +14,12 @@ if (!$id_permohonan) {
     exit;
 }
 
-// Fetch request header with applicant info (current data from staf table)
-$stmt = $conn->prepare("SELECT p.*,
-                        s.nama AS nama_pemohon,
-                        s.jawatan AS jawatan_pemohon,
+// Fetch request header with applicant info
+// Use COALESCE: prefer jawatan from request form, fallback to profile
+$stmt = $conn->prepare("SELECT p.ID_permohonan, p.tarikh_mohon, p.status, p.ID_pemohon,
+                        p.nama_pemohon,
+                        COALESCE(NULLIF(p.jawatan_pemohon, ''), s.jawatan) AS jawatan_pemohon,
+                        p.ID_jabatan, p.catatan, p.catatan_admin,
                         j.nama_jabatan
                         FROM permohonan p
                         JOIN staf s ON p.ID_pemohon = s.ID_staf

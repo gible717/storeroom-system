@@ -10,11 +10,11 @@ $selected_kategori = $_GET['kategori'] ?? '';
 
 // Get all categories for dropdown
 $kategori_sql = "SELECT DISTINCT b.kategori
-                 FROM barang b
-                 INNER JOIN permohonan_barang pb ON b.no_kod = pb.no_kod
-                 INNER JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
-                 WHERE p.ID_pemohon = ? AND b.kategori IS NOT NULL AND b.kategori != ''
-                 ORDER BY b.kategori ASC";
+                FROM barang b
+                INNER JOIN permohonan_barang pb ON b.no_kod = pb.no_kod
+                INNER JOIN permohonan p ON pb.ID_permohonan = p.ID_permohonan
+                WHERE p.ID_pemohon = ? AND b.kategori IS NOT NULL AND b.kategori != ''
+                ORDER BY b.kategori ASC";
 $kategori_stmt = $conn->prepare($kategori_sql);
 $kategori_stmt->bind_param('s', $id_staf);
 $kategori_stmt->execute();
@@ -437,6 +437,30 @@ require 'staff_header.php';
                                     </tbody>
                                 </table>
                             `;
+
+                            // Show staff's own remarks if exists
+                            if (data.header.catatan && data.header.catatan.trim() !== '') {
+                                html += `
+                                    <hr>
+                                    <h6 class="fw-bold">Catatan Pemohon (Anda)</h6>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-chat-left-text me-2"></i>
+                                        ${data.header.catatan.replace(/\n/g, '<br>')}
+                                    </div>
+                                `;
+                            }
+
+                            // Show admin remarks if exists
+                            if (data.header.catatan_admin && data.header.catatan_admin.trim() !== '') {
+                                html += `
+                                    <hr>
+                                    <h6 class="fw-bold">Catatan Pelulus</h6>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-person-badge me-2"></i>
+                                        ${data.header.catatan_admin.replace(/\n/g, '<br>')}
+                                    </div>
+                                `;
+                            }
 
                             detailsModalBody.innerHTML = html;
 

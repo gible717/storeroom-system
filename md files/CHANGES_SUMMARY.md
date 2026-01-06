@@ -1,5 +1,37 @@
-# Summary of Changes - Admin Remarks Feature
-**Date**: 5 January 2026
+# Summary of Changes - System Improvements
+**Last Updated**: 6 January 2026
+**Version**: 2.1
+
+---
+
+## 🆕 Latest Updates (6 January 2026)
+
+### 1. Bidirectional Remarks System
+- **request_list.php**: Modal now shows both staff and admin remarks
+- **staff_dashboard.php**: Quick view updated to show both remarks
+- **manage_requests.php**: Admin can view both staff and admin remarks
+- **Purpose**: Transparent two-way communication between staff and admin
+
+### 2. Smart Jawatan Autocomplete
+- **kewps8_print.php**: Added COALESCE logic for jawatan display
+- **request_review.php**: Added COALESCE logic for jawatan display
+- **kewps8_form.php**: Implemented smart autocomplete with datalist
+- **get_jawatan_suggestions.php** (NEW): AJAX endpoint for suggestions
+- **kewps8_cart_ajax.php**: Returns jawatan in cart get action
+- **Purpose**: Learn from user behavior and auto-suggest jawatan values
+
+### 3. Smart Telegram Notifications
+- **telegram_helper.php**: Only show jawatan and catatan if not empty
+- **Purpose**: Cleaner notifications without empty fields
+
+### 4. Bug Fixes
+- **admin_dashboard.php**: Fixed missing "Diluluskan" status badge
+
+📄 **See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md) for detailed documentation**
+
+---
+
+## 📊 Previous Updates (5 January 2026)
 
 ---
 

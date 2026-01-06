@@ -100,6 +100,8 @@ Header table for stock requests (KEW.PS-8 form)
 **Notes:**
 - `nama_pelulus` and `jawatan_pelulus` are denormalized copies from the `staf` table at the time of approval to maintain historical accuracy
 - `catatan_admin` stores admin feedback/reasons for approval or rejection decisions
+- **Smart Display Logic (COALESCE)**: `jawatan_pemohon` uses `COALESCE(NULLIF(p.jawatan_pemohon, ''), pemohon.jawatan)` in queries - prefers form input, falls back to profile
+- **Bidirectional Communication**: Both `catatan` (staff remarks) and `catatan_admin` (admin remarks) are visible to both parties for transparent communication
 
 ---
 
