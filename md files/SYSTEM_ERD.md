@@ -78,16 +78,17 @@ Header table for stock requests (KEW.PS-8 form)
 **Columns:**
 - `ID_permohonan` (INT) - PRIMARY KEY AUTO_INCREMENT - Request ID
 - `tarikh_mohon` (DATE) - Request date
+- `masa_mohon` (DATETIME) - Request datetime with time (for accurate timestamp tracking and smart time display)
 - `status` (VARCHAR: 'Baru', 'Diluluskan', 'Ditolak', 'Diterima') - Request status
 - `ID_pemohon` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Requester ID
 - `nama_pemohon` (VARCHAR) - Requester name (denormalized for history)
 - `jawatan_pemohon` (VARCHAR) - Requester position (denormalized for history)
 - `ID_jabatan` (INT) - FOREIGN KEY → jabatan.ID_jabatan - Department ID
 - `catatan` (TEXT) - Staff's notes/remarks on the request
-- `catatan_admin` (TEXT) - **NEW** Admin's remarks/notes for approval or rejection
+- `catatan_admin` (TEXT) - Admin's remarks/notes for approval or rejection
 - `ID_pelulus` (VARCHAR) - FOREIGN KEY → staf.ID_staf - Approver ID
-- `nama_pelulus` (VARCHAR) - **NEW** Approver name (denormalized for audit trail)
-- `jawatan_pelulus` (VARCHAR) - **NEW** Approver position (denormalized for audit trail)
+- `nama_pelulus` (VARCHAR) - Approver name (denormalized for audit trail)
+- `jawatan_pelulus` (VARCHAR) - Approver position (denormalized for audit trail)
 - `tarikh_lulus` (DATETIME) - Approval/rejection datetime
 - `created_at` (TIMESTAMP) - Record creation timestamp
 
@@ -214,13 +215,17 @@ erDiagram
     permohonan {
         INT ID_permohonan PK "Auto Increment"
         DATE tarikh_mohon
+        DATETIME masa_mohon "Request datetime"
         VARCHAR status "Baru|Diluluskan|Ditolak|Diterima"
         VARCHAR ID_pemohon FK "Requester"
         VARCHAR nama_pemohon "Denormalized"
         VARCHAR jawatan_pemohon "Denormalized"
         INT ID_jabatan FK
-        TEXT catatan "Notes"
+        TEXT catatan "Staff Notes"
+        TEXT catatan_admin "Admin Notes"
         VARCHAR ID_pelulus FK "Approver (nullable)"
+        VARCHAR nama_pelulus "Denormalized"
+        VARCHAR jawatan_pelulus "Denormalized"
         DATETIME tarikh_lulus "Nullable"
         TIMESTAMP created_at
     }
@@ -305,14 +310,15 @@ erDiagram
 │                      permohonan                               │           │
 │───────────────────────────────────────────────────────────────│           │
 │ PK  ID_permohonan (INT AUTO_INCREMENT)                        │           │
-│     tarikh_mohon                                              │           │
+│     tarikh_mohon, masa_mohon                                  │           │
 │     status (Baru|Diluluskan|Ditolak|Diterima)                │           │
 │ FK  ID_pemohon → staf.ID_staf (requester)                    │           │
-│     nama_pemohon (denormalized)                               │           │
-│     jawatan_pemohon (denormalized)                            │           │
+│     nama_pemohon, jawatan_pemohon (denormalized)              │           │
 │ FK  ID_jabatan → jabatan.ID_jabatan                           │           │
-│     catatan                                                   │           │
+│     catatan (staff remarks)                                   │           │
+│     catatan_admin (admin remarks)                             │           │
 │ FK  ID_pelulus → staf.ID_staf (approver, nullable)           │           │
+│     nama_pelulus, jawatan_pelulus (denormalized)              │           │
 │     tarikh_lulus                                              │           │
 │     created_at                                                │           │
 └───────────────────────────────┬───────────────────────────────┘           │
@@ -502,7 +508,7 @@ KATEGORI (1) ──────< (N) barang
 
 ---
 
-**Generated:** 30 December 2025
+**Generated:** 30 December 2025 | **Last Updated:** 7 January 2026
 **Database:** storeroom_db (7 tables, 8 FK constraints)
 **System:** Sistem Pengurusan Bilik Stor dan Inventori MPK
 **Status:** Production-Ready, Cleaned & Optimized

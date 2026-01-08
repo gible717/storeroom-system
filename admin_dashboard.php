@@ -188,26 +188,34 @@ require 'admin_header.php';
     opacity: 1;
 }
 
-/* Gradient backgrounds for action cards */
+/* MYDS-compliant gradient backgrounds for action cards */
 .admin-stat-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
 }
 
 .admin-stat-warning {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
 }
 
 .admin-stat-danger {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
 }
 
-/* Apply glow animation classes to stat card numbers */
+/* Apply glow animation classes to stat card numbers - keep white text */
 .admin-stat-card .pending-warning-active {
     animation: pending-warning-glow 2s ease-in-out infinite;
+    color: white !important;
 }
 
 .admin-stat-card .stock-warning-active {
     animation: stock-warning-glow 2s ease-in-out infinite;
+    color: white !important;
+}
+
+/* Ensure stat numbers always stay white on gradient cards */
+.admin-stat-card .pending-warning-safe,
+.admin-stat-card .stock-warning-safe {
+    color: white !important;
 }
 
 /* Mini stat cards - simple minimal style for additional info */
@@ -693,9 +701,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 stockNumberEl.classList.add('stock-warning-active');
                 stockNumberEl.classList.remove('stock-warning-safe');
             } else {
-                // Within 15-minute session - show normal red (no glow)
+                // Within 15-minute session - show white without glow
                 stockNumberEl.classList.remove('stock-warning-active', 'stock-warning-safe');
-                stockNumberEl.style.color = '#dc3545';
+                stockNumberEl.style.color = 'white';
             }
         }
     }
@@ -706,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem(stockSessionKey, Date.now().toString());
         stockNumberEl.classList.remove('stock-warning-active');
         if (stockCount > 0) {
-            stockNumberEl.style.color = '#dc3545';
+            stockNumberEl.style.color = 'white';
         }
     });
 
@@ -730,9 +738,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 pendingNumberEl.classList.add('pending-warning-active');
                 pendingNumberEl.classList.remove('pending-warning-safe');
             } else {
-                // Within 15-minute session - show normal yellow (no glow)
+                // Within 15-minute session - show white without glow
                 pendingNumberEl.classList.remove('pending-warning-active', 'pending-warning-safe');
-                pendingNumberEl.style.color = '#ffc107';
+                pendingNumberEl.style.color = 'white';
             }
         }
     }
@@ -743,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem(pendingSessionKey, Date.now().toString());
         pendingNumberEl.classList.remove('pending-warning-active');
         if (pendingCount > 0) {
-            pendingNumberEl.style.color = '#ffc107';
+            pendingNumberEl.style.color = 'white';
         }
     });
 

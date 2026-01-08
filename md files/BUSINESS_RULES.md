@@ -1,9 +1,9 @@
 # Business Rules Documentation
 **Sistem Pengurusan Bilik Stor dan Inventori - MPK**
 
-**Date:** 30 December 2025
+**Date:** 30 December 2025 | **Last Updated:** 7 January 2026
 **Status:** Production-Ready, Cleaned & Optimized
-**Version:** 1.0
+**Version:** 1.1
 
 ---
 

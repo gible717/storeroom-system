@@ -252,17 +252,17 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
     display: inline-block;
 }
 
-/* Color variants */
+/* MYDS-compliant color variants */
 .action-card-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
 }
 
 .action-card-success {
-    background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    background: linear-gradient(135deg, #198754 0%, #157347 100%);
 }
 
 .action-card-info {
-    background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
 }
 
 /* Empty state */

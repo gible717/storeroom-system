@@ -1,6 +1,6 @@
 # DATABASE SCHEMA & DATA FLOW ANALYSIS
 **Sistem Pengurusan Bilik Stor dan Inventori - MPK**
-**Date:** 30 December 2025
+**Date:** 30 December 2025 | **Last Updated:** 7 January 2026
 **Status:** PRODUCTION - Cleaned & Optimized
 
 ---
@@ -92,13 +92,17 @@
 |--------|------|-------------|-------------|
 | ID_permohonan | INT | PRIMARY KEY AUTO_INCREMENT | Request ID |
 | tarikh_mohon | DATE | NOT NULL | Request date |
+| masa_mohon | DATETIME | | Request datetime with time |
 | status | VARCHAR | NOT NULL | Status: 'Baru', 'Diluluskan', 'Ditolak', 'Diterima' |
 | ID_pemohon | VARCHAR | FOREIGN KEY → staf | Requester staff ID |
 | nama_pemohon | VARCHAR | NOT NULL | Requester name (denormalized) |
 | jawatan_pemohon | VARCHAR | | Requester position (denormalized) |
 | ID_jabatan | INT | FOREIGN KEY → jabatan | Department ID (nullable) |
-| catatan | TEXT | | Request notes/remarks |
+| catatan | TEXT | | Staff's request notes/remarks |
+| catatan_admin | TEXT | | Admin's approval/rejection remarks |
 | ID_pelulus | VARCHAR | FOREIGN KEY → staf | Approver staff ID |
+| nama_pelulus | VARCHAR | | Approver name (denormalized) |
+| jawatan_pelulus | VARCHAR | | Approver position (denormalized) |
 | tarikh_lulus | DATETIME | | Approval/rejection datetime |
 | created_at | TIMESTAMP | | Creation timestamp |
 

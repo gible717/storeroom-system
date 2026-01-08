@@ -34,14 +34,14 @@
         </li>
 
         <li class="sidebar-item">
-            <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php') echo 'active'; ?>">
+            <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php' || $current_page == 'request_review.php' || $current_page == 'kewps8_form.php') echo 'active'; ?>">
                 <i class="bi bi-clipboard2-data-fill me-3"></i>
                 <span>Permohonan</span>
             </a>
         </li>
 
         <li class="sidebar-item">
-            <a href="admin_reports.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_reports') || str_starts_with($current_page, 'report_')) echo 'active'; ?>">
+            <a href="admin_reports.php" class="sidebar-link <?php if(str_starts_with($current_page, 'admin_reports') || str_starts_with($current_page, 'report_') || str_starts_with($current_page, 'kewps3_')) echo 'active'; ?>">
                 <i class="bi bi-file-earmark-bar-graph-fill me-3"></i>
                 <span>Laporan</span>
             </a>

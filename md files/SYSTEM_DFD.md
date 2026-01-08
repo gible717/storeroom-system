@@ -447,7 +447,7 @@ graph TB
 
 ---
 
-**Generated:** 30 December 2025
+**Generated:** 30 December 2025 | **Last Updated:** 7 January 2026
 **Database:** storeroom_db (7 tables, 8 FK constraints)
 **System:** Sistem Pengurusan Bilik Stor dan Inventori MPK
 **Status:** Production-Ready, Cleaned & Optimized

@@ -22,7 +22,7 @@ $kategori_list_result = $conn->query($kategori_list_sql);
         <div class="col-lg-8 col-md-7 mb-4">
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-white py-3" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                    <h6 class="m-0 fw-bold text-primary">Senarai Kategori Sedia Ada</h6>
+                    <h6 class="m-0 fw-bold text">Senarai Kategori Sedia Ada</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
