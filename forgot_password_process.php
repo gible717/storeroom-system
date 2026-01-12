@@ -22,6 +22,12 @@ if ($step == '1') {
         exit;
     }
 
+    // Clear any previous reset session data to prevent conflicts
+    unset($_SESSION['reset_id_staf']);
+    unset($_SESSION['reset_nama']);
+    unset($_SESSION['reset_old_password']);
+    unset($_SESSION['reset_verified']);
+
     // Check if user exists
     $stmt = $conn->prepare("SELECT ID_staf, nama, kata_laluan FROM staf WHERE ID_staf = ?");
     $stmt->bind_param("s", $id_staf);
@@ -41,8 +47,12 @@ if ($step == '1') {
     // Store verification data in session (temporary)
     $_SESSION['reset_id_staf'] = $user['ID_staf'];
     $_SESSION['reset_nama'] = $user['nama'];
-    $_SESSION['reset_old_password'] = $user['kata_laluan']; // To prevent reusing same password
+    $_SESSION['reset_old_password'] = $user['kata_laluan']; // Current hashed password to prevent reusing
     $_SESSION['reset_verified'] = true;
+    $_SESSION['reset_timestamp'] = time(); // Track when reset was initiated
+
+    // Log the reset attempt for debugging
+    //error_log("Password reset initiated - ID: " . $user['ID_staf'] . ", Hash: " . substr($user['kata_laluan'], 0, 20) . "...");
 
     // Redirect to step 2 (reset password form)
     header("Location: reset_password.php");

@@ -37,7 +37,14 @@ if (strlen($kata_laluan_baru) < 6) {
 }
 
 // IMPORTANT: Check if new password is same as old password
-if (password_verify($kata_laluan_baru, $old_password_hash)) {
+$is_same_password = password_verify($kata_laluan_baru, $old_password_hash);
+
+// Log the verification attempt for debugging
+//error_log("Password reset verification - ID: $id_staf, Same as old: " . ($is_same_password ? 'YES' : 'NO') .
+          //", New password length: " . strlen($kata_laluan_baru) .
+          //", Hash: " . substr($old_password_hash, 0, 30) . "...");
+
+if ($is_same_password) {
     header("Location: reset_password.php?error=" . urlencode("Kata laluan baru tidak boleh sama dengan kata laluan lama. Sila gunakan kata laluan yang berbeza."));
     exit;
 }

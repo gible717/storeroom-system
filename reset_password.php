@@ -9,7 +9,25 @@ if (!isset($_SESSION['reset_verified']) || $_SESSION['reset_verified'] !== true)
     exit;
 }
 
+// Check for session timeout (30 minutes)
+$reset_timeout = 1800; // 30 minutes in seconds
+if (isset($_SESSION['reset_timestamp'])) {
+    $elapsed_time = time() - $_SESSION['reset_timestamp'];
+    if ($elapsed_time > $reset_timeout) {
+        // Session expired, clear data
+        unset($_SESSION['reset_id_staf']);
+        unset($_SESSION['reset_nama']);
+        unset($_SESSION['reset_old_password']);
+        unset($_SESSION['reset_verified']);
+        unset($_SESSION['reset_timestamp']);
+
+        header("Location: forgot_password.php?error=" . urlencode("Sesi tamat tempoh. Sila cuba lagi."));
+        exit;
+    }
+}
+
 $nama = $_SESSION['reset_nama'] ?? 'Pengguna';
+$id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
 ?>
 <!DOCTYPE html>
 <html lang="ms">
@@ -193,12 +211,21 @@ $nama = $_SESSION['reset_nama'] ?? 'Pengguna';
         let checkTimeout;
         const newPasswordInput = document.getElementById('kata_laluan_baru');
         const newPasswordFeedback = document.getElementById('newPasswordFeedback');
+        const confirmPasswordInput = document.getElementById('sahkan_kata_laluan');
+        const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
 
         newPasswordInput.addEventListener('input', function() {
             const password = this.value;
+            const inputField = this; // Store reference for use in setTimeout
 
             // Clear previous timeout
             clearTimeout(checkTimeout);
+
+            // Also trigger validation for confirm password field if it has value
+            const confirmPassword = confirmPasswordInput.value;
+            if (confirmPassword.length > 0) {
+                confirmPasswordInput.dispatchEvent(new Event('input'));
+            }
 
             // Reset feedback if empty
             if (password.length === 0) {
@@ -216,39 +243,65 @@ $nama = $_SESSION['reset_nama'] ?? 'Pengguna';
                 return;
             }
 
+            // Clear any previous error state before checking
+            this.classList.remove('is-invalid', 'is-valid');
+            newPasswordFeedback.style.display = 'none';
+            newPasswordFeedback.textContent = ''; // Clear text too
+
             // Debounce AJAX call (wait 500ms after user stops typing)
             checkTimeout = setTimeout(function() {
+                console.log('🔍 Starting password check for:', password);
+
                 // Check if password matches old password via AJAX
                 const formData = new FormData();
                 formData.append('password', password);
 
                 fetch('check_old_password.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin'
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Password check response:', data); // Debug log
+                    console.log('Checking password:', password); // Show what password was checked
+
+                    if (data.error) {
+                        console.error('Server error:', data.error);
+                        // Don't show error to user, just allow them to proceed
+                        inputField.classList.remove('is-invalid', 'is-valid');
+                        newPasswordFeedback.style.display = 'none';
+                        return;
+                    }
+
                     if (data.matches === true) {
-                        newPasswordInput.classList.add('is-invalid');
-                        newPasswordInput.classList.remove('is-valid');
+                        console.log('❌ Password matches old password');
+                        inputField.classList.add('is-invalid');
+                        inputField.classList.remove('is-valid');
                         newPasswordFeedback.textContent = 'Kata laluan baru tidak boleh sama dengan kata laluan lama anda.';
                         newPasswordFeedback.style.display = 'block';
                     } else {
-                        newPasswordInput.classList.remove('is-invalid');
-                        newPasswordInput.classList.add('is-valid');
+                        console.log('✅ Password is different from old password');
+                        inputField.classList.remove('is-invalid');
+                        inputField.classList.add('is-valid');
                         newPasswordFeedback.style.display = 'none';
                     }
                 })
                 .catch(error => {
                     console.error('Error checking password:', error);
+                    // On error, don't block the user - just clear validation
+                    inputField.classList.remove('is-invalid', 'is-valid');
+                    newPasswordFeedback.style.display = 'none';
                 });
             }, 500);
         });
 
         // Real-time validation for confirm password field
-        const confirmPasswordInput = document.getElementById('sahkan_kata_laluan');
-        const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
-
         confirmPasswordInput.addEventListener('input', function() {
             const newPassword = newPasswordInput.value;
             const confirmPassword = this.value;
@@ -257,28 +310,23 @@ $nama = $_SESSION['reset_nama'] ?? 'Pengguna';
             if (confirmPassword.length === 0) {
                 this.classList.remove('is-invalid', 'is-valid');
                 confirmPasswordFeedback.style.display = 'none';
+                confirmPasswordFeedback.textContent = '';
                 return;
             }
 
             // Check if passwords match
             if (newPassword !== confirmPassword) {
+                console.log('❌ Passwords do not match');
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
                 confirmPasswordFeedback.textContent = 'Kata laluan tidak sepadan. Sila semak semula.';
                 confirmPasswordFeedback.style.display = 'block';
             } else {
+                console.log('✅ Passwords match!');
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');
                 confirmPasswordFeedback.style.display = 'none';
-            }
-        });
-
-        // Also validate confirm password when new password changes
-        newPasswordInput.addEventListener('input', function() {
-            const confirmPassword = confirmPasswordInput.value;
-            if (confirmPassword.length > 0) {
-                // Trigger validation on confirm password field
-                confirmPasswordInput.dispatchEvent(new Event('input'));
+                confirmPasswordFeedback.textContent = '';
             }
         });
 
