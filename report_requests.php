@@ -167,21 +167,57 @@ $summary = [
 ?>
 
 <style>
-.stat-card {
-    background: #fff; border: 1px solid #e9ecef; border-radius: 0.75rem;
-    padding: 1.5rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+/* Gradient Stat Cards */
+.card-statistic-3 {
+    position: relative;
+    overflow: hidden;
+}
+.card-statistic-3 .card-icon-large {
+    font-size: 110px;
+    position: absolute;
+    right: -5px;
+    top: 15px;
+    opacity: 0.1;
+    color: #000;
+    line-height: 1;
+}
+.card-statistic-3 .card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+.card-statistic-3 h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+.gradient-card {
+    border-radius: 12px;
+    border: none;
+    color: #fff;
+    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1),
+                0 0.9375rem 1.40625rem rgba(90,97,105,0.1),
+                0 0.25rem 0.53125rem rgba(90,97,105,0.12);
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.stat-card-icon {
-    font-size: 2.5rem; width: 70px; height: 70px; display: flex;
-    align-items: center; justify-content: center; border-radius: 0.5rem; margin-right: 1.25rem;
+.gradient-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 2.5rem rgba(90,97,105,0.15),
+                0 1rem 1.5rem rgba(90,97,105,0.15);
 }
-.stat-card-icon.bg-primary-light { color: #4f46e5; }
-.stat-card-icon.bg-success-light { color: #10b981; }
-.stat-card-icon.bg-info-light { color: #3b82f6; }
-.stat-card-info h6 { color: #6c757d; font-size: 0.875rem; margin-bottom: 0.25rem; }
-.stat-card-info h4 { margin-bottom: 0; font-weight: 700; font-size: 2rem; color: #1f2937; }
+/* Indigo/Purple gradient for Jumlah Permohonan */
+.l-bg-indigo {
+    background: linear-gradient(to right, #312e81, #6366f1) !important;
+}
+/* Green gradient for Jumlah Jabatan */
+.l-bg-green-dark {
+    background: linear-gradient(to right, #065f46, #10b981) !important;
+}
+/* Cyan/Teal gradient for Purata per Jabatan */
+.l-bg-cyan {
+    background: linear-gradient(to right, #0e7490, #06b6d4) !important;
+}
 
 .dept-table { font-size: 0.9rem; }
 .dept-table th { background-color: #f8f9fa; font-weight: 600; }
@@ -250,30 +286,51 @@ $summary = [
 </div>
 
 <div class="row g-4 mb-4">
+    <!-- Jumlah Permohonan Card -->
     <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
-            <div class="stat-card-info">
-                <h6>Jumlah Permohonan</h6>
-                <h4><?php echo number_format($summary['total_requests'] ?? 0); ?></h4>
+        <div class="card gradient-card l-bg-indigo">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-journal-text"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Jumlah Permohonan</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><?php echo number_format($summary['total_requests'] ?? 0); ?></h2>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Jumlah Jabatan Card -->
     <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon bg-success-light"><i class="bi bi-building"></i></div>
-            <div class="stat-card-info">
-                <h6>Jumlah Jabatan</h6>
-                <h4><?php echo number_format($summary['total_departments'] ?? 0); ?></h4>
+        <div class="card gradient-card l-bg-green-dark">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-building"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Jumlah Jabatan</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><?php echo number_format($summary['total_departments'] ?? 0); ?></h2>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <!-- Purata per Jabatan Card -->
     <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon bg-info-light"><i class="bi bi-graph-up"></i></div>
-            <div class="stat-card-info">
-                <h6>Purata per Jabatan</h6>
-                <h4><?php echo number_format($summary['avg_per_dept'] ?? 0, 1); ?></h4>
+        <div class="card gradient-card l-bg-cyan">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-graph-up"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Purata per Jabatan</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><?php echo number_format($summary['avg_per_dept'] ?? 0, 1); ?></h2>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -284,7 +341,7 @@ $summary = [
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold mb-3">Top 10 Jumlah Permohonan mengikut Jabatan</h6>
+                <h6 class="card-title fw-bold mb-3">Top 10 Jumlah Permohonan</h6>
                 <div style="height: 400px;">
                     <canvas id="topDepartmentsChart"></canvas>
                 </div>
@@ -294,7 +351,7 @@ $summary = [
     <div class="col-md-6">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold mb-3">Status Permohonan Mengikut Jabatan</h6>
+                <h6 class="card-title fw-bold mb-3">Status Permohonan</h6>
                 <div style="height: 400px;">
                     <canvas id="departmentStatusChart"></canvas>
                 </div>
@@ -309,7 +366,7 @@ $summary = [
     <div class="col-12">
         <div class="card shadow-sm border-0" style="border-radius: 1rem;">
             <div class="card-body p-4">
-                <h6 class="card-title fw-bold mb-3">Top 5 Trend Bulanan mengikut Jabatan</h6>
+                <h6 class="card-title fw-bold mb-3">Top 5 Trend Bulanan</h6>
                 <div style="height: 350px;">
                     <canvas id="monthlyTrendChart"></canvas>
                 </div>
@@ -322,7 +379,7 @@ $summary = [
 <!-- Department Summary Table -->
 <div class="card shadow-sm border-0" style="border-radius: 1rem;">
     <div class="card-body p-4">
-        <h5 class="mb-3 fw-bold">Jadual Ringkasan Jabatan</h5>
+        <h5 class="mb-3 fw-bold">Senarai Ringkasan</h5>
         <div class="table-responsive">
             <table class="table table-hover table-bordered dept-table align-middle">
                 <thead>
@@ -386,9 +443,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const monthlyLabels = <?php echo json_encode($monthly_labels); ?>;
     const monthlyDatasets = <?php echo json_encode($monthly_datasets); ?>;
 
-    // Chart 1: Top Departments - Horizontal Bar Chart
+    // Chart 1: Top Departments - Colorful Horizontal Bar Chart
     const topDeptCtx = document.getElementById('topDepartmentsChart');
     if (topDeptCtx && deptLabels.length > 0) {
+        // Different colors for each bar (like Top 5 Items chart)
+        const deptColors = [
+            '#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+            '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'
+        ];
         new Chart(topDeptCtx.getContext('2d'), {
             type: 'bar',
             data: {
@@ -396,10 +458,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Jumlah Permohonan',
                     data: deptRequests,
-                    backgroundColor: '#4f46e5',
-                    borderColor: '#4338ca',
-                    borderWidth: 1,
-                    borderRadius: 4
+                    backgroundColor: deptColors.slice(0, deptLabels.length),
+                    borderRadius: 6,
+                    borderSkipped: false
                 }]
             },
             options: {
@@ -415,6 +476,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         ticks: {
                             stepSize: 1,
                             precision: 0
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
@@ -476,39 +546,75 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Chart 3: Monthly Trend - Line Chart
+    // Chart 3: Monthly Trend - Grouped Bar Chart
     const monthlyCtx = document.getElementById('monthlyTrendChart');
     if (monthlyCtx && monthlyDatasets.length > 0) {
+        // Convert line datasets to bar datasets with rounded corners
+        const barDatasets = monthlyDatasets.map((dataset, index) => ({
+            label: dataset.label,
+            data: dataset.data,
+            backgroundColor: dataset.borderColor,
+            borderColor: dataset.borderColor,
+            borderWidth: 0,
+            borderRadius: 4,
+            borderSkipped: false
+        }));
+
         new Chart(monthlyCtx.getContext('2d'), {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: monthlyLabels,
-                datasets: monthlyDatasets
+                datasets: barDatasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'rect',
+                            padding: 15,
+                            font: {
+                                size: 11
+                            }
+                        }
                     },
                     tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 12,
                         callbacks: {
                             title: function(context) {
                                 return context[0].label;
                             },
                             label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + ' permohonan';
+                                return ' ' + context.dataset.label + ': ' + context.parsed.y + ' permohonan';
                             }
                         }
                     }
                 },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 1,
                             precision: 0
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
                         }
                     }
                 }

@@ -37,11 +37,35 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
     <title>Tetap Semula Kata Laluan - Sistem Pengurusan Stor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <!-- MyDS Typography: Poppins for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* MyDS Design System Variables */
+        :root {
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            /* MyDS Spacing Scale (8px base unit) */
+            --space-1: 0.25rem;      /* 4px */
+            --space-2: 0.5rem;       /* 8px */
+            --space-3: 0.75rem;      /* 12px */
+            --space-4: 1rem;         /* 16px */
+            --space-5: 1.25rem;      /* 20px */
+            --space-6: 1.5rem;       /* 24px */
+            --space-8: 2rem;         /* 32px */
+            --space-10: 2.5rem;      /* 40px */
+            --space-12: 3rem;        /* 48px */
+            --space-16: 4rem;        /* 64px */
+        }
         body, html {
             height: 100%;
             margin: 0;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+            font-family: var(--font-body);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
         }
         .main-container {
             display: flex;
@@ -134,27 +158,30 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
                     <!-- Step 2: Set New Password -->
                     <form id="resetPasswordForm" action="reset_password_process.php" method="POST">
                         <div class="mb-3">
-                            <label for="kata_laluan_baru" class="form-label">Kata Laluan Baru <span class="text-danger">*</span></label>
+                            <label for="kata_laluan_baru" class="form-label">Kata Laluan Baru <span class="text-danger" aria-hidden="true">*</span></label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="kata_laluan_baru" name="kata_laluan_baru"
-                                       placeholder="Masukkan kata laluan baru" required>
-                                <span class="input-group-text" id="togglePassword1" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk atau sembunyikan kata laluan">
-                                    <i class="bi bi-eye-slash-fill" id="eyeIcon1"></i>
+                                       placeholder="Masukkan kata laluan baru" required aria-required="true" aria-describedby="password_requirements newPasswordFeedback"
+                                       minlength="6" maxlength="10">
+                                <span class="input-group-text" id="togglePassword1" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk kata laluan" aria-pressed="false">
+                                    <i class="bi bi-eye-slash-fill" id="eyeIcon1" aria-hidden="true"></i>
                                 </span>
                             </div>
-                            <div id="newPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
+                            <small id="password_requirements" class="form-text text-muted">6-10 aksara</small>
+                            <div id="newPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;" role="alert" aria-live="polite"></div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="sahkan_kata_laluan" class="form-label">Sahkan Kata Laluan <span class="text-danger">*</span></label>
+                            <label for="sahkan_kata_laluan" class="form-label">Sahkan Kata Laluan <span class="text-danger" aria-hidden="true">*</span></label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="sahkan_kata_laluan" name="sahkan_kata_laluan"
-                                       placeholder="Masukkan semula kata laluan baru" required>
-                                <span class="input-group-text" id="togglePassword2" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk atau sembunyikan kata laluan pengesahan">
-                                    <i class="bi bi-eye-slash-fill" id="eyeIcon2"></i>
+                                       placeholder="Masukkan semula kata laluan baru" required aria-required="true" aria-describedby="confirmPasswordFeedback"
+                                       minlength="6" maxlength="10">
+                                <span class="input-group-text" id="togglePassword2" style="cursor: pointer;" role="button" tabindex="0" aria-label="Tunjuk kata laluan pengesahan" aria-pressed="false">
+                                    <i class="bi bi-eye-slash-fill" id="eyeIcon2" aria-hidden="true"></i>
                                 </span>
                             </div>
-                            <div id="confirmPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;"></div>
+                            <div id="confirmPasswordFeedback" class="invalid-feedback d-block" style="display: none !important;" role="alert" aria-live="polite"></div>
                         </div>
 
                         <div class="alert alert-info">
@@ -183,28 +210,48 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Toggle Password 1
+        // Toggle Password 1 - with keyboard support
         const togglePassword1 = document.getElementById('togglePassword1');
         const passwordInput1 = document.getElementById('kata_laluan_baru');
         const eyeIcon1 = document.getElementById('eyeIcon1');
 
-        togglePassword1.addEventListener('click', function() {
-            const type = passwordInput1.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput1.setAttribute('type', type);
+        function togglePassword1Visibility() {
+            const isPassword = passwordInput1.getAttribute('type') === 'password';
+            passwordInput1.setAttribute('type', isPassword ? 'text' : 'password');
             eyeIcon1.classList.toggle('bi-eye-fill');
             eyeIcon1.classList.toggle('bi-eye-slash-fill');
+            togglePassword1.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+            togglePassword1.setAttribute('aria-label', isPassword ? 'Sembunyikan kata laluan' : 'Tunjuk kata laluan');
+        }
+
+        togglePassword1.addEventListener('click', togglePassword1Visibility);
+        togglePassword1.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePassword1Visibility();
+            }
         });
 
-        // Toggle Password 2
+        // Toggle Password 2 - with keyboard support
         const togglePassword2 = document.getElementById('togglePassword2');
         const passwordInput2 = document.getElementById('sahkan_kata_laluan');
         const eyeIcon2 = document.getElementById('eyeIcon2');
 
-        togglePassword2.addEventListener('click', function() {
-            const type = passwordInput2.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput2.setAttribute('type', type);
+        function togglePassword2Visibility() {
+            const isPassword = passwordInput2.getAttribute('type') === 'password';
+            passwordInput2.setAttribute('type', isPassword ? 'text' : 'password');
             eyeIcon2.classList.toggle('bi-eye-fill');
             eyeIcon2.classList.toggle('bi-eye-slash-fill');
+            togglePassword2.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+            togglePassword2.setAttribute('aria-label', isPassword ? 'Sembunyikan kata laluan pengesahan' : 'Tunjuk kata laluan pengesahan');
+        }
+
+        togglePassword2.addEventListener('click', togglePassword2Visibility);
+        togglePassword2.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePassword2Visibility();
+            }
         });
 
         // Real-time validation for new password field
@@ -234,11 +281,19 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
                 return;
             }
 
-            // Check minimum length
+            // Check 6-10 characters
             if (password.length < 6) {
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
                 newPasswordFeedback.textContent = 'Kata laluan mestilah sekurang-kurangnya 6 aksara.';
+                newPasswordFeedback.style.display = 'block';
+                return;
+            }
+
+            if (password.length > 10) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+                newPasswordFeedback.textContent = 'Kata laluan tidak boleh melebihi 10 aksara.';
                 newPasswordFeedback.style.display = 'block';
                 return;
             }
@@ -356,10 +411,10 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
                 return false;
             }
 
-            // Double-check minimum length
-            if (password.length < 6) {
+            // Double-check 6-10 characters
+            if (password.length < 6 || password.length > 10) {
                 e.preventDefault();
-                alert('Kata laluan mestilah sekurang-kurangnya 6 aksara.');
+                alert('Kata laluan mestilah antara 6 hingga 10 aksara.');
                 return false;
             }
         });

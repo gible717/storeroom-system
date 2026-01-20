@@ -4,7 +4,7 @@
 <nav class="sidebar">
     <div class="sidebar-header">
         <img src="assets/img/admin-logo.png" alt="Logo" class="sidebar-brand-logo">
-        <span class="sidebar-brand-text">Sistem Pengurusan Bilik Stor dan Inventori</span>
+        <span class="sidebar-brand-text"> InventStor - Sistem Pengurusan Bilik Stor dan Inventori</span>
     </div>
 
     <ul class="sidebar-nav">
@@ -71,6 +71,12 @@
         align-items: center;
         text-align: left;
         border-bottom: 1px solid #374151;
+    }
+    .sidebar-brand-logo {
+        width: 200px;
+        height: 200px;
+        object-fit: contain;
+        margin-bottom: 0.75rem;
     }
     .sidebar-brand-text {
         font-size: 1.1rem;

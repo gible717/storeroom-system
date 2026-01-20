@@ -42,8 +42,8 @@ $jabatan_result = $conn->query($sql);
             text-align: center;
         }
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 100px;
+            height: 100px;
         }
 
         /* Success Popup Notification */
@@ -98,32 +98,25 @@ $jabatan_result = $conn->query($sql);
         }
     </style>
 </head>
-<body>
+<body style="position: relative;">
 
-    <!-- Back Arrow + Title (outside container, same horizontal line) -->
-    <div style="max-width: 600px; width: 100%; margin: 0 auto; margin-bottom: 1.5rem; position: relative;">
-        <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%);">
-            <i class="bi bi-house-fill fs-4"></i>
-        </a>
-        <h2 class="h4 fw-bold mb-0 text-center">Daftar Akaun Baru</h2>
-    </div>
+    <!-- Home button at top right -->
+    <a href="index.php" class="text-dark text-decoration-none" title="Kembali ke Halaman Utama"
+        style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
+        <i class="bi bi-house-fill fs-4"></i>
+    </a>
+
+    <h4 class="text-center mb-4 fw-bold">Daftar Akaun Baru</h4>
 
     <div class="card register-card">
         <div class="card-body">
 
             <div class="form-header">
-                                <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
+                <img src="/storeroom/assets/img/logo.png" alt="Logo" class="logo">
                 <h5 class="fw-bold mb-0">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h5>
             </div>
 
-            <!-- Divider Line -->
-            <div class="d-flex justify-content-center my-3">
-                <hr style="width: 150px; border-top: 1px solid #dee2e6; margin: 0;">
-            </div>
-
-            <div class="text-center mb-3">
-                <p class="text-muted">Sila lengkapkan maklumat di bawah.</p>
-            </div>
+            <p class="text-center text-muted mb-4">Sila lengkapkan maklumat di bawah.</p>
 
             <?php if (isset($_GET['error'])): ?>
                 <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($_GET['error']); ?></div>

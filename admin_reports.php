@@ -133,23 +133,134 @@ while ($row = $top_items_result->fetch_assoc()) {
 ?>
 
 <style>
-/* Stat card - horizontal layout */
-.stat-card { background: #fff; border: 1px solid #e9ecef; border-radius: 0.75rem; padding: 1.5rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.stat-card-icon { font-size: 2.5rem; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; margin-right: 1.25rem; }
-.stat-card-icon.bg-primary-light {color: #4f46e5; }
-.stat-card-icon.bg-success-light {color: #10b981; }
-.stat-card-icon.bg-danger-light {color: #ef4444; }
-.stat-card-icon.bg-warning-light {color: #f59e0b; }
-.stat-card-info h6 { color: #6c757d; font-size: 0.875rem; margin-bottom: 0.25rem; }
-.stat-card-info h4 { margin-bottom: 0; font-weight: 700; font-size: 2rem; color: #1f2937; }
+/* Gradient Stat Cards */
+.card-statistic-3 {
+    position: relative;
+    overflow: hidden;
+}
+.card-statistic-3 .card-icon-large {
+    font-size: 110px;
+    position: absolute;
+    right: -5px;
+    top: 15px;
+    opacity: 0.1;
+    color: #000;
+    line-height: 1;
+}
+.card-statistic-3 .card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+.card-statistic-3 h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+.gradient-card {
+    border-radius: 12px;
+    border: none;
+    color: #fff;
+    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1),
+                0 0.9375rem 1.40625rem rgba(90,97,105,0.1),
+                0 0.25rem 0.53125rem rgba(90,97,105,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.gradient-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 2.5rem rgba(90,97,105,0.15),
+                0 1rem 1.5rem rgba(90,97,105,0.15);
+}
+/* Indigo/Purple gradient for Jumlah Permohonan */
+.l-bg-indigo {
+    background: linear-gradient(to right, #312e81, #6366f1) !important;
+}
+/* Green gradient for Diluluskan */
+.l-bg-green-dark {
+    background: linear-gradient(to right, #065f46, #10b981) !important;
+}
+/* Red gradient for Ditolak */
+.l-bg-red {
+    background: linear-gradient(to right, #991b1b, #ef4444) !important;
+}
+/* Orange gradient for Belum Diproses */
+.l-bg-orange {
+    background: linear-gradient(to right, #92400e, #f59e0b) !important;
+}
 
-/* Report action cards */
-.report-action-card { border: 2px solid #e5e7eb; border-radius: 1rem; padding: 2rem; text-align: center; transition: all 0.3s; height: 100%; background: white; }
-.report-action-card:hover { border-color: #4f46e5; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.15); }
-.report-action-card i { font-size: 3.5rem; margin-bottom: 1rem; }
-.report-action-card h5 { font-weight: 700; margin-bottom: 0.75rem; }
-.report-action-card p { color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; }
+/* Report action cards - Card Box Style */
+.card-box {
+    position: relative;
+    color: #fff;
+    padding: 20px 15px 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+    height: 100%;
+}
+.card-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+.card-box:hover .card-box-icon i {
+    font-size: 90px;
+    transition: 0.5s;
+}
+.card-box .inner {
+    padding: 5px 10px 0 10px;
+    position: relative;
+    z-index: 1;
+}
+.card-box h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+}
+.card-box p {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    line-height: 1.4;
+    min-height: 40px;
+}
+.card-box .card-box-icon {
+    position: absolute;
+    bottom: 40px;
+    right: 10px;
+    z-index: 0;
+    font-size: 72px;
+    color: rgba(0, 0, 0, 0.15);
+    line-height: 1;
+}
+.card-box .card-box-footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+    padding: 8px 0;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.1);
+    width: 100%;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+.card-box .card-box-footer:hover {
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+.card-box.bg-success-custom {
+    background-color: #10b981 !important;
+}
+.card-box.bg-primary-custom {
+    background-color: #3b82f6 !important;
+}
+.card-box.bg-warning-custom {
+    background-color: #f59e0b !important;
+}
 
 /* Tab filter styling */
 .filter-tabs { display: inline-flex; background: #f3f4f6; border-radius: 0.5rem; padding: 0.25rem; }
@@ -203,28 +314,68 @@ while ($row = $top_items_result->fetch_assoc()) {
 
     <!-- Stat Cards -->
     <div class="row g-3">
+        <!-- Jumlah Permohonan Card -->
         <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-primary-light"><i class="bi bi-journal-text"></i></div>
-                <div class="stat-card-info fw-bold"><h6>Jumlah Permohonan</h6><h4><?php echo $cards['jumlah_permohonan']; ?></h4></div>
+            <div class="card gradient-card l-bg-indigo">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon-large"><i class="bi bi-journal-text"></i></div>
+                    <div class="mb-4">
+                        <h5 class="card-title">Jumlah Permohonan</h5>
+                    </div>
+                    <div class="row align-items-center d-flex">
+                        <div class="col-8">
+                            <h2><?php echo $cards['jumlah_permohonan']; ?></h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- Diluluskan Card -->
         <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-success-light"><i class="bi bi-check-circle"></i></div>
-                <div class="stat-card-info fw-bold"><h6>Diluluskan</h6><h4><?php echo $cards['jumlah_lulus']; ?></h4></div>
+            <div class="card gradient-card l-bg-green-dark">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon-large"><i class="bi bi-check-circle"></i></div>
+                    <div class="mb-4">
+                        <h5 class="card-title">Diluluskan</h5>
+                    </div>
+                    <div class="row align-items-center d-flex">
+                        <div class="col-8">
+                            <h2><?php echo $cards['jumlah_lulus']; ?></h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- Ditolak Card -->
         <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-danger-light"><i class="bi bi-x-circle"></i></div>
-                <div class="stat-card-info fw-bold"><h6>Ditolak</h6><h4><?php echo $cards['jumlah_tolak']; ?></h4></div>
+            <div class="card gradient-card l-bg-red">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon-large"><i class="bi bi-x-circle"></i></div>
+                    <div class="mb-4">
+                        <h5 class="card-title">Ditolak</h5>
+                    </div>
+                    <div class="row align-items-center d-flex">
+                        <div class="col-8">
+                            <h2><?php echo $cards['jumlah_tolak']; ?></h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- Belum Diproses Card -->
         <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-card-icon bg-warning-light"><i class="bi bi-hourglass-split"></i></div>
-                <div class="stat-card-info fw-bold"><h6>Belum Diproses</h6><h4><?php echo $cards['jumlah_pending']; ?></h4></div>
+            <div class="card gradient-card l-bg-orange">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon-large"><i class="bi bi-hourglass-split"></i></div>
+                    <div class="mb-4">
+                        <h5 class="card-title">Belum Diproses</h5>
+                    </div>
+                    <div class="row align-items-center d-flex">
+                        <div class="col-8">
+                            <h2><?php echo $cards['jumlah_pending']; ?></h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -255,28 +406,43 @@ while ($row = $top_items_result->fetch_assoc()) {
     <h3 class="fw-bold d-inline-block" style="border-bottom: 3px solid #dee2e6; padding-bottom: 0.5rem; padding-left: 2rem; padding-right: 2rem;">Jana Laporan</h3>
 </div>
 <div class="row g-4">
+    <!-- KEW.PS-3 Card -->
     <div class="col-md-4">
-        <div class="report-action-card">
-            <i class="bi bi-file-earmark-ruled text-success"></i>
-            <h5>KEW.PS-3 Bahagian B</h5>
-            <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh</p>
-            <a href="kewps3_report.php" class="btn btn-success btn-sm">Jana KEW.PS-3</a>
+        <div class="card-box bg-success-custom">
+            <div class="inner">
+                <h3>KEW.PS-3 Bahagian B</h3>
+                <p>Kad Kawalan Stok - Rekod transaksi stok mengikut item dan tempoh</p>
+            </div>
+            <div class="card-box-icon">
+                <i class="bi bi-file-earmark-ruled"></i>
+            </div>
+            <a href="kewps3_report.php" class="card-box-footer">Jana KEW.PS-3 <i class="bi bi-arrow-right-circle"></i></a>
         </div>
     </div>
+    <!-- Analisis Jabatan Card -->
     <div class="col-md-4">
-        <div class="report-action-card">
-            <i class="bi bi-graph-up text-primary"></i>
-            <h5>Analisis Mengikut Jabatan</h5>
-            <p>Infografik permohonan mengikut jabatan: jumlah permohonan, kadar kelulusan dan trend bulanan</p>
-            <a href="report_requests.php" class="btn btn-primary btn-sm">Lihat Analisis</a>
+        <div class="card-box bg-primary-custom">
+            <div class="inner">
+                <h3>Analisis Mengikut Jabatan</h3>
+                <p>Infografik permohonan mengikut jabatan, kadar kelulusan dan trend bulanan</p>
+            </div>
+            <div class="card-box-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <a href="report_requests.php" class="card-box-footer">Lihat Analisis <i class="bi bi-arrow-right-circle"></i></a>
         </div>
     </div>
+    <!-- Laporan Inventori Card -->
     <div class="col-md-4">
-        <div class="report-action-card">
-            <i class="bi bi-box-seam text-warning"></i>
-            <h5>Laporan Inventori</h5>
-            <p>Analisis inventori bulanan, nilai stok, pergerakan masuk/keluar, dan baki semasa mengikut item</p>
-            <a href="report_inventory.php" class="btn btn-warning btn-sm">Lihat Inventori</a>
+        <div class="card-box bg-warning-custom">
+            <div class="inner">
+                <h3>Laporan Inventori</h3>
+                <p>Analisis inventori bulanan, nilai stok, pergerakan masuk/keluar dan baki semasa</p>
+            </div>
+            <div class="card-box-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <a href="report_inventory.php" class="card-box-footer">Lihat Inventori <i class="bi bi-arrow-right-circle"></i></a>
         </div>
     </div>
 </div>

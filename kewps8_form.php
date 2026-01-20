@@ -9,7 +9,7 @@ if (!isset($_SESSION['ID_staf'])) {
     exit;
 }
 
-$pageTitle = "Borang Permohonan Stok";
+$pageTitle = "Borang KEW.PS-8";
 
 // Load appropriate header based on user role
 if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {

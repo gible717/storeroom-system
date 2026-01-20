@@ -142,6 +142,42 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* Item count badge - soft indigo */
+.badge-item-count {
+    background: #6366f1 !important;
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Time-based welcome card backgrounds */
+.welcome-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Morning (6AM - 12PM) - Warm peach/orange */
+.welcome-card.time-morning {
+    background: linear-gradient(135deg, rgba(254, 215, 170, 0.3) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+/* Afternoon (12PM - 5PM) - Light blue sky */
+.welcome-card.time-afternoon {
+    background: linear-gradient(135deg, rgba(186, 230, 253, 0.3) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+/* Evening (5PM - 7PM) - Sunset orange/purple */
+.welcome-card.time-evening {
+    background: linear-gradient(135deg, rgba(253, 186, 116, 0.3) 0%, rgba(233, 213, 255, 0.2) 50%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+/* Night (7PM - 6AM) - Cool navy/purple */
+.welcome-card.time-night {
+    background: linear-gradient(135deg, rgba(199, 210, 254, 0.3) 0%, rgba(233, 213, 255, 0.2) 50%, rgba(255, 255, 255, 0.9) 100%);
+}
+
 /* Recent activity styles */
 .recent-activity-card {
     border: none;
@@ -385,7 +421,7 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <span class="activity-id"><?php echo htmlspecialchars($item_display); ?></span>
                                     <?php if ($activity['item_count'] > 1): ?>
-                                        <span class="badge bg-secondary"><?php echo $activity['item_count']; ?> item</span>
+                                        <span class="badge badge-item-count"><?php echo $activity['item_count']; ?> item</span>
                                     <?php endif; ?>
                                     <span class="status-badge status-<?php echo strtolower(str_replace(' ', '', $activity['status'])); ?>">
                                         <?php echo htmlspecialchars($activity['status']); ?>
@@ -726,5 +762,29 @@ function attachDetailButtonListeners() {
         </div>
     </div>
 </div>
+
+<script>
+// Time-based welcome card background
+(function() {
+    const hour = new Date().getHours();
+    const welcomeCard = document.querySelector('.welcome-card');
+
+    if (welcomeCard) {
+        let timeClass = 'time-morning'; // Default
+
+        if (hour >= 6 && hour < 12) {
+            timeClass = 'time-morning';   // 6AM - 12PM
+        } else if (hour >= 12 && hour < 17) {
+            timeClass = 'time-afternoon'; // 12PM - 5PM
+        } else if (hour >= 17 && hour < 19) {
+            timeClass = 'time-evening';   // 5PM - 7PM
+        } else {
+            timeClass = 'time-night';     // 7PM - 6AM
+        }
+
+        welcomeCard.classList.add(timeClass);
+    }
+})();
+</script>
 
 <?php require 'staff_footer.php'; ?>

@@ -4,16 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InventStor - Halaman Utama</title>
+    <title>Halaman Utama - InventStor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- MyDS Typography: Poppins for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* MyDS Design System Variables */
+        :root {
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            /* MyDS Spacing Scale (8px base unit) */
+            --space-1: 0.25rem;      /* 4px */
+            --space-2: 0.5rem;       /* 8px */
+            --space-3: 0.75rem;      /* 12px */
+            --space-4: 1rem;         /* 16px */
+            --space-5: 1.25rem;      /* 20px */
+            --space-6: 1.5rem;       /* 24px */
+            --space-8: 2rem;         /* 32px */
+            --space-10: 2.5rem;      /* 40px */
+            --space-12: 3rem;        /* 48px */
+            --space-16: 4rem;        /* 64px */
+        }
         body, html {
             height: 100%;
             margin: 0;
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--font-body);
             overflow: hidden;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
         }
 
         /* Background Slideshow Container */
@@ -78,24 +101,21 @@
         }
 
         .logo {
-            max-height: 130px;
-            margin-bottom: 1.5rem;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px;
-            border-radius: 50%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 4px solid rgba(255, 255, 255, 0.8);
+            height: 340px;
+            margin-bottom: -2rem;
+            filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
         }
 
         .welcome-content h1 {
             font-weight: 700;
             font-size: 2.5rem;
+            margin-bottom: 0.5rem;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .welcome-content p {
             font-size: 1.15rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
@@ -153,9 +173,9 @@
         <div class="bg-overlay"></div>
         <div class="welcome-content">
 
-            <img src="assets/img/logo.png" alt="Logo" class="logo">
+            <img src="assets/img/admin-logo.png" alt="Logo InventStor" class="logo">
 
-            <h1 class="mb-3">InventStor</h1>
+            <h1>InventStor</h1>
             <p class="lead">Sistem Pengurusan Bilik Stor dan Inventori</p>
 
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">

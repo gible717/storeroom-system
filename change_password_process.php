@@ -20,9 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $new_password = $_POST['new_password'];
 $confirm_password = $_POST['confirm_password'];
 
-// Validate password
-if (empty($new_password) || strlen($new_password) < 8) {
-    header('Location: change_password.php?error=' . urlencode('Kata laluan mestilah sekurang-kurangnya 8 aksara.'));
+// Validate password (6-10 characters)
+if (empty($new_password) || strlen($new_password) < 6) {
+    header('Location: change_password.php?error=' . urlencode('Kata laluan mestilah sekurang-kurangnya 6 aksara.'));
+    exit;
+}
+if (strlen($new_password) > 10) {
+    header('Location: change_password.php?error=' . urlencode('Kata laluan tidak boleh melebihi 10 aksara.'));
     exit;
 }
 if ($new_password !== $confirm_password) {

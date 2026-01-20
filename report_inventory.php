@@ -171,46 +171,49 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
 
 <!-- Summary Cards -->
 <div class="row g-4 mb-4">
+    <!-- Jumlah Item Card -->
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-radius: 1rem;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-primary-light me-3">
-                        <i class="bi bi-box-seam fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-1">Jumlah Item</h6>
-                        <h3 class="mb-0 fw-bold"><?php echo number_format($total_items); ?></h3>
+        <div class="card gradient-card l-bg-indigo">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-box-seam"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Jumlah Item</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><?php echo number_format($total_items); ?></h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Jumlah Stok Card -->
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-radius: 1rem;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-success-light me-3">
-                        <i class="bi bi-stack fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-1">Jumlah Stok</h6>
-                        <h3 class="mb-0 fw-bold"><?php echo number_format($total_stock); ?> Unit</h3>
+        <div class="card gradient-card l-bg-green-dark">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-stack"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Jumlah Stok</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><?php echo number_format($total_stock); ?> <small style="font-size: 0.5em;">Unit</small></h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Jumlah Nilai Card -->
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm" style="border-radius: 1rem;">
-            <div class="card-body p-4">
-                <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-warning-light me-3">
-                        <i class="bi bi-currency-dollar fs-3"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-1">Jumlah Nilai</h6>
-                        <h3 class="mb-0 fw-bold">RM <?php echo number_format($total_value, 2); ?></h3>
+        <div class="card gradient-card l-bg-orange">
+            <div class="card-statistic-3 p-4">
+                <div class="card-icon-large"><i class="bi bi-currency-dollar"></i></div>
+                <div class="mb-4">
+                    <h5 class="card-title">Jumlah Nilai</h5>
+                </div>
+                <div class="row align-items-center d-flex">
+                    <div class="col-8">
+                        <h2><small style="font-size: 0.5em;">RM</small> <?php echo number_format($total_value, 2); ?></h2>
                     </div>
                 </div>
             </div>
@@ -282,17 +285,57 @@ document.getElementById('filterForm').addEventListener('submit', function(e) {
 </div>
 
 <style>
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Gradient Stat Cards */
+.card-statistic-3 {
+    position: relative;
+    overflow: hidden;
 }
-.bg-primary-light { color: #4f46e5; }
-.bg-success-light { color: #10b981; }
-.bg-warning-light { color: #f59e0b; }
+.card-statistic-3 .card-icon-large {
+    font-size: 110px;
+    position: absolute;
+    right: -5px;
+    top: 15px;
+    opacity: 0.1;
+    color: #000;
+    line-height: 1;
+}
+.card-statistic-3 .card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+.card-statistic-3 h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+.gradient-card {
+    border-radius: 12px;
+    border: none;
+    color: #fff;
+    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1),
+                0 0.9375rem 1.40625rem rgba(90,97,105,0.1),
+                0 0.25rem 0.53125rem rgba(90,97,105,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.gradient-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 2.5rem rgba(90,97,105,0.15),
+                0 1rem 1.5rem rgba(90,97,105,0.15);
+}
+/* Indigo/Purple gradient for Jumlah Item */
+.l-bg-indigo {
+    background: linear-gradient(to right, #312e81, #6366f1) !important;
+}
+/* Green gradient for Jumlah Stok */
+.l-bg-green-dark {
+    background: linear-gradient(to right, #065f46, #10b981) !important;
+}
+/* Orange gradient for Jumlah Nilai */
+.l-bg-orange {
+    background: linear-gradient(to right, #92400e, #f59e0b) !important;
+}
 </style>
 
 <?php

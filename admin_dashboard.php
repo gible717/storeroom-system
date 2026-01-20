@@ -31,14 +31,45 @@ require 'admin_header.php';
 .status-baru {
     background: #fff3cd;
     color: #997404;
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+/* Pulsing animation for BARU badge */
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
+    }
 }
 
 .status-baru-recent {
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: pulse-glow 2s ease-in-out infinite, pulse-badge 2s ease-in-out infinite;
 }
 
 .status-diluluskan { background: #d1e7dd; color: #0a3622; }
 .status-ditolak { background: #f8d7da; color: #58151c; }
+
+/* Pending count badge in header - pulsing red notification */
+.pending-count-badge {
+    animation: pulse-count 2s ease-in-out infinite;
+    font-size: 0.75rem;
+    vertical-align: middle;
+}
+
+@keyframes pulse-count {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+    }
+}
 
 /* Stock status badges - matching status pill styling */
 .stock-badge {
@@ -96,6 +127,13 @@ require 'admin_header.php';
     animation: pending-warning-glow 2s ease-in-out infinite;
     color: #ffc107 !important;
 }
+
+/* Item count badge - soft indigo */
+.badge-item-count {
+    background: #6366f1 !important;
+    color: #fff;
+    font-weight: 500;
+}
 .pending-warning-safe {
     color: #198754 !important;
 }
@@ -103,12 +141,22 @@ require 'admin_header.php';
 /* Enhanced request list item styles */
 .request-list-item {
     transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    border-left: 4px solid transparent;
     padding: 1rem 0.5rem;
 }
 .request-list-item:hover {
     background-color: #f8f9fa;
     border-left-color: #0d6efd;
+}
+
+/* Urgent styling for BARU requests */
+.request-list-item.request-urgent {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, rgba(255, 243, 205, 0.3), transparent);
+}
+.request-list-item.request-urgent:hover {
+    border-left-color: #f59e0b;
+    background: linear-gradient(to right, rgba(255, 243, 205, 0.5), rgba(248, 249, 250, 0.8));
 }
 
 /* Stat card styles - gradient action cards */
@@ -235,28 +283,75 @@ require 'admin_header.php';
 
 .mini-stat-card:hover {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
 }
 
 .mini-stat-card .card-icon {
     font-size: 1.75rem;
     margin-bottom: 0.5rem;
-    color: #6c757d;
 }
 
 .mini-stat-card .stat-value {
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
-    color: #212529;
 }
 
 .mini-stat-card .stat-title {
     font-size: 0.75rem;
     margin-bottom: 0;
-    color: #6c757d;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 500;
+}
+
+/* MYDS-compliant color variants for mini stat cards */
+.mini-stat-primary .card-icon {
+    color: #0d6efd;
+}
+
+.mini-stat-primary .stat-value {
+    color: #0d6efd;
+}
+
+.mini-stat-primary .stat-title {
+    color: #6c757d;
+}
+
+.mini-stat-success .card-icon {
+    color: #198754;
+}
+
+.mini-stat-success .stat-value {
+    color: #198754;
+}
+
+.mini-stat-success .stat-title {
+    color: #6c757d;
+}
+
+.mini-stat-info .card-icon {
+    color: #0dcaf0;
+}
+
+.mini-stat-info .stat-value {
+    color: #0dcaf0;
+}
+
+.mini-stat-info .stat-title {
+    color: #6c757d;
+}
+
+.mini-stat-warning .card-icon {
+    color: #ffc107;
+}
+
+.mini-stat-warning .stat-value {
+    color: #ffc107;
+}
+
+.mini-stat-warning .stat-title {
+    color: #6c757d;
 }
 </style>
 
@@ -366,7 +461,7 @@ $pending_sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, s.nama,
                 ORDER BY p.ID_permohonan DESC";
 $pending_requests = $conn->query($pending_sql);
 
-// Get recent requests
+// Get recent requests - sorted by status priority (Baru first), then by date
 $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status, s.nama,
                     COUNT(pb.ID_permohonan_barang) AS bilangan_item,
                     GROUP_CONCAT(b.perihal_stok SEPARATOR ', ') AS senarai_barang
@@ -375,8 +470,15 @@ $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status,
                 LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
                 LEFT JOIN barang b ON pb.no_kod = b.no_kod
                 GROUP BY p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status, s.nama
-                ORDER BY p.ID_permohonan DESC
-                LIMIT 4";
+                ORDER BY
+                    CASE
+                        WHEN p.status = 'Baru' THEN 1
+                        WHEN p.status = 'Diluluskan' THEN 2
+                        WHEN p.status = 'Ditolak' THEN 3
+                        ELSE 4
+                    END,
+                    p.ID_permohonan DESC
+                LIMIT 6";
 $recent_requests = $conn->query($sql_requests);
 ?>
 
@@ -425,7 +527,12 @@ $recent_requests = $conn->query($sql_requests);
     <div class="col-lg-10 col-xl-8 mx-auto">
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Permohonan Terkini</h5>
+                <h5 class="mb-0 fw-bold">
+                    Permohonan Terkini
+                    <?php if ($tertunda > 0): ?>
+                        <span class="badge bg-danger ms-2 pending-count-badge"><?php echo $tertunda; ?> Baru</span>
+                    <?php endif; ?>
+                </h5>
                 <a href="manage_requests.php">
                     Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
                 </a>
@@ -440,12 +547,12 @@ $recent_requests = $conn->query($sql_requests);
                         $item_names = substr($item_names, 0, 57) . '...';
                     }
                 ?>
-                <div class="list-group-item request-list-item d-flex justify-content-between align-items-start">
+                <div class="list-group-item request-list-item d-flex justify-content-between align-items-start<?php echo ($req['status'] === 'Baru') ? ' request-urgent' : ''; ?>">
                     <div class="flex-grow-1 me-3">
                         <div class="d-flex align-items-center gap-2 mb-2 fw-semibold">
                             <span><?php echo htmlspecialchars($item_names); ?></span>
                             <?php if ($req['bilangan_item'] > 1): ?>
-                                <span class="badge bg-secondary"><?php echo $req['bilangan_item']; ?> item</span>
+                                <span class="badge badge-item-count"><?php echo $req['bilangan_item']; ?> item</span>
                             <?php endif; ?>
                         </div>
                         <small class="text-muted">
@@ -496,7 +603,7 @@ $recent_requests = $conn->query($sql_requests);
         <div class="row g-3">
             <!-- Total Users -->
             <div class="col-6 col-md-3">
-                <div class="card mini-stat-card">
+                <div class="card mini-stat-card mini-stat-primary">
                     <div class="card-icon">
                         <i class="bi bi-people-fill"></i>
                     </div>
@@ -507,7 +614,7 @@ $recent_requests = $conn->query($sql_requests);
 
             <!-- Monthly Requests -->
             <div class="col-6 col-md-3">
-                <div class="card mini-stat-card">
+                <div class="card mini-stat-card mini-stat-warning">
                     <div class="card-icon">
                         <i class="bi bi-calendar-check-fill"></i>
                     </div>
@@ -518,7 +625,7 @@ $recent_requests = $conn->query($sql_requests);
 
             <!-- Approval Rate -->
             <div class="col-6 col-md-3">
-                <div class="card mini-stat-card">
+                <div class="card mini-stat-card mini-stat-success">
                     <div class="card-icon">
                         <i class="bi bi-check-circle-fill"></i>
                     </div>
@@ -529,7 +636,7 @@ $recent_requests = $conn->query($sql_requests);
 
             <!-- Active Departments -->
             <div class="col-6 col-md-3">
-                <div class="card mini-stat-card">
+                <div class="card mini-stat-card mini-stat-info">
                     <div class="card-icon">
                         <i class="bi bi-building-fill"></i>
                     </div>
@@ -639,7 +746,7 @@ $recent_requests = $conn->query($sql_requests);
                                     <a href="manage_requests.php" class="btn btn-link p-0 fw-bold text-decoration-none me-2">
                                         #<?php echo htmlspecialchars($req['ID_permohonan']); ?>
                                     </a>
-                                    <span class="badge bg-secondary"><?php echo $req['bilangan_item']; ?> item</span>
+                                    <span class="badge badge-item-count"><?php echo $req['bilangan_item']; ?> item</span>
                                 </div>
                                 <div class="mb-2">
                                     <small class="text-muted d-block">

@@ -48,10 +48,6 @@ $matches = password_verify($password, $old_password_hash);
          // ", Matches: " . ($matches ? 'YES ❌' : 'NO ✅'));
 
 echo json_encode([
-    'matches' => $matches,
-    'debug' => [
-        'hash_length' => strlen($old_password_hash),
-        'password_length' => strlen($password)
-    ]
+    'matches' => $matches
 ]);
 ?>

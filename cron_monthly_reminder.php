@@ -5,8 +5,11 @@
  * Automated script to send monthly restock reminders to admins
  * This script should be run daily via a cron job or Windows Task Scheduler
  *
- * It will only send notifications during the first week of the month (days 1-7)
- * and only on weekdays (Monday-Friday)
+ * It will send notifications on ANY weekday (Monday-Friday) during the first
+ * week of the month (days 1-7). This provides multiple opportunities to send
+ * the reminder in case the script fails on a particular day.
+ *
+ * The script will only send ONE reminder per month (tracked in database).
  *
  * CRON SETUP:
  * Run this script daily at 9:00 AM:

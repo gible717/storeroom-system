@@ -21,11 +21,35 @@ if (isset($_SESSION['ID_staf'])) {
     <title>Log Masuk - InventStor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <!-- MyDS Typography: Poppins for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* MyDS Design System Variables */
+        :root {
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            /* MyDS Spacing Scale (8px base unit) */
+            --space-1: 0.25rem;      /* 4px */
+            --space-2: 0.5rem;       /* 8px */
+            --space-3: 0.75rem;      /* 12px */
+            --space-4: 1rem;         /* 16px */
+            --space-5: 1.25rem;      /* 20px */
+            --space-6: 1.5rem;       /* 24px */
+            --space-8: 2rem;         /* 32px */
+            --space-10: 2.5rem;      /* 40px */
+            --space-12: 3rem;        /* 48px */
+            --space-16: 4rem;        /* 64px */
+        }
         body, html {
             height: 100%;
             margin: 0;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+            font-family: var(--font-body);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
         }
         .main-container {
             display: flex;
@@ -63,8 +87,8 @@ if (isset($_SESSION['ID_staf'])) {
             text-align: center;
         }
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 120px;
+            height: 120px;
         }
         .form-control {
             border-radius: 0.5rem;
@@ -129,14 +153,15 @@ if (isset($_SESSION['ID_staf'])) {
 
                 <form action="login_process.php" method="POST">
                     <div class="mb-3">
-                        <label for="ID_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no. gaji" required>
+                        <label for="ID_staf" class="form-label">ID Staf <span class="text-danger" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no. gaji" required aria-required="true" aria-describedby="ID_staf_help" maxlength="5">
+                        <small id="ID_staf_help" class="form-text text-muted">Tepat 5 aksara (cth: 10101)</small>
                     </div>
                     <div class="mb-3">
-                        <label for="katalaluan" class="form-label">Kata Laluan <span class="text-danger">*</span></label>
+                        <label for="katalaluan" class="form-label">Kata Laluan <span class="text-danger" aria-hidden="true">*</span></label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="katalaluan" name="katalaluan" placeholder="Masukkan kata laluan" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tunjuk atau sembunyikan kata laluan"><i class="bi bi-eye-slash"></i></button>
+                            <input type="password" class="form-control" id="katalaluan" name="katalaluan" placeholder="Masukkan kata laluan" required aria-required="true">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tunjuk kata laluan" aria-pressed="false"><i class="bi bi-eye-slash" aria-hidden="true"></i></button>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -156,14 +181,31 @@ if (isset($_SESSION['ID_staf'])) {
     </div>
 
     <script>
-        // Toggle password visibility
-        document.getElementById('togglePassword').addEventListener('click', function() {
+        // Toggle password visibility function
+        function togglePasswordVisibility() {
             const password = document.getElementById('katalaluan');
-            const icon = this.querySelector('i');
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
+            const toggleBtn = document.getElementById('togglePassword');
+            const icon = toggleBtn.querySelector('i');
+            const isPassword = password.getAttribute('type') === 'password';
+
+            password.setAttribute('type', isPassword ? 'text' : 'password');
             icon.classList.toggle('bi-eye');
             icon.classList.toggle('bi-eye-slash');
+
+            // Update aria-pressed and aria-label for accessibility
+            toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+            toggleBtn.setAttribute('aria-label', isPassword ? 'Sembunyikan kata laluan' : 'Tunjuk kata laluan');
+        }
+
+        // Toggle password visibility on click
+        document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+
+        // Toggle password visibility on Enter or Space key (keyboard support)
+        document.getElementById('togglePassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePasswordVisibility();
+            }
         });
 
         // Custom validation messages in Malay

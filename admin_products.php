@@ -124,19 +124,20 @@ $total_rows = $result->num_rows;
     <!-- Products Table -->
     <div class="card shadow mb-4">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" width="100%">
+            <div class="table-responsive table-responsive-accessible" tabindex="0" role="region" aria-label="Senarai produk inventori">
+                <table class="table table-hover table-accessible" width="100%">
+                    <caption class="visually-hidden">Senarai semua produk dalam inventori dengan maklumat kategori, pembekal, harga dan status stok</caption>
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;">Bil.</th>
-                            <th>Kod Item</th>
-                            <th>Nama Produk</th>
-                            <th>Kategori</th>
-                            <th>Nama Pembekal</th>
-                            <th>Harga (RM)</th>
-                            <th>Stok</th>
-                            <th>Status</th>
-                            <th>Tindakan</th>
+                            <th scope="col" style="width: 50px;">Bil.</th>
+                            <th scope="col">Kod Item</th>
+                            <th scope="col">Nama Produk</th>
+                            <th scope="col">Kategori</th>
+                            <th scope="col">Nama Pembekal</th>
+                            <th scope="col">Harga (RM)</th>
+                            <th scope="col">Stok</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,11 +145,12 @@ $total_rows = $result->num_rows;
                             <?php
                             $bil = 1; // Start numbering from 1
                             while($row = $result->fetch_assoc()):
+                            $productName = htmlspecialchars($row['nama_produk'] ?? '');
                             ?>
                                 <tr>
                                     <td class="text-center"><?php echo $bil++; ?></td>
                                     <td><?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_produk'] ?? ''); ?></td>
+                                    <td><?php echo $productName; ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
                                     <td><?php echo number_format((float)$row['harga'], 2); ?></td>
@@ -162,9 +164,9 @@ $total_rows = $result->num_rows;
                                         ?>
                                     </td>
                                     <td>
-                                        <button class="btn btn-icon-only text-view" title="Lihat"><i class="bi bi-eye-fill"></i></button>
-                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only text-edit" title="Kemaskini"><i class="bi bi-pencil-fill"></i></a>
-                                        <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only text-delete" title="Padam" onclick="return confirm('Adakah anda pasti mahu memadam produk ini?');"><i class="bi bi-trash-fill"></i></a>
+                                        <button class="btn btn-icon-only btn-action text-view" title="Lihat" aria-label="Lihat butiran <?php echo $productName; ?>"><i class="bi bi-eye-fill" aria-hidden="true"></i></button>
+                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only btn-action text-edit" title="Kemaskini" aria-label="Kemaskini <?php echo $productName; ?>"><i class="bi bi-pencil-fill" aria-hidden="true"></i></a>
+                                        <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only btn-action text-delete" title="Padam" aria-label="Padam <?php echo $productName; ?>" onclick="return confirm('Adakah anda pasti mahu memadam produk ini?');"><i class="bi bi-trash-fill" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

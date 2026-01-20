@@ -36,6 +36,11 @@ if (strlen($kata_laluan_baru) < 6) {
     exit;
 }
 
+if (strlen($kata_laluan_baru) > 10) {
+    header("Location: reset_password.php?error=" . urlencode("Kata laluan tidak boleh melebihi 10 aksara."));
+    exit;
+}
+
 // IMPORTANT: Check if new password is same as old password
 $is_same_password = password_verify($kata_laluan_baru, $old_password_hash);
 

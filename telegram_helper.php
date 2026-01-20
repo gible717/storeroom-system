@@ -9,6 +9,7 @@ require_once __DIR__ . '/telegram_config.php';
  * @param array $keyboard - Optional inline keyboard buttons
  * @return bool - True if sent successfully to at least one admin
  */
+
 function send_telegram_notification($message, $keyboard = null) {
     // Check if Telegram is enabled
     if (!TELEGRAM_ENABLED) {
@@ -168,7 +169,7 @@ function format_monthly_restock_reminder() {
 
 /**
  * Check if today should send monthly restock reminder
- * Only sends on the first Tuesday of each month
+ * Sends on any weekday (Monday-Friday) during the first week of each month
  * @return bool - True if should send reminder today
  */
 function should_send_monthly_reminder() {
@@ -181,14 +182,14 @@ function should_send_monthly_reminder() {
     // Get current day of week (1=Monday, 2=Tuesday, ..., 7=Sunday)
     $day_of_week = (int)date('N');
 
-    // Check if today is Tuesday (2)
-    $is_tuesday = ($day_of_week === 2);
+    // Check if today is a weekday (Monday=1 to Friday=5)
+    $is_weekday = ($day_of_week >= 1 && $day_of_week <= 5);
 
     // Check if it's the first week (days 1-7)
     $is_first_week = ($day_of_month >= 1 && $day_of_month <= 7);
 
-    // Only send on the first Tuesday of the month
-    return $is_tuesday && $is_first_week;
+    // Send on any weekday during the first week of the month
+    return $is_weekday && $is_first_week;
 }
 
 /**

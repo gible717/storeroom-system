@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Halaman Tidak Ditemui</title>
     
+    <!-- MyDS Typography: Poppins for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -12,17 +16,31 @@
             padding: 0;
         }
 
+        /* MyDS Design System Variables */
         :root {
             --main-width: 80%;
             --main-height: 90%;
             --main-radius: 25px;
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            /* MyDS Spacing Scale (8px base unit) */
+            --space-1: 0.25rem;      /* 4px */
+            --space-2: 0.5rem;       /* 8px */
+            --space-3: 0.75rem;      /* 12px */
+            --space-4: 1rem;         /* 16px */
+            --space-5: 1.25rem;      /* 20px */
+            --space-6: 1.5rem;       /* 24px */
+            --space-8: 2rem;         /* 32px */
+            --space-10: 2.5rem;      /* 40px */
+            --space-12: 3rem;        /* 48px */
+            --space-16: 4rem;        /* 64px */
         }
 
         body {
             overflow-x: hidden;
             font-size: 14px;
             height: 100vh;
-            font-family: Poppins, sans-serif;
+            font-family: var(--font-body);
             background-color: #000000;
             background-image: linear-gradient(147deg, #000000 0%, #0f0f0f 74%);
             color: #fff;
@@ -278,10 +296,7 @@
 
     <main class="main">
         <div class="menu">
-            <a href="login.php"> <h1 class="px-4 Logo">Sistem Pengurusan Bilik Stor dan Inventori</h1> </a>
-            <div id="toggle">
-                <span class="menuBTN"></span>
-            </div>
+            <a href="login.php"> <h1 class="px-4 Logo">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h1> </a>
         </div>
         <div id="menu-page" class="menu-page">
             <div class="social_box">

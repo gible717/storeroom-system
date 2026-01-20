@@ -6,11 +6,35 @@
     <title>Lupa Kata Laluan - Sistem Pengurusan Stor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <!-- MyDS Typography: Poppins for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* MyDS Design System Variables */
+        :root {
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            /* MyDS Spacing Scale (8px base unit) */
+            --space-1: 0.25rem;      /* 4px */
+            --space-2: 0.5rem;       /* 8px */
+            --space-3: 0.75rem;      /* 12px */
+            --space-4: 1rem;         /* 16px */
+            --space-5: 1.25rem;      /* 20px */
+            --space-6: 1.5rem;       /* 24px */
+            --space-8: 2rem;         /* 32px */
+            --space-10: 2.5rem;      /* 40px */
+            --space-12: 3rem;        /* 48px */
+            --space-16: 4rem;        /* 64px */
+        }
         body, html {
             height: 100%;
             margin: 0;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+            font-family: var(--font-body);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
         }
         .main-container {
             display: flex;
@@ -48,8 +72,8 @@
             text-align: center;
         }
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 120px;
+            height: 120px;
         }
         .form-control {
             border-radius: 0.5rem;
@@ -84,18 +108,16 @@
         <div class="form-section" style="position: relative;">
             <!-- Home button at top right -->
             <a href="login.php" class="text-dark text-decoration-none" title="Kembali ke Log Masuk"
-               style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
-                <i class="bi bi-arrow-left fs-4"></i>
+            style="position: absolute; top: 2rem; right: 2rem; z-index: 10;">
             </a>
 
             <div style="width: 100%; max-width: 420px;">
+                <h4 class="text-center mb-4 fw-bold">Tetap Semula Kata Laluan</h4>
                 <div class="reset-card" style="margin: 0;">
                     <div class="form-header">
                         <img src="/storeroom/assets/img/logo.png" alt="Logo Majlis Perbandaran Kangar" class="logo">
                         <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
                     </div>
-
-                    <h4 class="text-center mb-3 fw-bold">Tetap Semula Kata Laluan</h4>
                     <p class="text-center text-muted mb-4">Masukkan ID Staf anda untuk menetapkan semula kata laluan</p>
 
                     <?php if (isset($_GET['error'])): ?>
@@ -109,10 +131,10 @@
                         <input type="hidden" name="step" value="1">
 
                         <div class="mb-3">
-                            <label for="ID_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
+                            <label for="ID_staf" class="form-label">ID Staf <span class="text-danger" aria-hidden="true">*</span></label>
                             <input type="text" class="form-control" id="ID_staf" name="ID_staf"
-                                   placeholder="Masukkan no. gaji anda" required autofocus>
-                            <small class="text-muted">Contoh: A12345</small>
+                                   placeholder="Masukkan no. gaji anda" required autofocus aria-required="true" aria-describedby="ID_staf_help" maxlength="5">
+                            <small id="ID_staf_help" class="text-muted">Tepat 5 aksara (cth: S0001)</small>
                         </div>
 
                         <div class="alert alert-info">
