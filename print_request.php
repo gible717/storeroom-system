@@ -88,9 +88,25 @@ if ($request['status'] === 'Diluluskan' || $request['status'] === 'Selesai') {
         .signature-box { border-top: 1px solid #000; padding-top: 1rem; font-weight: bold; }
         .print-actions { text-align: center; padding: 1rem 2rem 2rem; }
         @media print {
-            body { background-color: #ffffff; }
-            .print-container { margin: 0; border: none; box-shadow: none; }
+            body {
+                background-color: #ffffff;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-container {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                width: 100% !important;
+                max-width: none !important;
+                transform: scale(1) !important;
+                transform-origin: top left;
+            }
             .print-actions { display: none; }
+            table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
         }
     </style>
 </head>

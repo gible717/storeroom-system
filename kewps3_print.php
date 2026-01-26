@@ -212,12 +212,23 @@ $conn->close();
 
             body {
                 background-color: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .document-container {
                 box-shadow: none !important;
                 margin: 0 !important;
                 padding: 8px !important;
+                width: 100% !important;
+                max-width: none !important;
+                transform: scale(1) !important;
+                transform-origin: top left;
+            }
+
+            .transactions {
+                width: 100% !important;
+                table-layout: fixed;
             }
 
             .page-break {

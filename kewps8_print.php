@@ -165,13 +165,24 @@ $conn->close();
 
         @media print {
             .no-print { display: none; }
-            body { background-color: #FFF; }
+            body {
+                background-color: #FFF;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             .page-container {
                 margin: 0;
-                padding: 0;
+                padding: 10px;
                 box-shadow: none;
-                width: 100%;
+                width: 100% !important;
+                max-width: none !important;
                 min-height: 0;
+                transform: scale(1) !important;
+                transform-origin: top left;
+            }
+            .report-table {
+                width: 100% !important;
+                table-layout: fixed;
             }
         }
     </style>

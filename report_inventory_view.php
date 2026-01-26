@@ -137,13 +137,18 @@ $kategori_result = $conn->query($kategori_sql);
                 background-color: #fff !important;
                 margin: 0;
                 padding: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .document-container {
                 box-shadow: none !important;
                 margin: 0 !important;
                 padding: 15px;
-                width: 100%;
+                width: 100% !important;
+                max-width: none !important;
+                transform: scale(1) !important;
+                transform-origin: top left;
             }
 
             .report-header {
@@ -154,6 +159,8 @@ $kategori_result = $conn->query($kategori_sql);
             table {
                 font-size: 9pt;
                 page-break-inside: auto;
+                width: 100% !important;
+                table-layout: fixed;
             }
 
             tr {
