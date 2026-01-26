@@ -98,11 +98,12 @@
             align-items: center;
             text-align: center;
             color: #ffffff;
+            padding-bottom: 60px; /* Account for footer height to center visually */
         }
 
         .logo {
             height: 340px;
-            margin-bottom: -2rem;
+            margin-bottom: -5rem;
             filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
         }
 
