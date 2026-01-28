@@ -1,29 +1,32 @@
 <?php
-// request_edit.php - Edit existing request form
+// admin_request_edit.php - Admin edit their own request items (before approval)
 
 $pageTitle = "Kemaskini Permohonan";
-require 'staff_header.php';
+require 'admin_header.php';
 
 // Get request ID and validate
 $id_permohonan = $_GET['id'] ?? null;
-$id_staf = $_SESSION['ID_staf'];
+$current_user_id = $_SESSION['ID_staf'];
 
 if (!$id_permohonan) {
     $_SESSION['error_msg'] = "ID Permohonan tidak sah.";
-    header('Location: request_list.php');
+    header('Location: manage_requests.php');
     exit;
 }
 
-// Security check: verify ownership and status
-$stmt = $conn->prepare("SELECT * FROM permohonan WHERE ID_permohonan = ? AND ID_pemohon = ? AND status = 'Baru'");
-$stmt->bind_param("is", $id_permohonan, $id_staf);
+// Get request details (admin can only edit their OWN 'Baru' request)
+$stmt = $conn->prepare("SELECT p.*, s.nama AS nama_pemohon
+                        FROM permohonan p
+                        JOIN staf s ON p.ID_pemohon = s.ID_staf
+                        WHERE p.ID_permohonan = ? AND p.status = 'Baru' AND p.ID_pemohon = ?");
+$stmt->bind_param("is", $id_permohonan, $current_user_id);
 $stmt->execute();
 $request_header = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$request_header) {
-    $_SESSION['error_msg'] = "Permohonan tidak dijumpai atau telah diluluskan.";
-    header('Location: request_list.php');
+    $_SESSION['error_msg'] = "Permohonan tidak dijumpai, telah diproses, atau anda tiada kebenaran untuk mengedit.";
+    header('Location: manage_requests.php');
     exit;
 }
 
@@ -49,17 +52,25 @@ while ($row = $result_all_barang->fetch_assoc()) {
 }
 ?>
 
-<div class="position-relative text-center mb-4">
-    <a href="request_list.php" class="position-absolute top-50 start-0 translate-middle-y text-dark" title="Kembali">
-        <i class="bi bi-arrow-left fs-4"></i>
-    </a>
-    <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <a href="manage_requests.php" class="text-dark me-3" title="Kembali">
+            <i class="bi bi-arrow-left fs-4"></i>
+        </a>
+        <div>
+            <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
+            <small class="text-muted">
+                ID Permohonan: #<?php echo $id_permohonan; ?> |
+                Pemohon: <?php echo htmlspecialchars($request_header['nama_pemohon']); ?>
+            </small>
+        </div>
+    </div>
 </div>
 
-<form action="request_edit_process.php" method="POST" id="edit-form">
+<form action="admin_request_edit_process.php" method="POST" id="edit-form">
     <input type="hidden" name="id_permohonan" value="<?php echo $id_permohonan; ?>">
 
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-white border-0 p-4">
@@ -128,30 +139,31 @@ while ($row = $result_all_barang->fetch_assoc()) {
                     </div>
                 </div>
             </div>
-            
+
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-white border-0 p-4">
-                    <h5 class="fw-bold mb-0">Maklumat Permohonan</h5>
+                    <h5 class="fw-bold mb-0">Tindakan</h5>
                 </div>
                 <div class="card-body p-4">
-                    <div class="mb-3">
-                        <label for="jawatan_input" class="form-label">Jawatan</label>
-                        <input type="text" class="form-control" name="jawatan" id="jawatan_input" value="<?php echo htmlspecialchars($request_header['jawatan_pemohon'] ?? ''); ?>" placeholder="Cth: Pegawai Teknologi Maklumat">
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small>Anda boleh menambah, memadam atau mengubah kuantiti item sebelum meluluskan permohonan ini.</small>
                     </div>
-                    <div class="mb-3">
-                        <label for="catatan_input" class="form-label">Catatan</label>
-                        <textarea class="form-control" name="catatan" id="catatan_input" rows="4"><?php echo htmlspecialchars($request_header['catatan'] ?? ''); ?></textarea>
-                    </div>
-                    <hr class="my-3">
-                    <div class="d-grid">
+                    <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg" id="update_btn">
-                            <i class="bi bi-check-circle-fill me-2"></i>Kemaskini Permohonan
+                            <i class="bi bi-check-circle-fill me-2"></i>Simpan Perubahan
                         </button>
+                        <a href="request_review.php?id=<?php echo $id_permohonan; ?>" class="btn btn-primary">
+                            <i class="bi bi-arrow-right me-2"></i>Terus ke Semakan
+                        </a>
+                        <a href="manage_requests.php" class="btn btn-light">
+                            Batal
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 </form>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -174,18 +186,17 @@ document.addEventListener('DOMContentLoaded', function() {
     editForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const currentState = getFormState();
-
-        // Check if form data changed
-        if (currentState === initialFormState) {
+        // Check if there are any items
+        if (tableBody.querySelectorAll('.item-row').length === 0) {
+            Swal.fire('Ralat', 'Permohonan mesti mempunyai sekurang-kurangnya satu item.', 'warning');
             return;
         }
 
         // Submit form data
         updateBtn.disabled = true;
-        updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengemaskini...';
+        updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
 
-        fetch('request_edit_process.php', {
+        fetch('admin_request_edit_process.php', {
             method: 'POST',
             body: new FormData(editForm)
         })
@@ -198,18 +209,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     confirmButtonText: 'OK'
                 }).then(() => {
-                    window.location.href = 'request_list.php';
+                    window.location.href = 'manage_requests.php';
                 });
             } else {
                 Swal.fire('Ralat', data.message, 'error');
                 updateBtn.disabled = false;
-                updateBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Kemaskini Permohonan';
+                updateBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Simpan Perubahan';
             }
         })
         .catch(error => {
             Swal.fire('Ralat', 'Gagal menghubungi server.', 'error');
             updateBtn.disabled = false;
-            updateBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Kemaskini Permohonan';
+            updateBtn.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Simpan Perubahan';
         });
     });
 
@@ -269,6 +280,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php 
-require 'staff_footer.php'; 
+<?php
+require 'admin_footer.php';
 ?>

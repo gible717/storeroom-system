@@ -44,7 +44,7 @@ $kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL
 $kategori_result = $conn->query($kategori_sql);
 
 // Get all requests with item details and category info
-$sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, s.nama,
+$sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, p.ID_pemohon, s.nama,
             COUNT(pb.ID_permohonan_barang) AS bilangan_item,
             GROUP_CONCAT(DISTINCT b.perihal_stok SEPARATOR ', ') AS senarai_barang,
             GROUP_CONCAT(DISTINCT b.kategori SEPARATOR ', ') AS kategori_list
@@ -52,7 +52,7 @@ $sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, s.nam
         JOIN staf s ON p.ID_pemohon = s.ID_staf
         LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
         LEFT JOIN barang b ON pb.no_kod = b.no_kod
-        GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, s.nama
+        GROUP BY p.ID_permohonan, p.tarikh_mohon, p.status, p.catatan_admin, p.ID_pemohon, s.nama
         ORDER BY
         CASE p.status
             WHEN 'Baru' THEN 1
@@ -159,10 +159,20 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
                                     $catatan_admin = trim($row['catatan_admin'] ?? '');
 
                                     if ($status === 'Baru'):
+                                        // Check if current admin is the request owner
+                                        $is_owner = isset($row['ID_pemohon']) && $row['ID_pemohon'] === $userID;
                                     ?>
+                                        <?php if ($is_owner): ?>
+                                        <!-- Owner can only edit, not approve their own request -->
+                                        <a href="admin_request_edit.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-outline-warning btn-sm" title="Edit Item">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <?php else: ?>
+                                        <!-- Other admins can approve/reject -->
                                         <a href="request_review.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-primary btn-sm" title="Semak Permohonan">
                                             Semak
                                         </a>
+                                        <?php endif; ?>
 
                                     <?php elseif ($status === 'Diluluskan' || $status === 'Selesai'): ?>
                                         <a href="kewps8_print.php?id=<?php echo $row['ID_permohonan']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Dokumen">

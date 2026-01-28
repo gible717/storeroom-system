@@ -161,6 +161,12 @@ $conn->close();
             padding-right: 5px;
         }
 
+        table.transactions td.date-cell {
+            font-size: 7pt;
+            white-space: nowrap;
+            padding: 2px 1px;
+        }
+
         .opening-balance {
             font-weight: normal;
         }
@@ -397,7 +403,7 @@ for ($page = 1; $page <= $total_pages; $page++):
                     $balance_value = $running_balance * $harga;
                 ?>
                 <tr>
-                    <td><?php echo date('d/m/Y', strtotime($txn['tarikh_transaksi'])); ?></td>
+                    <td class="date-cell"><?php echo date('d/m/Y', strtotime($txn['tarikh_transaksi'])); ?></td>
                     <td></td>
                     <td class="left"><?php echo htmlspecialchars($txn['nama_jabatan'] ?? $txn['terima_dari_keluar_kepada'] ?? '-'); ?></td>
 
