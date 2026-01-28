@@ -3,6 +3,15 @@
 
 $pageTitle = "Tambah Jabatan";
 require 'admin_header.php';
+
+// Get error message and form data from session/query
+$error = isset($_GET['error']) ? $_GET['error'] : null;
+$error_field = isset($_SESSION['error_field']) ? $_SESSION['error_field'] : null;
+$form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
+
+// Clear session data after retrieving
+unset($_SESSION['error_field']);
+unset($_SESSION['form_data']);
 ?>
 
 <!-- Page Header -->
@@ -18,6 +27,15 @@ require 'admin_header.php';
     <div></div>
 </div>
 
+<!-- Error Alert -->
+<?php if ($error): ?>
+<div class="alert alert-danger alert-dismissible fade show" role="alert" style="max-width: 600px; margin: 0 auto 1rem auto;">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <?php echo htmlspecialchars($error); ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<?php endif; ?>
+
 <!-- Add Form -->
 <div class="card shadow-sm border-0" style="border-radius: 1rem; max-width: 600px; margin: 0 auto;">
     <div class="card-body p-4 p-md-5">
@@ -26,8 +44,14 @@ require 'admin_header.php';
 
             <div class="mb-3">
                 <label for="nama_jabatan" class="form-label">Nama Jabatan <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="nama_jabatan" name="nama_jabatan"
-                    placeholder="Cth: Jabatan Kewangan" required>
+                <input type="text" class="form-control <?php echo ($error_field === 'nama_jabatan') ? 'is-invalid' : ''; ?>"
+                    id="nama_jabatan" name="nama_jabatan"
+                    placeholder="Cth: Jabatan Kewangan"
+                    value="<?php echo isset($form_data['nama_jabatan']) ? htmlspecialchars($form_data['nama_jabatan']) : ''; ?>"
+                    required>
+                <?php if ($error_field === 'nama_jabatan'): ?>
+                <div class="invalid-feedback">Nama jabatan ini sudah wujud. Sila gunakan nama yang lain.</div>
+                <?php endif; ?>
             </div>
 
             <div class="text-end mt-4">

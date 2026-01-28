@@ -8,19 +8,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
     $nama_jabatan = $_POST['nama_jabatan'];
     if (empty($nama_jabatan)) {
-        header("Location: admin_department.php?error=" . urlencode("Nama jabatan diperlukan."));
+        header("Location: department_add.php?error=" . urlencode("Nama jabatan diperlukan."));
         exit;
     }
 
     $stmt = $conn->prepare("INSERT INTO jabatan (nama_jabatan) VALUES (?)");
     $stmt->bind_param("s", $nama_jabatan);
 
-    if ($stmt->execute()) {
+    try {
+        $stmt->execute();
+        $stmt->close();
         header("Location: admin_department.php?success=" . urlencode("Jabatan baru berjaya ditambah."));
-    } else {
-        header("Location: admin_department.php?error=" . urlencode("Gagal menambah jabatan."));
+        exit;
+    } catch (mysqli_sql_exception $e) {
+        $stmt->close();
+        if ($e->getCode() == 1062) {
+            $_SESSION['form_data'] = ['nama_jabatan' => $nama_jabatan];
+            $_SESSION['error_field'] = 'nama_jabatan';
+            header("Location: department_add.php?error=" . urlencode("Jabatan '$nama_jabatan' sudah wujud dalam sistem. Sila gunakan nama yang lain."));
+        } else {
+            header("Location: department_add.php?error=" . urlencode("Gagal menambah jabatan. Ralat pangkalan data."));
+        }
+        exit;
     }
-    $stmt->close();
 
 // Edit department
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'edit') {
@@ -36,12 +46,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $stmt = $conn->prepare("UPDATE jabatan SET nama_jabatan = ? WHERE ID_jabatan = ?");
     $stmt->bind_param("si", $nama_jabatan, $id_jabatan);
 
-    if ($stmt->execute()) {
+    try {
+        $stmt->execute();
+        $stmt->close();
         header("Location: admin_department.php?success=" . urlencode("Jabatan berjaya dikemaskini."));
-    } else {
-        header("Location: admin_department.php?error=" . urlencode("Gagal mengemaskini jabatan."));
+        exit;
+    } catch (mysqli_sql_exception $e) {
+        $stmt->close();
+        if ($e->getCode() == 1062) {
+            header("Location: admin_department.php?error=" . urlencode("Jabatan '$nama_jabatan' sudah wujud dalam sistem."));
+        } else {
+            header("Location: admin_department.php?error=" . urlencode("Gagal mengemaskini jabatan. Ralat pangkalan data."));
+        }
+        exit;
     }
-    $stmt->close();
 
 // Delete department
 } elseif (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {

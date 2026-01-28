@@ -7,6 +7,18 @@ require 'admin_header.php';
 // Get all categories
 $kategori_list_sql = "SELECT * FROM kategori ORDER BY nama_kategori ASC";
 $kategori_list_result = $conn->query($kategori_list_sql);
+
+// Get error/success message and form data from session/query
+$error = isset($_GET['error']) ? $_GET['error'] : null;
+$success = isset($_GET['success']) ? $_GET['success'] : null;
+$error_field = isset($_SESSION['error_field']) ? $_SESSION['error_field'] : null;
+$form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
+$edit_mode = isset($_SESSION['edit_mode']) ? $_SESSION['edit_mode'] : false;
+
+// Clear session data after retrieving
+unset($_SESSION['error_field']);
+unset($_SESSION['form_data']);
+unset($_SESSION['edit_mode']);
 ?>
 
 <div class="container-fluid">
@@ -16,6 +28,24 @@ $kategori_list_result = $conn->query($kategori_list_sql);
         </a>
         <h1 class="h3 mb-0 text-gray-800 fw-bold">Pengurusan Kategori</h1>
     </div>
+
+    <!-- Error Alert -->
+    <?php if ($error): ?>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <?php echo htmlspecialchars($error); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
+
+    <!-- Success Alert -->
+    <?php if ($success): ?>
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <?php echo htmlspecialchars($success); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
 
     <div class="row">
         <!-- Category List -->
@@ -67,20 +97,26 @@ $kategori_list_result = $conn->query($kategori_list_sql);
         <div class="col-lg-4 col-md-5 mb-4">
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-header bg-primary text-white" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                    <span id="form-title">Tambah Kategori Baru</span>
+                    <span id="form-title"><?php echo $edit_mode ? 'Edit Kategori' : 'Tambah Kategori Baru'; ?></span>
                 </div>
                 <div class="card-body p-4">
                     <form action="admin_category_process.php" method="POST" id="categoryForm">
-                        <input type="hidden" name="action" id="form-action" value="add">
-                        <input type="hidden" name="ID_kategori" id="form-id" value="">
+                        <input type="hidden" name="action" id="form-action" value="<?php echo $edit_mode ? 'edit' : 'add'; ?>">
+                        <input type="hidden" name="ID_kategori" id="form-id" value="<?php echo isset($form_data['ID_kategori']) ? htmlspecialchars($form_data['ID_kategori']) : ''; ?>">
                         <div class="mb-3">
                             <label for="nama_kategori" class="form-label fw-bold">Nama Kategori</label>
-                            <input type="text" class="form-control" id="nama_kategori" name="nama_kategori" placeholder="Cth: Toner" required>
+                            <input type="text" class="form-control <?php echo ($error_field === 'nama_kategori') ? 'is-invalid' : ''; ?>"
+                                id="nama_kategori" name="nama_kategori" placeholder="Cth: Toner"
+                                value="<?php echo isset($form_data['nama_kategori']) ? htmlspecialchars($form_data['nama_kategori']) : ''; ?>"
+                                required>
+                            <?php if ($error_field === 'nama_kategori'): ?>
+                            <div class="invalid-feedback">Nama kategori ini sudah wujud. Sila gunakan nama yang lain.</div>
+                            <?php endif; ?>
                         </div>
                         <button type="submit" class="btn btn-primary w-100" id="form-btn">
-                            <i class="bi bi-plus-circle-fill" id="form-icon"></i> <span id="form-btn-text">Tambah</span>
+                            <i class="bi <?php echo $edit_mode ? 'bi-check-circle-fill' : 'bi-plus-circle-fill'; ?>" id="form-icon"></i> <span id="form-btn-text"><?php echo $edit_mode ? 'Kemaskini' : 'Tambah'; ?></span>
                         </button>
-                        <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-btn" onclick="resetForm()">
+                        <button type="button" class="btn btn-secondary w-100 mt-2 <?php echo $edit_mode ? '' : 'd-none'; ?>" id="cancel-btn" onclick="resetForm()">
                             Batal
                         </button>
                     </form>

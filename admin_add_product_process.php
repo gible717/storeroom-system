@@ -54,9 +54,20 @@ try {
     $stmt->execute();
     header("Location: admin_products.php?success=" . urlencode("Produk '$nama_produk' berjaya ditambah!"));
 } catch (mysqli_sql_exception $e) {
+    // Store form data in session for repopulating
+    $_SESSION['form_data'] = [
+        'id_produk' => $id_produk,
+        'nama_produk' => $nama_produk,
+        'ID_kategori' => $ID_kategori,
+        'nama_pembekal' => $nama_pembekal,
+        'harga' => $harga,
+        'stok_semasa' => $stok_semasa
+    ];
+
     // Error 1062 = duplicate entry
     if ($e->getCode() === 1062) {
-        $error_message = "Ralat: ID Produk '$id_produk' sudah wujud. Sila gunakan ID yang lain.";
+        $_SESSION['error_field'] = 'id_produk';
+        $error_message = "ID Produk '$id_produk' sudah wujud dalam sistem. Sila gunakan ID yang lain.";
     } else {
         $error_message = "Ralat semasa menyimpan produk: " . $e->getMessage();
     }

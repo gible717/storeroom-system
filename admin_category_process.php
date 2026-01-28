@@ -15,18 +15,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt = $conn->prepare("INSERT INTO kategori (nama_kategori) VALUES (?)");
         $stmt->bind_param("s", $nama_kategori);
 
-        if ($stmt->execute()) {
+        try {
+            $stmt->execute();
+            $stmt->close();
             header("Location: admin_category.php?success=Kategori berjaya ditambah!");
             exit;
-        } else {
-            if ($conn->errno == 1062) {
-                header("Location: admin_category.php?error=Kategori ini sudah wujud.");
+        } catch (mysqli_sql_exception $e) {
+            $stmt->close();
+            if ($e->getCode() == 1062) {
+                $_SESSION['form_data'] = ['nama_kategori' => $nama_kategori];
+                $_SESSION['error_field'] = 'nama_kategori';
+                header("Location: admin_category.php?error=" . urlencode("Kategori '$nama_kategori' sudah wujud dalam sistem. Sila gunakan nama yang lain."));
             } else {
-                header("Location: admin_category.php?error=Ralat pangkalan data: " . $conn->error);
+                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
             }
             exit;
         }
-        $stmt->close();
     }
 
     // Edit/Update category
@@ -37,18 +41,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt = $conn->prepare("UPDATE kategori SET nama_kategori = ? WHERE ID_kategori = ?");
         $stmt->bind_param("si", $nama_kategori, $ID_kategori);
 
-        if ($stmt->execute()) {
+        try {
+            $stmt->execute();
+            $stmt->close();
             header("Location: admin_category.php?success=Kategori berjaya dikemaskini!");
             exit;
-        } else {
-            if ($conn->errno == 1062) {
-                header("Location: admin_category.php?error=Nama kategori ini sudah wujud.");
+        } catch (mysqli_sql_exception $e) {
+            $stmt->close();
+            if ($e->getCode() == 1062) {
+                $_SESSION['form_data'] = ['nama_kategori' => $nama_kategori, 'ID_kategori' => $ID_kategori];
+                $_SESSION['error_field'] = 'nama_kategori';
+                $_SESSION['edit_mode'] = true;
+                header("Location: admin_category.php?error=" . urlencode("Kategori '$nama_kategori' sudah wujud dalam sistem. Sila gunakan nama yang lain."));
             } else {
-                header("Location: admin_category.php?error=Ralat pangkalan data: " . $conn->error);
+                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
             }
             exit;
         }
-        $stmt->close();
     }
 
     // Delete category
@@ -57,18 +66,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt = $conn->prepare("DELETE FROM kategori WHERE ID_kategori = ?");
         $stmt->bind_param("i", $ID_kategori);
 
-        if ($stmt->execute()) {
+        try {
+            $stmt->execute();
+            $stmt->close();
             header("Location: admin_category.php?success=Kategori berjaya dipadam!");
             exit;
-        } else {
-            if ($conn->errno == 1451) {
-                header("Location: admin_category.php?error=Tidak boleh padam. Kategori ini sedang digunakan oleh produk.");
+        } catch (mysqli_sql_exception $e) {
+            $stmt->close();
+            if ($e->getCode() == 1451) {
+                header("Location: admin_category.php?error=" . urlencode("Tidak boleh padam. Kategori ini sedang digunakan oleh produk."));
             } else {
-                header("Location: admin_category.php?error=Ralat pangkalan data: " . $conn->error);
+                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
             }
             exit;
         }
-        $stmt->close();
     }
 
     else {
