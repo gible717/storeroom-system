@@ -234,20 +234,49 @@ $kategori_result = $conn->query($kategori_sql);
         .report-header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #000;
             padding-bottom: 15px;
         }
 
-        .report-title {
-            font-size: 20px;
+        .report-logo {
+            width: 70px;
+            height: auto;
+            margin-bottom: 8px;
+        }
+
+        .report-org {
+            font-size: 14pt;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .report-unit {
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .report-divider {
+            border: none;
+            border-top: 2px solid #000;
+            margin: 10px auto;
+            width: 100%;
+        }
+
+        .report-title {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 8px;
         }
 
         .report-info {
-            font-size: 12px;
-            color: #555;
-            margin-bottom: 5px;
+            font-size: 10pt;
+            color: #000;
+            margin-bottom: 3px;
         }
 
         table {
@@ -315,16 +344,18 @@ $kategori_result = $conn->query($kategori_sql);
     <div class="document-container">
         <!-- Report Header -->
         <div class="report-header">
-            <div class="report-title">LAPORAN INVENTORI</div>
+            <img src="assets/img/logo.png" alt="Logo MPK" class="report-logo">
+            <div class="report-org">Majlis Perbandaran Kangar</div>
+            <div class="report-unit">Unit Teknologi Maklumat</div>
+            <div class="report-title">Laporan Inventori Stor</div>
             <div class="report-info">
-                <?php if ($kategori_filter !== 'Semua'): ?>
-                    <strong>Kategori:</strong> <?php echo htmlspecialchars($kategori_filter); ?>
+                <?php if ($kategori_filter !== '' && $kategori_filter !== 'Semua'): ?>
+                    Kategori: <strong><?php echo htmlspecialchars($kategori_filter); ?></strong>
                 <?php else: ?>
-                    <strong>Semua Kategori</strong>
+                    Kategori: <strong>Semua</strong>
                 <?php endif; ?>
-            </div>
-            <div class="report-info">
-                <strong>Tarikh Laporan:</strong> <?php echo date('d/m/Y'); ?>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                Tarikh Laporan: <strong><?php echo date('d/m/Y'); ?></strong>
             </div>
         </div>
 
