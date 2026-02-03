@@ -66,41 +66,45 @@ while ($row = $top_dept_result->fetch_assoc()) {
 }
 
 // --- Get Monthly Trend for Top 5 Departments ---
-$sql_monthly_trend = "SELECT
-    j.nama_jabatan,
-    DATE_FORMAT(p.tarikh_mohon, '%Y-%m') AS bulan,
-    COUNT(DISTINCT p.ID_permohonan) AS jumlah
-FROM permohonan p
-LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
-LEFT JOIN barang b ON pb.no_kod = b.no_kod
-LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
-$where_clause
-AND j.nama_jabatan IN (" . implode(',', array_fill(0, min(5, count($dept_labels)), '?')) . ")
-GROUP BY j.nama_jabatan, DATE_FORMAT(p.tarikh_mohon, '%Y-%m')
-ORDER BY bulan ASC";
-
-// Prepare parameters for monthly trend (add top 5 department names)
-$monthly_params = $params;
-$monthly_types = $types;
-for ($i = 0; $i < min(5, count($dept_labels)); $i++) {
-    $monthly_params[] = $dept_labels[$i];
-    $monthly_types .= "s";
-}
-
-$stmt_monthly = $conn->prepare($sql_monthly_trend);
-$stmt_monthly->bind_param($monthly_types, ...$monthly_params);
-$stmt_monthly->execute();
-$monthly_result = $stmt_monthly->get_result();
-
-// Organize monthly data by department
 $monthly_by_dept = [];
-while ($row = $monthly_result->fetch_assoc()) {
-    $dept_name = $row['nama_jabatan'];
-    $month = $row['bulan'];
-    if (!isset($monthly_by_dept[$dept_name])) {
-        $monthly_by_dept[$dept_name] = [];
+
+if (count($dept_labels) > 0) {
+    $top5_count = min(5, count($dept_labels));
+    $sql_monthly_trend = "SELECT
+        j.nama_jabatan,
+        DATE_FORMAT(p.tarikh_mohon, '%Y-%m') AS bulan,
+        COUNT(DISTINCT p.ID_permohonan) AS jumlah
+    FROM permohonan p
+    LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
+    LEFT JOIN barang b ON pb.no_kod = b.no_kod
+    LEFT JOIN jabatan j ON p.ID_jabatan = j.ID_jabatan
+    $where_clause
+    AND j.nama_jabatan IN (" . implode(',', array_fill(0, $top5_count, '?')) . ")
+    GROUP BY j.nama_jabatan, DATE_FORMAT(p.tarikh_mohon, '%Y-%m')
+    ORDER BY bulan ASC";
+
+    // Prepare parameters for monthly trend (add top 5 department names)
+    $monthly_params = $params;
+    $monthly_types = $types;
+    for ($i = 0; $i < $top5_count; $i++) {
+        $monthly_params[] = $dept_labels[$i];
+        $monthly_types .= "s";
     }
-    $monthly_by_dept[$dept_name][$month] = $row['jumlah'];
+
+    $stmt_monthly = $conn->prepare($sql_monthly_trend);
+    $stmt_monthly->bind_param($monthly_types, ...$monthly_params);
+    $stmt_monthly->execute();
+    $monthly_result = $stmt_monthly->get_result();
+
+    // Organize monthly data by department
+    while ($row = $monthly_result->fetch_assoc()) {
+        $dept_name = $row['nama_jabatan'];
+        $month = $row['bulan'];
+        if (!isset($monthly_by_dept[$dept_name])) {
+            $monthly_by_dept[$dept_name] = [];
+        }
+        $monthly_by_dept[$dept_name][$month] = $row['jumlah'];
+    }
 }
 
 // Get all months in the date range

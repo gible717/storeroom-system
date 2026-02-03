@@ -166,7 +166,7 @@ $total_rows = $result->num_rows;
                                     <td>
                                         <button class="btn btn-icon-only btn-action text-view" title="Lihat" aria-label="Lihat butiran <?php echo $productName; ?>"><i class="bi bi-eye-fill" aria-hidden="true"></i></button>
                                         <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only btn-action text-edit" title="Kemaskini" aria-label="Kemaskini <?php echo $productName; ?>"><i class="bi bi-pencil-fill" aria-hidden="true"></i></a>
-                                        <a href="admin_delete_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only btn-action text-delete" title="Padam" aria-label="Padam <?php echo $productName; ?>" onclick="return confirm('Adakah anda pasti mahu memadam produk ini?');"><i class="bi bi-trash-fill" aria-hidden="true"></i></a>
+                                        <button type="button" class="btn btn-icon-only btn-action text-delete" title="Padam" aria-label="Padam <?php echo $productName; ?>" onclick="confirmDelete('<?php echo htmlspecialchars($row['ID_produk'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['nama_produk'] ?? '', ENT_QUOTES); ?>')"><i class="bi bi-trash-fill" aria-hidden="true"></i></button>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -186,6 +186,24 @@ $total_rows = $result->num_rows;
 </div>
 
 <script>
+// SweetAlert2 delete confirmation
+function confirmDelete(productId, productName) {
+    Swal.fire({
+        title: 'Adakah anda pasti?',
+        text: 'Produk "' + productName + '" akan dipadam. Tindakan ini tidak boleh dibatalkan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, padamkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'admin_delete_product.php?id=' + encodeURIComponent(productId);
+        }
+    });
+}
+
 // Real-time search and filter functionality
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');

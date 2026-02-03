@@ -219,7 +219,7 @@ function getInitials($name) {
 
                 <div class="d-grid gap-2">
                     <button type="button" class="btn btn-primary" id="triggerUploadButton">
-                        <i class="bi bi-upload-fill me-2"></i>Tukar Gambar Profil
+                        <i class="bi bi-upload-fill me-2"></i>Muat Naik Gambar Profil
                     </button>
                     <button type="button" class="btn btn-outline-danger" id="triggerDeleteButton" <?php echo empty($user['gambar_profil']) ? 'disabled' : ''; ?>>
                         <i class="bi bi-trash me-2"></i>Padam Gambar
@@ -385,7 +385,7 @@ function getInitials($name) {
             }
         });
         submitBtn.disabled = !hasChanges;
-    }
+    } 
 
     // Add event listeners to all form fields
     formFields.forEach(field => {

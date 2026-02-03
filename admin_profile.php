@@ -187,7 +187,7 @@ function getInitials($name) {
 
                 <div class="d-grid gap-2">
                     <button type="button" class="btn btn-primary" id="triggerUploadButton">
-                        <i class="bi bi-upload me-2"></i>Tukar Gambar Baharu
+                        <i class="bi bi-upload me-2"></i>Muat Naik Gambar Baharu
                     </button>
                     <button type="button" class="btn btn-outline-danger" id="triggerDeleteButton" <?php if (empty($user['gambar_profil'])) echo 'disabled'; ?>>
                         <i class="bi bi-trash me-2"></i>Padam Gambar

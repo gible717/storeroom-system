@@ -132,11 +132,10 @@ $total_rows = $users->num_rows;
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
 
-                                        <a href="user_delete.php?id=<?php echo htmlspecialchars($user['ID_staf']); ?>"
-                                        class="btn btn-sm btn-outline-danger" title="Padam"
-                                        onclick="return confirm('Adakah anda pasti mahu memadam pengguna ini?');">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Padam"
+                                        onclick="confirmDeleteUser('<?php echo htmlspecialchars($user['ID_staf'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($user['nama'], ENT_QUOTES); ?>')">
                                             <i class="bi bi-trash3-fill"></i>
-                                        </a>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -160,6 +159,24 @@ $total_rows = $users->num_rows;
 </div>
 
 <script>
+// SweetAlert2 delete confirmation
+function confirmDeleteUser(userId, userName) {
+    Swal.fire({
+        title: 'Adakah anda pasti?',
+        text: 'Pengguna "' + userName + '" akan dipadam. Tindakan ini tidak boleh dibatalkan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, padamkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'user_delete.php?id=' + encodeURIComponent(userId);
+        }
+    });
+}
+
 // Real-time search and filter functionality
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
