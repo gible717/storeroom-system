@@ -1,5 +1,5 @@
 <?php
-// admin_products.php - Product inventory listing with filters & pagination
+// admin_products.php - Product inventory listing with filters
 
 $pageTitle = "Pengurusan Produk";
 require 'admin_header.php';
@@ -12,8 +12,8 @@ if ($conn === null || $conn->connect_error) {
 $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
 $supplier_result = $conn->query("SELECT DISTINCT nama_pembekal FROM barang WHERE nama_pembekal IS NOT NULL AND nama_pembekal != '' ORDER BY nama_pembekal ASC");
 
-// Main query - fetch ALL products with category name (no pagination limit for client-side filtering)
-$sql = "SELECT b.no_kod AS ID_produk, b.perihal_stok AS nama_produk, b.harga_seunit AS harga, b.nama_pembekal, b.baki_semasa AS stok_semasa, k.nama_kategori
+// Main query - fetch ALL products with category name and product image
+$sql = "SELECT b.no_kod AS ID_produk, b.perihal_stok AS nama_produk, b.harga_seunit AS harga, b.nama_pembekal, b.baki_semasa AS stok_semasa, b.gambar_produk, k.nama_kategori
         FROM barang b LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
         ORDER BY b.no_kod ASC";
 
@@ -24,52 +24,270 @@ $total_rows = $result->num_rows;
 ?>
 
 <style>
-.btn-icon-only { background-color: transparent; border: none; padding: 0.375rem 0.5rem; font-size: 1.1rem; transition: transform 0.2s; }
-.btn-icon-only:hover { transform: scale(1.2); }
-.text-view { color: #667EEA; }
-.text-edit { color: #64748B; }
-.text-delete { color: #DC2626; }
-
-/* Stock status badges - matching new status pill styling */
-.stock-badge {
-    padding: 0.35rem 0.75rem;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* --- Page Header --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #212529;
+}
+.page-header .header-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
+/* --- Filter Card --- */
+.filter-card {
+    border: none;
+    border-radius: 1rem;
+    margin-bottom: 1.5rem;
+}
+.filter-card .card-body {
+    padding: 1rem 1.25rem;
+}
+
+/* --- Search bar --- */
+.search-products {
+    max-width: 280px;
+}
+.search-products .input-group-text {
+    border-right: none;
+}
+.search-products .form-control {
+    border-left: none;
+}
+.search-products .form-control:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+/* --- Table Enhancements --- */
+.products-table-card {
+    border: none;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.products-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e9ecef;
+    white-space: nowrap;
+}
+
+.products-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+.products-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+.products-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- Product Thumbnail --- */
+.product-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    object-fit: cover;
+}
+.product-thumb-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #f1f3f5 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 1rem;
+}
+
+/* --- Stock Badges --- */
+.stock-badge {
+    padding: 0.3rem 0.7rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
 .stock-mencukupi {
     background: #d1e7dd;
     color: #0a3622;
 }
-
 .stock-rendah {
     background: #fff3cd;
     color: #997404;
 }
-
 .stock-habis {
     background: #f8d7da;
     color: #58151c;
 }
+
+/* --- Action Buttons --- */
+.btn-action-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    border: none;
+    background: transparent;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    padding: 0;
+}
+.btn-action-icon.view {
+    color: #4f46e5;
+}
+.btn-action-icon.view:hover {
+    background: #eef2ff;
+    color: #4338ca;
+}
+.btn-action-icon.edit {
+    color: #64748b;
+}
+.btn-action-icon.edit:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+.btn-action-icon.delete {
+    color: #dc3545;
+}
+.btn-action-icon.delete:hover {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* --- Filter dropdowns --- */
+.filter-select {
+    font-size: 0.8rem;
+    border-radius: 50px;
+    padding: 0.35rem 2rem 0.35rem 0.85rem;
+    border: 1.5px solid #dee2e6;
+    color: #495057;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+    width: auto !important;
+}
+.filter-select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.15);
+}
+
+/* --- Clear filters button --- */
+.btn-clear-filters {
+    font-size: 0.8rem;
+    border-radius: 50px;
+    padding: 0.35rem 0.85rem;
+    border: 1.5px solid #dee2e6;
+    background: #fff;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+.btn-clear-filters:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+/* --- Tambah Produk button --- */
+.btn-tambah-produk {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-tambah-produk:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* --- Urus Kategori button --- */
+.btn-urus-kategori {
+    border: 1.5px solid #dee2e6;
+    color: #495057;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+.btn-urus-kategori:hover {
+    border-color: #4f46e5;
+    color: #4f46e5;
+    background: #eef2ff;
+}
+
+/* --- Product name styling --- */
+.product-name-cell {
+    font-weight: 500;
+    color: #212529;
+}
+.product-kod-cell {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* --- Card footer --- */
+.table-footer {
+    background: #fff;
+    border-top: 1px solid #e9ecef;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0 0 1rem 1rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
 </style>
 
 <div class="container-fluid">
-    <!-- Header -->
-    <div class="text-center mb-3">
-        <h1 class="h3 mb-0 text-gray-800 fw-bold">Senarai Produk</h1>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1>Senarai Produk</h1>
+            <small class="text-muted"><?php echo $total_rows; ?> produk dalam inventori</small>
+        </div>
+        <div class="header-actions">
+            <a href="admin_category.php" class="btn btn-urus-kategori">
+                <i class="bi bi-tags-fill me-1"></i> Urus Kategori
+            </a>
+            <a href="admin_add_product.php" class="btn btn-tambah-produk">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+            </a>
+        </div>
     </div>
 
-    <!-- Filter & Search -->
-    <div class="mb-4">
-        <div class="row g-3 justify-content-between">
-            <!-- Left side - Filters -->
-            <div class="col-auto">
+    <!-- Filter & Search Card -->
+    <div class="card filter-card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <!-- Filters -->
                 <div class="d-flex flex-wrap align-items-center gap-2">
-                    <!-- Category Filter -->
-                    <select id="kategoriFilter" class="form-select form-select-sm" style="width: auto;">
+                    <select id="kategoriFilter" class="form-select form-select-sm filter-select">
                         <option value="">Semua Kategori</option>
                         <?php if ($kategori_result && $kategori_result->num_rows > 0):
                             $kategori_result->data_seek(0);
@@ -80,8 +298,7 @@ $total_rows = $result->num_rows;
                             <?php endwhile; endif; ?>
                     </select>
 
-                    <!-- Supplier Filter -->
-                    <select id="pembekalFilter" class="form-select form-select-sm" style="width: auto;">
+                    <select id="pembekalFilter" class="form-select form-select-sm filter-select">
                         <option value="">Semua Pembekal</option>
                         <?php if ($supplier_result && $supplier_result->num_rows > 0):
                             while($supplier_row = $supplier_result->fetch_assoc()): ?>
@@ -91,66 +308,75 @@ $total_rows = $result->num_rows;
                             <?php endwhile; endif; ?>
                     </select>
 
-                    <!-- Status Filter (Malay labels) -->
-                    <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
+                    <select id="statusFilter" class="form-select form-select-sm filter-select">
                         <option value="">Semua Status</option>
                         <option value="Stok Mencukupi">Stok Mencukupi</option>
                         <option value="Stok Rendah">Stok Rendah</option>
                         <option value="Kehabisan Stok">Kehabisan Stok</option>
                     </select>
 
-                    <!-- Clear Filters Button -->
-                    <button id="clearFiltersBtn" class="btn btn-sm btn-outline-secondary" style="display: none;">
+                    <button id="clearFiltersBtn" class="btn btn-sm btn-clear-filters" style="display: none;">
                         <i class="bi bi-x-circle me-1"></i>Kosongkan <span id="filterCount" class="badge bg-secondary ms-1"></span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Right side - Search & Actions -->
-            <div class="col-auto d-flex align-items-center gap-2">
-                <div class="input-group" style="width: 250px;">
-                    <span class="input-group-text bg-white">
-                        <i class="bi bi-search"></i>
+                <!-- Search -->
+                <div class="input-group search-products">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
                     </span>
-                    <input type="text" id="searchInput" class="form-control bg-white"
-                        placeholder="Cari Kod, Nama Produk...">
+                    <input type="text" id="searchInput" class="form-control border-start-0 bg-white"
+                        placeholder="Cari kod, nama produk...">
                 </div>
-                <a href="admin_category.php" class="btn btn-outline-secondary"><i class="bi bi-tags-fill me-1"></i> Urus Kategori</a>
-                <a href="admin_add_product.php" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Tambah Produk</a>
             </div>
         </div>
     </div>
 
-    <!-- Products Table -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
+    <!-- Products Table Card -->
+    <div class="card products-table-card shadow-sm">
+        <div class="card-body p-0">
             <div class="table-responsive table-responsive-accessible" tabindex="0" role="region" aria-label="Senarai produk inventori">
-                <table class="table table-hover table-accessible" width="100%">
+                <table class="table table-hover products-table mb-0" width="100%">
                     <caption class="visually-hidden">Senarai semua produk dalam inventori dengan maklumat kategori, pembekal, harga dan status stok</caption>
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th scope="col" style="width: 50px;">Bil.</th>
+                            <th scope="col" style="width: 56px;">Foto</th>
                             <th scope="col">Kod Item</th>
                             <th scope="col">Nama Produk</th>
                             <th scope="col">Kategori</th>
-                            <th scope="col">Nama Pembekal</th>
+                            <th scope="col">Pembekal</th>
                             <th scope="col">Harga (RM)</th>
                             <th scope="col">Stok</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Tindakan</th>
+                            <th scope="col" style="width: 110px;">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if ($result && $result->num_rows > 0): ?>
                             <?php
-                            $bil = 1; // Start numbering from 1
+                            $bil = 1;
                             while($row = $result->fetch_assoc()):
                             $productName = htmlspecialchars($row['nama_produk'] ?? '');
+                            $productId = htmlspecialchars($row['ID_produk'] ?? '');
+                            $gambar = $row['gambar_produk'] ?? null;
+                            $has_image = (!empty($gambar) && file_exists($gambar));
                             ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $bil++; ?></td>
-                                    <td><?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?></td>
-                                    <td><?php echo $productName; ?></td>
+                                    <td class="text-center text-muted"><?php echo $bil++; ?></td>
+                                    <td>
+                                        <?php if ($has_image): ?>
+                                            <img src="<?php echo htmlspecialchars($gambar); ?>"
+                                                 class="product-thumb"
+                                                 alt="<?php echo $productName; ?>">
+                                        <?php else: ?>
+                                            <div class="product-thumb-placeholder">
+                                                <i class="bi bi-image"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="product-kod-cell"><?php echo $productId; ?></td>
+                                    <td class="product-name-cell"><?php echo $productName; ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
                                     <td><?php echo number_format((float)$row['harga'], 2); ?></td>
@@ -164,23 +390,39 @@ $total_rows = $result->num_rows;
                                         ?>
                                     </td>
                                     <td>
-                                        <button class="btn btn-icon-only btn-action text-view" title="Lihat" aria-label="Lihat butiran <?php echo $productName; ?>"><i class="bi bi-eye-fill" aria-hidden="true"></i></button>
-                                        <a href="admin_edit_product.php?id=<?php echo htmlspecialchars($row['ID_produk'] ?? ''); ?>" class="btn btn-icon-only btn-action text-edit" title="Kemaskini" aria-label="Kemaskini <?php echo $productName; ?>"><i class="bi bi-pencil-fill" aria-hidden="true"></i></a>
-                                        <button type="button" class="btn btn-icon-only btn-action text-delete" title="Padam" aria-label="Padam <?php echo $productName; ?>" onclick="confirmDelete('<?php echo htmlspecialchars($row['ID_produk'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['nama_produk'] ?? '', ENT_QUOTES); ?>')"><i class="bi bi-trash-fill" aria-hidden="true"></i></button>
+                                        <div class="d-flex gap-1">
+                                            <button class="btn-action-icon view" title="Lihat" aria-label="Lihat butiran <?php echo $productName; ?>"
+                                                    data-id="<?php echo $productId; ?>"
+                                                    data-name="<?php echo $productName; ?>"
+                                                    data-kategori="<?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?>"
+                                                    data-pembekal="<?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?>"
+                                                    data-harga="<?php echo number_format((float)$row['harga'], 2); ?>"
+                                                    data-stok="<?php echo (int)$row['stok_semasa']; ?>"
+                                                    data-gambar="<?php echo $has_image ? htmlspecialchars($gambar) : ''; ?>">
+                                                <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                                            </button>
+                                            <a href="admin_edit_product.php?id=<?php echo $productId; ?>" class="btn-action-icon edit" title="Kemaskini" aria-label="Kemaskini <?php echo $productName; ?>">
+                                                <i class="bi bi-pencil-fill" aria-hidden="true"></i>
+                                            </a>
+                                            <button type="button" class="btn-action-icon delete" title="Padam" aria-label="Padam <?php echo $productName; ?>"
+                                                    onclick="confirmDelete('<?php echo htmlspecialchars($row['ID_produk'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['nama_produk'] ?? '', ENT_QUOTES); ?>')">
+                                                <i class="bi bi-trash-fill" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="9" class="text-center">Tiada produk ditemui yang sepadan.</td></tr>
+                            <tr><td colspan="10" class="text-center py-4 text-muted">Tiada produk ditemui.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Info Footer -->
-        <div class="card-footer">
-            <small class="text-muted">Showing <?php echo $total_rows; ?> of <?php echo $total_rows; ?> entries</small>
+        <!-- Table Footer -->
+        <div class="table-footer d-flex justify-content-between align-items-center">
+            <span id="tableInfo">Menunjukkan <?php echo $total_rows; ?> daripada <?php echo $total_rows; ?> produk</span>
         </div>
     </div>
 </div>
@@ -190,12 +432,12 @@ $total_rows = $result->num_rows;
 function confirmDelete(productId, productName) {
     Swal.fire({
         title: 'Adakah anda pasti?',
-        text: 'Produk "' + productName + '" akan dipadam. Tindakan ini tidak boleh dibatalkan!',
+        html: 'Produk <strong>"' + productName + '"</strong> akan dipadam.<br><small class="text-muted">Tindakan ini tidak boleh dibatalkan.</small>',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
+        confirmButtonColor: '#dc3545',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, padamkan!',
+        confirmButtonText: '<i class="bi bi-trash me-1"></i>Ya, padamkan',
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -204,30 +446,24 @@ function confirmDelete(productId, productName) {
     });
 }
 
-// Real-time search and filter functionality
+// Real-time search and filter
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const kategoriFilter = document.getElementById('kategoriFilter');
     const pembekalFilter = document.getElementById('pembekalFilter');
     const statusFilter = document.getElementById('statusFilter');
-    const tableBody = document.querySelector('tbody');
+    const tableBody = document.querySelector('.products-table tbody');
     const rows = tableBody.querySelectorAll('tr');
 
     // Highlight search text
     function highlightText(cell, searchText) {
         if (!cell) return;
-
         const originalText = cell.textContent;
-
-        // Remove existing highlights
         cell.innerHTML = originalText;
-
-        // Add new highlights if search text exists
         if (searchText && searchText.length > 0) {
             const safeText = searchText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             const regex = new RegExp(`(${safeText})`, 'gi');
-            const highlightedText = originalText.replace(regex, '<mark style="background-color: yellow; padding: 0;">$1</mark>');
-            cell.innerHTML = highlightedText;
+            cell.innerHTML = originalText.replace(regex, '<mark style="background-color: yellow; padding: 0;">$1</mark>');
         }
     }
 
@@ -239,62 +475,50 @@ document.addEventListener('DOMContentLoaded', function() {
         let visibleCount = 0;
 
         rows.forEach(row => {
-            // Skip the "no data" row
             if (row.cells.length === 1 && row.cells[0].getAttribute('colspan')) {
                 row.style.display = 'none';
                 return;
             }
 
-            // Get cell data (based on table structure)
-            const bilCell = row.cells[0]; // Bil. column
-            const kodItemCell = row.cells[1];
-            const namaProdukCell = row.cells[2];
-            const kategoriCell = row.cells[3];
-            const pembekalCell = row.cells[4];
-            const statusBadge = row.cells[7].querySelector('.badge');
+            // Cell indices (Foto column at index 1)
+            const bilCell = row.cells[0];
+            const kodItemCell = row.cells[2];
+            const namaProdukCell = row.cells[3];
+            const kategoriCell = row.cells[4];
+            const pembekalCell = row.cells[5];
+            const statusBadge = row.cells[8] ? row.cells[8].querySelector('.stock-badge') : null;
 
             if (!kodItemCell || !namaProdukCell || !kategoriCell) return;
 
             const kodItem = kodItemCell.textContent.toLowerCase();
             const namaProduk = namaProdukCell.textContent.toLowerCase();
             const kategori = kategoriCell.textContent.toLowerCase();
-            const pembekal = pembekalCell.textContent.toLowerCase();
-            const status = statusBadge ? statusBadge.textContent : '';
+            const pembekal = pembekalCell ? pembekalCell.textContent.toLowerCase() : '';
+            const status = statusBadge ? statusBadge.textContent.trim() : '';
 
-            // Check search match (Kod Item, Nama Produk, Kategori, Pembekal)
             const matchesSearch = searchText === '' ||
                                 kodItem.includes(searchText) ||
                                 namaProduk.includes(searchText) ||
                                 kategori.includes(searchText) ||
                                 pembekal.includes(searchText);
 
-            // Check kategori filter
             const matchesKategori = kategoriText === '' || kategori === kategoriText.toLowerCase();
-
-            // Check pembekal filter
             const matchesPembekal = pembekalText === '' || pembekal === pembekalText.toLowerCase();
-
-            // Check status filter
             const matchesStatus = statusText === '' || status === statusText;
 
-            // Show/hide row
             if (matchesSearch && matchesKategori && matchesPembekal && matchesStatus) {
                 row.style.display = '';
                 visibleCount++;
-
-                // Update Bil. column to show correct numbering
                 bilCell.textContent = visibleCount;
 
-                // Highlight matching text
                 if (searchText && searchText.length > 0) {
                     highlightText(kodItemCell, searchText);
                     highlightText(namaProdukCell, searchText);
                     highlightText(kategoriCell, searchText);
                     highlightText(pembekalCell, searchText);
                 } else {
-                    // Remove highlights when search is cleared
                     [kodItemCell, namaProdukCell, kategoriCell, pembekalCell].forEach(cell => {
-                        cell.innerHTML = cell.textContent;
+                        if (cell) cell.innerHTML = cell.textContent;
                     });
                 }
             } else {
@@ -302,33 +526,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Show "no results" message if needed
+        // No results row
         const existingNoResult = tableBody.querySelector('.no-results-row');
-        if (existingNoResult) {
-            existingNoResult.remove();
-        }
+        if (existingNoResult) existingNoResult.remove();
 
         if (visibleCount === 0) {
             const noResultRow = document.createElement('tr');
             noResultRow.className = 'no-results-row';
-            noResultRow.innerHTML = '<td colspan="9" class="text-center text-muted py-4">Tiada padanan ditemui.</td>';
+            noResultRow.innerHTML = '<td colspan="10" class="text-center text-muted py-4"><i class="bi bi-search d-block fs-3 mb-2 opacity-50"></i>Tiada padanan ditemui.</td>';
             tableBody.appendChild(noResultRow);
         }
 
-        // Update pagination info
-        updatePaginationInfo(visibleCount);
-    }
-
-    function updatePaginationInfo(visibleCount) {
-        const paginationInfo = document.querySelector('.card-footer small');
-        if (paginationInfo && visibleCount > 0) {
-            paginationInfo.textContent = `Showing ${visibleCount} of ${visibleCount} entries`;
-        } else if (paginationInfo) {
-            paginationInfo.textContent = 'Showing 0 entries';
+        // Update footer info
+        const tableInfo = document.getElementById('tableInfo');
+        const totalRows = <?php echo $total_rows; ?>;
+        if (tableInfo) {
+            tableInfo.textContent = visibleCount === totalRows
+                ? `Menunjukkan ${totalRows} produk`
+                : `Menunjukkan ${visibleCount} daripada ${totalRows} produk`;
         }
     }
 
-    // Check if filters are active and update Clear button
+    // Clear filters button
     function updateClearButton() {
         const clearBtn = document.getElementById('clearFiltersBtn');
         const filterCountBadge = document.getElementById('filterCount');
@@ -340,14 +559,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (statusFilter.value) activeCount++;
 
         if (activeCount > 0) {
-            clearBtn.style.display = 'inline-block';
+            clearBtn.style.display = 'inline-flex';
             filterCountBadge.textContent = activeCount;
         } else {
             clearBtn.style.display = 'none';
         }
     }
 
-    // Clear all filters
     document.getElementById('clearFiltersBtn').addEventListener('click', function() {
         searchInput.value = '';
         kategoriFilter.value = '';
@@ -357,8 +575,59 @@ document.addEventListener('DOMContentLoaded', function() {
         updateClearButton();
     });
 
+    // View product detail popup
+    document.querySelectorAll('.btn-action-icon.view').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const d = this.dataset;
+            const stok = parseInt(d.stok);
+            let statusHtml = '';
+            if (stok > 10) statusHtml = '<span class="stock-badge stock-mencukupi">Stok Mencukupi</span>';
+            else if (stok > 0) statusHtml = '<span class="stock-badge stock-rendah">Stok Rendah</span>';
+            else statusHtml = '<span class="stock-badge stock-habis">Kehabisan Stok</span>';
+
+            const photoHtml = d.gambar
+                ? `<img src="${d.gambar}" style="max-width:100%;max-height:200px;object-fit:contain;border-radius:0.75rem;margin-bottom:1rem;">`
+                : `<div style="width:100%;height:120px;background:linear-gradient(135deg,#f1f3f5,#e9ecef);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:#adb5bd;font-size:3rem;margin-bottom:1rem;"><i class="bi bi-image"></i></div>`;
+
+            Swal.fire({
+                html: `
+                    ${photoHtml}
+                    <h5 style="font-weight:700;margin-bottom:0.25rem;">${d.name}</h5>
+                    <small class="text-muted" style="font-family:monospace;">${d.id}</small>
+                    <hr style="margin:0.75rem 0;">
+                    <div style="text-align:left;font-size:0.85rem;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Kategori</span>
+                            <strong>${d.kategori}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Pembekal</span>
+                            <strong>${d.pembekal}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Harga Seunit</span>
+                            <strong>RM ${d.harga}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Stok</span>
+                            <div><strong class="me-2">${d.stok} unit</strong>${statusHtml}</div>
+                        </div>
+                    </div>
+                `,
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonColor: '#4f46e5',
+                confirmButtonText: '<i class="bi bi-pencil-fill me-1"></i>Kemaskini',
+                width: 420
+            }).then(result => {
+                if (result.isConfirmed) {
+                    window.location.href = 'admin_edit_product.php?id=' + encodeURIComponent(d.id);
+                }
+            });
+        });
+    });
+
     // Event listeners
-    searchInput.addEventListener('keyup', filterTable);
     searchInput.addEventListener('input', function() {
         filterTable();
         updateClearButton();

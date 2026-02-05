@@ -70,7 +70,7 @@ $total_rows = $requests_result ? $requests_result->num_rows : 0;
     <h3 class="mb-0 fw-bold">Senarai Permohonan</h3>
 </div>
 <div class="d-flex justify-content-end mb-4">
-    <a href="kewps8_form.php" class="btn btn-primary">
+    <a href="kewps8_browse.php" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>Buat Permohonan
     </a>
 </div>

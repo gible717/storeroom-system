@@ -127,7 +127,7 @@ require 'staff_header.php';
                     <i class="bi bi-arrow-left fs-4"></i>
                 </a>
                 <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>
-                <a href="kewps8_form.php?action=new" class="btn btn-primary">
+                <a href="kewps8_browse.php" class="btn btn-primary">
                     <i class="bi bi-plus-lg me-2"></i>Buat Permohonan Baru
                 </a>
             </div>

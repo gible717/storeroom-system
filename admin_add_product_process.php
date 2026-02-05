@@ -1,34 +1,35 @@
 <?php
-// admin_add_product_process.php - Handles new product form submission
+// admin_add_product_process.php - Handles new product form submission (JSON response)
 
 session_start();
 require 'db.php';
 require 'auth_check.php';
 
+header('Content-Type: application/json');
+
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: admin_add_product.php");
+    echo json_encode(['status' => 'error', 'message' => 'Kaedah permintaan tidak sah.']);
     exit;
 }
 
 // Get form data
 $id_produk = trim($_POST['id_produk'] ?? '');
 $nama_produk = trim($_POST['nama_produk'] ?? '');
-$ID_kategori = (int)$_POST['ID_kategori'];
-$nama_pembekal = trim($_POST['nama_pembekal'] ?? '');  // Optional - for record keeping only
+$ID_kategori = (int)($_POST['ID_kategori'] ?? 0);
+$nama_pembekal = trim($_POST['nama_pembekal'] ?? '');
 $harga = !empty($_POST['harga']) ? (float)$_POST['harga'] : null;
 $stok_semasa = !empty($_POST['stok_semasa']) ? (int)$_POST['stok_semasa'] : 0;
 
 // Validate required fields
-if (empty($id_produk) || empty($nama_produk)) {
-    header("Location: admin_add_product.php?error=" . urlencode("ID Produk dan Nama Produk wajib diisi."));
+if (empty($id_produk) || empty($nama_produk) || $ID_kategori <= 0) {
+    echo json_encode(['status' => 'error', 'message' => 'ID Produk, Nama Produk dan Kategori wajib diisi.']);
     exit;
 }
 
 // Get kategori name from KATEGORI table
 $kategori_name = '';
-$kategori_query = "SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?";
-$kategori_stmt = $conn->prepare($kategori_query);
+$kategori_stmt = $conn->prepare("SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?");
 $kategori_stmt->bind_param("i", $ID_kategori);
 $kategori_stmt->execute();
 $kategori_result = $kategori_stmt->get_result();
@@ -37,41 +38,88 @@ if ($kategori_row = $kategori_result->fetch_assoc()) {
 }
 $kategori_stmt->close();
 
-// Insert into barang table (mapped field names)
-$sql = "INSERT INTO barang (no_kod, perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa) VALUES (?, ?, ?, ?, ?, ?, ?)";
+// Handle photo upload
+$gambar_path = null;
+if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPLOAD_ERR_OK) {
+    $file = $_FILES['gambar_produk'];
+    $allowed_types = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!in_array($file['type'], $allowed_types)) {
+        echo json_encode(['status' => 'error', 'message' => 'Format foto tidak sah. Sila gunakan JPG, PNG, atau WEBP.']);
+        exit;
+    }
+
+    $upload_dir = 'uploads/product_images/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $filename = $id_produk . '_' . time() . '.' . $ext;
+    $destination = $upload_dir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $destination)) {
+        $gambar_path = $destination;
+    }
+}
+
+// Insert into barang table
+$sql = "INSERT INTO barang (no_kod, perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa, gambar_produk) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {
-    header("Location: admin_add_product.php?error=" . urlencode("Ralat pangkalan data: " . $conn->error));
+    echo json_encode(['status' => 'error', 'message' => 'Ralat pangkalan data: ' . $conn->error]);
     exit;
 }
 
-// Bind params: s=string, i=int, d=double
-// no_kod, perihal_stok, ID_kategori, kategori, harga_seunit, nama_pembekal, baki_semasa
-$stmt->bind_param("ssisssi", $id_produk, $nama_produk, $ID_kategori, $kategori_name, $harga, $nama_pembekal, $stok_semasa);
+$stmt->bind_param("ssisdsis", $id_produk, $nama_produk, $ID_kategori, $kategori_name, $harga, $nama_pembekal, $stok_semasa, $gambar_path);
 
 try {
     $stmt->execute();
-    header("Location: admin_products.php?success=" . urlencode("Produk '$nama_produk' berjaya ditambah!"));
-} catch (mysqli_sql_exception $e) {
-    // Store form data in session for repopulating
-    $_SESSION['form_data'] = [
-        'id_produk' => $id_produk,
-        'nama_produk' => $nama_produk,
-        'ID_kategori' => $ID_kategori,
-        'nama_pembekal' => $nama_pembekal,
-        'harga' => $harga,
-        'stok_semasa' => $stok_semasa
-    ];
-
-    // Error 1062 = duplicate entry
-    if ($e->getCode() === 1062) {
-        $_SESSION['error_field'] = 'id_produk';
-        $error_message = "ID Produk '$id_produk' sudah wujud dalam sistem. Sila gunakan ID yang lain.";
-    } else {
-        $error_message = "Ralat semasa menyimpan produk: " . $e->getMessage();
+    // Apply same photo to other selected products
+    $applied_count = 0;
+    if ($gambar_path && !empty($_POST['apply_photo_to'])) {
+        $apply_ids = json_decode($_POST['apply_photo_to'], true);
+        if (is_array($apply_ids) && count($apply_ids) > 0) {
+            $update_stmt = $conn->prepare("UPDATE barang SET gambar_produk = ? WHERE no_kod = ?");
+            foreach ($apply_ids as $other_id) {
+                $other_id = trim($other_id);
+                if ($other_id === '') continue;
+                $update_stmt->bind_param("ss", $gambar_path, $other_id);
+                $update_stmt->execute();
+                if ($update_stmt->affected_rows > 0) $applied_count++;
+            }
+            $update_stmt->close();
+        }
     }
-    header("Location: admin_add_product.php?error=" . urlencode($error_message));
+
+    $msg = "Produk '$nama_produk' berjaya ditambah!";
+    if ($applied_count > 0) {
+        $msg .= " Foto turut digunakan untuk $applied_count produk lain.";
+    }
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => $msg,
+        'redirectUrl' => 'admin_products.php'
+    ]);
+} catch (mysqli_sql_exception $e) {
+    // Clean up uploaded file on failure
+    if ($gambar_path && file_exists($gambar_path)) {
+        unlink($gambar_path);
+    }
+
+    if ($e->getCode() === 1062) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => "ID Produk '$id_produk' sudah wujud dalam sistem. Sila gunakan ID yang lain.",
+            'errorField' => 'id_produk'
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Ralat semasa menyimpan produk: ' . $e->getMessage()
+        ]);
+    }
 }
 
 $stmt->close();

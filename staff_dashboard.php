@@ -352,7 +352,7 @@ function smart_time_display($masa_mohon, $tarikh_mohon) {
 <h5 class="fw-bold mb-3">Tindakan Pantas</h5>
 <div class="row mb-4">
     <div class="col-lg-4 col-md-6 mb-4">
-        <a href="kewps8_form.php" class="text-decoration-none">
+        <a href="kewps8_browse.php" class="text-decoration-none">
             <div class="card action-card-enhanced action-card-primary">
                 <div class="card-icon">
                     <i class="bi bi-plus-circle-fill"></i>

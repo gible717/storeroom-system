@@ -92,6 +92,13 @@ switch ($action) {
         }
         break;
 
+    // Clear entire cart
+    case 'clear':
+        $_SESSION['cart'] = [];
+        $response['success'] = true;
+        $response['message'] = 'Senarai telah dikosongkan.';
+        break;
+
     default:
         $response['message'] = 'Tindakan tidak sah.';
 }

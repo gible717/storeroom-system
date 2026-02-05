@@ -34,7 +34,7 @@
         </li>
 
         <li class="sidebar-item">
-            <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php' || $current_page == 'request_review.php' || $current_page == 'kewps8_form.php') echo 'active'; ?>">
+            <a href="manage_requests.php" class="sidebar-link <?php if($current_page == 'manage_requests.php' || $current_page == 'request_review.php' || $current_page == 'kewps8_form.php' || $current_page == 'kewps8_browse.php') echo 'active'; ?>">
                 <i class="bi bi-clipboard2-data-fill me-3"></i>
                 <span>Permohonan</span>
             </a>

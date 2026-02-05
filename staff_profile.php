@@ -193,7 +193,6 @@ function getInitials($name) {
                 <p class="text-muted small mt-2">Gunakan 'mouse wheel' untuk zoom. Seret untuk gerakkan kotak.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" id="cropButton">Potong & Muat Naik</button>
             </div>
         </div>
@@ -299,6 +298,15 @@ function getInitials($name) {
             background: false,
             guides: true,
         });
+    });
+
+    // Destroy cropper and clean up when modal is closed
+    cropModalElement.addEventListener('hidden.bs.modal', function () {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        imageToCrop.src = '';
     });
 
     // Handle crop and upload
