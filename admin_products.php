@@ -8,13 +8,34 @@ if ($conn === null || $conn->connect_error) {
     die("<div class='container-fluid'><div class='alert alert-danger'>Ralat Sambungan Pangkalan Data.</div></div>");
 }
 
-// Get categories & suppliers for filter dropdowns
-$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
+// Get categories for filter dropdown (hierarchical)
+$kategori_filter_result = $conn->query("
+    SELECT k.ID_kategori, k.nama_kategori, k.parent_id, p.nama_kategori AS parent_name
+    FROM KATEGORI k
+    LEFT JOIN KATEGORI p ON k.parent_id = p.ID_kategori
+    ORDER BY COALESCE(k.parent_id, k.ID_kategori), k.parent_id IS NOT NULL, k.nama_kategori ASC
+");
+// Organize into tree for filter dropdown
+$filter_main_cats = [];
+$filter_sub_cats = [];
+if ($kategori_filter_result) {
+    while ($krow = $kategori_filter_result->fetch_assoc()) {
+        if ($krow['parent_id'] === null) {
+            $filter_main_cats[$krow['ID_kategori']] = $krow;
+        } else {
+            $filter_sub_cats[$krow['parent_id']][] = $krow;
+        }
+    }
+}
+
 $supplier_result = $conn->query("SELECT DISTINCT nama_pembekal FROM barang WHERE nama_pembekal IS NOT NULL AND nama_pembekal != '' ORDER BY nama_pembekal ASC");
 
-// Main query - fetch ALL products with category name and product image
-$sql = "SELECT b.no_kod AS ID_produk, b.perihal_stok AS nama_produk, b.harga_seunit AS harga, b.nama_pembekal, b.baki_semasa AS stok_semasa, b.gambar_produk, k.nama_kategori
-        FROM barang b LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
+// Main query - fetch ALL products with category name, parent category name, and product image
+$sql = "SELECT b.no_kod AS ID_produk, b.perihal_stok AS nama_produk, b.harga_seunit AS harga, b.nama_pembekal, b.baki_semasa AS stok_semasa, b.gambar_produk,
+               k.nama_kategori, pk.nama_kategori AS parent_kategori_name
+        FROM barang b
+        LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
+        LEFT JOIN KATEGORI pk ON k.parent_id = pk.ID_kategori
         ORDER BY b.no_kod ASC";
 
 $stmt = $conn->prepare($sql);
@@ -289,13 +310,18 @@ $total_rows = $result->num_rows;
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <select id="kategoriFilter" class="form-select form-select-sm filter-select">
                         <option value="">Semua Kategori</option>
-                        <?php if ($kategori_result && $kategori_result->num_rows > 0):
-                            $kategori_result->data_seek(0);
-                            while($kategori_row = $kategori_result->fetch_assoc()): ?>
-                                <option value="<?php echo htmlspecialchars($kategori_row['nama_kategori'] ?? ''); ?>">
-                                    <?php echo htmlspecialchars($kategori_row['nama_kategori'] ?? ''); ?>
-                                </option>
-                            <?php endwhile; endif; ?>
+                        <?php foreach ($filter_main_cats as $main): ?>
+                            <option value="<?php echo htmlspecialchars($main['nama_kategori']); ?>">
+                                <?php echo htmlspecialchars($main['nama_kategori']); ?>
+                            </option>
+                            <?php if (isset($filter_sub_cats[$main['ID_kategori']])): ?>
+                                <?php foreach ($filter_sub_cats[$main['ID_kategori']] as $sub): ?>
+                                    <option value="<?php echo htmlspecialchars($sub['nama_kategori']); ?>">
+                                        &nbsp;&nbsp;&nbsp;&#x2514; <?php echo htmlspecialchars($sub['nama_kategori']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </select>
 
                     <select id="pembekalFilter" class="form-select form-select-sm filter-select">
@@ -377,7 +403,15 @@ $total_rows = $result->num_rows;
                                     </td>
                                     <td class="product-kod-cell"><?php echo $productId; ?></td>
                                     <td class="product-name-cell"><?php echo $productName; ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?></td>
+                                    <td>
+                                        <?php
+                                        if (!empty($row['parent_kategori_name'])) {
+                                            echo htmlspecialchars($row['parent_kategori_name']) . ' <i class="bi bi-chevron-right" style="font-size:0.65rem;color:#adb5bd;"></i> ' . htmlspecialchars($row['nama_kategori']);
+                                        } else {
+                                            echo htmlspecialchars($row['nama_kategori'] ?? '-');
+                                        }
+                                        ?>
+                                    </td>
                                     <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
                                     <td><?php echo number_format((float)$row['harga'], 2); ?></td>
                                     <td><?php echo htmlspecialchars($row['stok_semasa'] ?? '0'); ?> unit</td>
@@ -391,10 +425,16 @@ $total_rows = $result->num_rows;
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
+                                            <?php
+                                            $kategori_display = $row['nama_kategori'] ?? '-';
+                                            if (!empty($row['parent_kategori_name'])) {
+                                                $kategori_display = $row['parent_kategori_name'] . ' > ' . $row['nama_kategori'];
+                                            }
+                                            ?>
                                             <button class="btn-action-icon view" title="Lihat" aria-label="Lihat butiran <?php echo $productName; ?>"
                                                     data-id="<?php echo $productId; ?>"
                                                     data-name="<?php echo $productName; ?>"
-                                                    data-kategori="<?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?>"
+                                                    data-kategori="<?php echo htmlspecialchars($kategori_display); ?>"
                                                     data-pembekal="<?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?>"
                                                     data-harga="<?php echo number_format((float)$row['harga'], 2); ?>"
                                                     data-stok="<?php echo (int)$row['stok_semasa']; ?>"
@@ -502,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 kategori.includes(searchText) ||
                                 pembekal.includes(searchText);
 
-            const matchesKategori = kategoriText === '' || kategori === kategoriText.toLowerCase();
+            const matchesKategori = kategoriText === '' || kategori.includes(kategoriText.toLowerCase());
             const matchesPembekal = pembekalText === '' || pembekal === pembekalText.toLowerCase();
             const matchesStatus = statusText === '' || status === statusText;
 

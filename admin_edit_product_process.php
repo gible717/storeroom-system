@@ -3,6 +3,7 @@
 
 session_start();
 require_once 'admin_auth_check.php';
+require_once 'image_optimizer.php';
 
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'Ralat tidak diketahui.'];
@@ -36,25 +37,46 @@ if (isset($_POST['delete_photo'])) {
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    if ($row && !empty($row['gambar_produk'])) {
-        // Only delete file if no other product uses the same photo
-        $check = $conn->prepare("SELECT COUNT(*) AS cnt FROM barang WHERE gambar_produk = ? AND no_kod != ?");
-        $check->bind_param("ss", $row['gambar_produk'], $id_produk);
+    $photo_path = $row['gambar_produk'] ?? null;
+
+    // Get list of other products to also remove photo from (if any)
+    $also_remove_from = [];
+    if (!empty($_POST['also_remove_from'])) {
+        $also_remove_from = json_decode($_POST['also_remove_from'], true) ?: [];
+    }
+
+    // Build list of all product IDs to remove photo from
+    $all_ids_to_update = [$id_produk];
+    foreach ($also_remove_from as $other_id) {
+        $all_ids_to_update[] = trim($other_id);
+    }
+
+    // Remove photo reference from all selected products
+    $placeholders = implode(',', array_fill(0, count($all_ids_to_update), '?'));
+    $types = str_repeat('s', count($all_ids_to_update));
+    $update_sql = "UPDATE barang SET gambar_produk = NULL WHERE no_kod IN ($placeholders)";
+    $update_stmt = $conn->prepare($update_sql);
+    $update_stmt->bind_param($types, ...$all_ids_to_update);
+    $update_stmt->execute();
+    $update_stmt->close();
+
+    // Check if any other product still uses this photo
+    if ($photo_path && file_exists($photo_path)) {
+        $check = $conn->prepare("SELECT COUNT(*) AS cnt FROM barang WHERE gambar_produk = ?");
+        $check->bind_param("s", $photo_path);
         $check->execute();
-        $others = $check->get_result()->fetch_assoc()['cnt'];
+        $remaining = $check->get_result()->fetch_assoc()['cnt'];
         $check->close();
 
-        if ($others == 0 && file_exists($row['gambar_produk'])) {
-            unlink($row['gambar_produk']);
+        // Only delete file if no product uses it anymore
+        if ($remaining == 0) {
+            unlink($photo_path);
         }
     }
 
-    $stmt = $conn->prepare("UPDATE barang SET gambar_produk = NULL WHERE no_kod = ?");
-    $stmt->bind_param("s", $id_produk);
-    $stmt->execute();
-    $stmt->close();
-
-    echo json_encode(['status' => 'success', 'message' => 'Foto telah dipadam.']);
+    $count = count($all_ids_to_update);
+    $msg = $count > 1 ? "Foto telah dipadam daripada $count produk." : 'Foto telah dipadam.';
+    echo json_encode(['status' => 'success', 'message' => $msg]);
     $conn->close();
     exit;
 }
@@ -77,14 +99,19 @@ if ($ID_kategori <= 0) {
     exit;
 }
 
-// Get kategori name
+// Get kategori name - resolve to MAIN category name for denormalized field
 $kategori_name = '';
-$kategori_stmt = $conn->prepare("SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?");
+$kategori_stmt = $conn->prepare("
+    SELECT COALESCE(p.nama_kategori, k.nama_kategori) AS main_kategori_name
+    FROM KATEGORI k
+    LEFT JOIN KATEGORI p ON k.parent_id = p.ID_kategori
+    WHERE k.ID_kategori = ?
+");
 $kategori_stmt->bind_param("i", $ID_kategori);
 $kategori_stmt->execute();
 $kategori_result = $kategori_stmt->get_result();
 if ($kategori_row = $kategori_result->fetch_assoc()) {
-    $kategori_name = $kategori_row['nama_kategori'];
+    $kategori_name = $kategori_row['main_kategori_name'];
 }
 $kategori_stmt->close();
 
@@ -132,7 +159,7 @@ if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPL
     $destination = $upload_dir . $filename;
 
     if (move_uploaded_file($file['tmp_name'], $destination)) {
-        $gambar_path = $destination;
+        $gambar_path = optimizeProductImage($destination);
         $photo_uploaded = true;
     }
 }

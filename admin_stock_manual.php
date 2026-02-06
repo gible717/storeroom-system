@@ -4,8 +4,20 @@
 $pageTitle = "Pengemaskinian Stok";
 require 'admin_header.php';
 
-// Get categories for dropdown
-$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI ORDER BY nama_kategori ASC");
+// Get main categories for dropdown (with subcategory IDs for filtering)
+$main_kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI WHERE parent_id IS NULL ORDER BY nama_kategori ASC");
+$kategori_with_subs = [];
+if ($main_kategori_result) {
+    while ($m = $main_kategori_result->fetch_assoc()) {
+        $all_ids = [$m['ID_kategori']];
+        $sub_result = $conn->query("SELECT ID_kategori FROM KATEGORI WHERE parent_id = " . (int)$m['ID_kategori']);
+        while ($s = $sub_result->fetch_assoc()) {
+            $all_ids[] = $s['ID_kategori'];
+        }
+        $m['all_ids'] = implode(',', $all_ids);
+        $kategori_with_subs[] = $m;
+    }
+}
 
 // Get products for dropdown from barang table
 $products_sql = "SELECT no_kod AS ID_produk, perihal_stok AS nama_produk, baki_semasa AS stok_semasa, ID_kategori FROM barang ORDER BY perihal_stok ASC";
@@ -25,12 +37,12 @@ $products_result = $conn->query($products_sql);
                         <div class="mb-4">
                             <label for="kategori_filter" class="form-label fw-bold">Kategori</label>
                             <select class="form-select form-control-lg" id="kategori_filter" onchange="filterProducts()">
-                                <option value="">-- Semua Kategori --</option>
-                                <?php if ($kategori_result && $kategori_result->num_rows > 0): ?>
-                                    <?php while($kategori_row = $kategori_result->fetch_assoc()): ?>
-                                        <option value="<?php echo $kategori_row['ID_kategori']; ?>"><?php echo htmlspecialchars($kategori_row['nama_kategori']); ?></option>
-                                    <?php endwhile; ?>
-                                <?php endif; ?>
+                                <option value="" data-all-ids="">-- Semua Kategori --</option>
+                                <?php foreach ($kategori_with_subs as $kat): ?>
+                                    <option value="<?php echo $kat['ID_kategori']; ?>" data-all-ids="<?php echo $kat['all_ids']; ?>">
+                                        <?php echo htmlspecialchars($kat['nama_kategori']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
 
@@ -110,7 +122,9 @@ function updateStokSemasa() {
 
 function filterProducts() {
     const kategoriFilter = document.getElementById('kategori_filter');
-    const selectedKategori = kategoriFilter.value;
+    const selectedOption = kategoriFilter.options[kategoriFilter.selectedIndex];
+    const allIdsStr = selectedOption.getAttribute('data-all-ids') || '';
+    const allIds = allIdsStr ? allIdsStr.split(',') : [];
     const productSelect = document.getElementById('ID_produk');
     const options = productSelect.querySelectorAll('option');
 
@@ -118,17 +132,16 @@ function filterProducts() {
     productSelect.value = '';
     document.getElementById('stok_semasa_display').value = '';
 
-    // Show/hide options based on category filter
+    // Show/hide options based on category filter (matches main + all subcategories)
     options.forEach(option => {
         if (option.value === '') {
-            // Always show the placeholder option
             option.style.display = '';
             return;
         }
 
         const productKategori = option.getAttribute('data-kategori');
 
-        if (selectedKategori === '' || productKategori === selectedKategori) {
+        if (allIds.length === 0 || allIds.includes(productKategori)) {
             option.style.display = '';
         } else {
             option.style.display = 'none';

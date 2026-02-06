@@ -4,6 +4,7 @@
 session_start();
 require 'db.php';
 require 'auth_check.php';
+require_once 'image_optimizer.php';
 
 header('Content-Type: application/json');
 
@@ -27,14 +28,19 @@ if (empty($id_produk) || empty($nama_produk) || $ID_kategori <= 0) {
     exit;
 }
 
-// Get kategori name from KATEGORI table
+// Get kategori name - resolve to MAIN category name for denormalized field
 $kategori_name = '';
-$kategori_stmt = $conn->prepare("SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?");
+$kategori_stmt = $conn->prepare("
+    SELECT COALESCE(p.nama_kategori, k.nama_kategori) AS main_kategori_name
+    FROM KATEGORI k
+    LEFT JOIN KATEGORI p ON k.parent_id = p.ID_kategori
+    WHERE k.ID_kategori = ?
+");
 $kategori_stmt->bind_param("i", $ID_kategori);
 $kategori_stmt->execute();
 $kategori_result = $kategori_stmt->get_result();
 if ($kategori_row = $kategori_result->fetch_assoc()) {
-    $kategori_name = $kategori_row['nama_kategori'];
+    $kategori_name = $kategori_row['main_kategori_name'];
 }
 $kategori_stmt->close();
 
@@ -58,7 +64,7 @@ if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPL
     $destination = $upload_dir . $filename;
 
     if (move_uploaded_file($file['tmp_name'], $destination)) {
-        $gambar_path = $destination;
+        $gambar_path = optimizeProductImage($destination);
     }
 }
 

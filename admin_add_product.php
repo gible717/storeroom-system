@@ -3,8 +3,8 @@
 $pageTitle = "Tambah Produk Baru";
 require 'admin_header.php';
 
-// Get categories for dropdown
-$kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori ASC");
+// Get main categories for dropdown (parent_id IS NULL = main category)
+$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI WHERE parent_id IS NULL ORDER BY nama_kategori ASC");
 ?>
 
 <style>
@@ -223,8 +223,8 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                                 <small class="form-text text-muted">Kod unik untuk produk ini. Contoh: A4-PAPER-001</small>
                             </div>
                             <div class="col-md-6">
-                                <label for="ID_kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
-                                <select class="form-select" id="ID_kategori" name="ID_kategori" required>
+                                <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                                <select class="form-select" id="ID_kategori_utama" required>
                                     <option value="">-- Sila Pilih Kategori --</option>
                                     <?php
                                     if ($kategori_result->num_rows > 0) {
@@ -236,6 +236,10 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
                                     }
                                     ?>
                                 </select>
+                                <select class="form-select mt-2 d-none" id="ID_subkategori">
+                                    <option value="">-- Sila Pilih Subkategori --</option>
+                                </select>
+                                <input type="hidden" name="ID_kategori" id="ID_kategori_final">
                             </div>
                         </div>
 
@@ -286,6 +290,48 @@ $kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori A
 document.addEventListener('DOMContentLoaded', function() {
 
     const photoInput = document.getElementById('photoInput');
+
+    // --- Cascading Category Dropdowns ---
+    const mainCatSelect = document.getElementById('ID_kategori_utama');
+    const subCatSelect = document.getElementById('ID_subkategori');
+    const finalCatInput = document.getElementById('ID_kategori_final');
+
+    mainCatSelect.addEventListener('change', function() {
+        const parentId = this.value;
+        subCatSelect.classList.add('d-none');
+        subCatSelect.innerHTML = '<option value="">-- Sila Pilih Subkategori --</option>';
+        finalCatInput.value = '';
+
+        if (!parentId) return;
+
+        fetch('get_subcategories_ajax.php?parent_id=' + encodeURIComponent(parentId))
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success' && data.has_subcategories) {
+                subCatSelect.classList.remove('d-none');
+                data.subcategories.forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub.ID_kategori;
+                    opt.textContent = sub.nama_kategori;
+                    subCatSelect.appendChild(opt);
+                });
+                finalCatInput.value = '';
+            } else {
+                finalCatInput.value = parentId;
+            }
+        })
+        .catch(() => {
+            finalCatInput.value = parentId;
+        });
+    });
+
+    subCatSelect.addEventListener('change', function() {
+        if (this.value) {
+            finalCatInput.value = this.value;
+        } else {
+            finalCatInput.value = '';
+        }
+    });
 
     // Store selected product IDs to apply photo to (chosen in dialog)
     let applyPhotoTo = [];
@@ -413,6 +459,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const addForm = document.getElementById('addProductForm');
     addForm.addEventListener('submit', function(event) {
         event.preventDefault();
+
+        // Validate category selection
+        if (!finalCatInput.value) {
+            Swal.fire('Ralat!', 'Sila pilih kategori untuk produk ini.', 'error');
+            mainCatSelect.focus();
+            return;
+        }
+
         const formData = new FormData(addForm);
         const submitBtn = addForm.querySelector('.btn-save');
         const originalHtml = submitBtn.innerHTML;

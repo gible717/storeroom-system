@@ -26,8 +26,34 @@ if (!$product) {
 $pageTitle = "Kemaskini Produk";
 require 'admin_header.php';
 
-// Get categories for dropdown
-$kategori_result = $conn->query("SELECT * FROM KATEGORI ORDER BY nama_kategori ASC");
+// Get main categories for dropdown
+$kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI WHERE parent_id IS NULL ORDER BY nama_kategori ASC");
+
+// Determine current main and sub category for pre-selection
+$current_main_id = $product['ID_kategori'];
+$current_sub_id = null;
+$current_subs = [];
+
+$cat_info_stmt = $conn->prepare("SELECT ID_kategori, parent_id, COALESCE(parent_id, ID_kategori) AS main_id FROM KATEGORI WHERE ID_kategori = ?");
+$cat_info_stmt->bind_param("i", $product['ID_kategori']);
+$cat_info_stmt->execute();
+$cat_info = $cat_info_stmt->get_result()->fetch_assoc();
+$cat_info_stmt->close();
+
+if ($cat_info && $cat_info['parent_id'] !== null) {
+    $current_main_id = $cat_info['main_id'];
+    $current_sub_id = $cat_info['ID_kategori'];
+}
+
+// Fetch subcategories for current main category (for pre-population)
+$sub_stmt = $conn->prepare("SELECT ID_kategori, nama_kategori FROM KATEGORI WHERE parent_id = ? ORDER BY nama_kategori ASC");
+$sub_stmt->bind_param("i", $current_main_id);
+$sub_stmt->execute();
+$sub_result = $sub_stmt->get_result();
+while ($s = $sub_result->fetch_assoc()) {
+    $current_subs[] = $s;
+}
+$sub_stmt->close();
 
 $gambar = $product['gambar_produk'] ?? null;
 $has_image = (!empty($gambar) && file_exists($gambar));
@@ -296,15 +322,15 @@ $has_image = (!empty($gambar) && file_exists($gambar));
                                    value="<?php echo htmlspecialchars($product['nama_produk']); ?>" required>
                         </div>
 
-                        <!-- Category -->
+                        <!-- Category (Cascading Dropdowns) -->
                         <div class="mb-3">
-                            <label for="ID_kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
-                            <select class="form-select" id="ID_kategori" name="ID_kategori" required>
+                            <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                            <select class="form-select" id="ID_kategori_utama" required>
                                 <option value="">-- Sila Pilih Kategori --</option>
                                 <?php
                                 if ($kategori_result->num_rows > 0) {
                                     while($kategori_row = $kategori_result->fetch_assoc()) {
-                                        $selected = ($product['ID_kategori'] == $kategori_row['ID_kategori']) ? 'selected' : '';
+                                        $selected = ($current_main_id == $kategori_row['ID_kategori']) ? 'selected' : '';
                                         echo "<option value='" . htmlspecialchars($kategori_row['ID_kategori']) . "' $selected>" . htmlspecialchars($kategori_row['nama_kategori']) . "</option>";
                                     }
                                 } else {
@@ -312,6 +338,15 @@ $has_image = (!empty($gambar) && file_exists($gambar));
                                 }
                                 ?>
                             </select>
+                            <select class="form-select mt-2 <?php echo empty($current_subs) ? 'd-none' : ''; ?>" id="ID_subkategori">
+                                <option value="">-- Sila Pilih Subkategori --</option>
+                                <?php foreach ($current_subs as $sub): ?>
+                                    <option value="<?php echo $sub['ID_kategori']; ?>" <?php echo ($sub['ID_kategori'] == $current_sub_id) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($sub['nama_kategori']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="hidden" name="ID_kategori" id="ID_kategori_final" value="<?php echo htmlspecialchars($product['ID_kategori']); ?>">
                         </div>
 
                         <!-- Supplier -->
@@ -362,6 +397,48 @@ $has_image = (!empty($gambar) && file_exists($gambar));
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Cascading Category Dropdowns ---
+    const mainCatSelect = document.getElementById('ID_kategori_utama');
+    const subCatSelect = document.getElementById('ID_subkategori');
+    const finalCatInput = document.getElementById('ID_kategori_final');
+
+    mainCatSelect.addEventListener('change', function() {
+        const parentId = this.value;
+        subCatSelect.classList.add('d-none');
+        subCatSelect.innerHTML = '<option value="">-- Sila Pilih Subkategori --</option>';
+        finalCatInput.value = '';
+
+        if (!parentId) return;
+
+        fetch('get_subcategories_ajax.php?parent_id=' + encodeURIComponent(parentId))
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success' && data.has_subcategories) {
+                subCatSelect.classList.remove('d-none');
+                data.subcategories.forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub.ID_kategori;
+                    opt.textContent = sub.nama_kategori;
+                    subCatSelect.appendChild(opt);
+                });
+                finalCatInput.value = '';
+            } else {
+                finalCatInput.value = parentId;
+            }
+        })
+        .catch(() => {
+            finalCatInput.value = parentId;
+        });
+    });
+
+    subCatSelect.addEventListener('change', function() {
+        if (this.value) {
+            finalCatInput.value = this.value;
+        } else {
+            finalCatInput.value = '';
+        }
+    });
 
     const photoInput = document.getElementById('photoInput');
     const currentProductId = '<?php echo htmlspecialchars($product['ID_produk'], ENT_QUOTES); ?>';
@@ -490,44 +567,133 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsDataURL(file);
     });
 
-    // --- Delete Photo ---
+    // --- Delete Photo (Smart: checks for shared photos) ---
     const deleteBtn = document.getElementById('deletePhotoBtn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', function() {
-            Swal.fire({
-                title: 'Padam Foto?',
-                text: 'Foto produk ini akan dipadam.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonText: 'Batal',
-                confirmButtonText: 'Ya, padamkan'
-            }).then(result => {
-                if (result.isConfirmed) {
-                    fetch('admin_edit_product_process.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'id_produk=' + encodeURIComponent(currentProductId) + '&delete_photo=1'
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            Swal.fire({ title: 'Berjaya!', text: 'Foto telah dipadam.', icon: 'success' })
-                            .then(() => location.reload());
-                        } else {
-                            Swal.fire({ title: 'Ralat!', text: data.message, icon: 'error' });
+            // First check if other products share this photo
+            fetch('get_shared_photo_products_ajax.php?product_id=' + encodeURIComponent(currentProductId))
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success' && data.has_shared) {
+                    // Show dialog with list of products sharing this photo
+                    let listHtml = '<div style="max-height:200px;overflow-y:auto;text-align:left;margin-top:0.5rem;">';
+                    data.shared_products.forEach(p => {
+                        listHtml += `
+                            <label class="d-flex align-items-center gap-2 py-2 px-2 rounded" style="cursor:pointer;border-bottom:1px solid #f1f3f5;">
+                                <input type="checkbox" class="form-check-input mt-0 shared-photo-cb" value="${p.id}" style="min-width:18px;">
+                                <span class="text-truncate" style="font-size:0.85rem;">${p.nama}</span>
+                                <small class="text-muted ms-auto" style="font-size:0.7rem;white-space:nowrap;">${p.id}</small>
+                            </label>`;
+                    });
+                    listHtml += '</div>';
+
+                    Swal.fire({
+                        title: 'Foto Dikongsi',
+                        html: `
+                            <p style="font-size:0.9rem;color:#6c757d;margin-bottom:0.5rem;">
+                                Foto ini turut digunakan oleh <strong>${data.shared_products.length}</strong> produk lain.
+                                Tandakan produk yang turut ingin dipadam fotonya:
+                            </p>
+                            <div style="margin-bottom:0.5rem;text-align:left;">
+                                <label class="form-check-label" style="font-size:0.8rem;cursor:pointer;color:#dc3545;font-weight:600;">
+                                    <input type="checkbox" class="form-check-input me-1" id="selectAllSharedCb"> Pilih Semua
+                                </label>
+                            </div>
+                            ${listHtml}
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonText: 'Batal',
+                        confirmButtonText: '<i class="bi bi-trash me-1"></i>Padam Foto',
+                        width: 480,
+                        didOpen: () => {
+                            const selectAll = document.getElementById('selectAllSharedCb');
+                            if (selectAll) {
+                                selectAll.addEventListener('change', function() {
+                                    document.querySelectorAll('.shared-photo-cb').forEach(cb => cb.checked = this.checked);
+                                });
+                            }
                         }
-                    })
-                    .catch(() => Swal.fire({ title: 'Ralat!', text: 'Gagal menghubungi server.', icon: 'error' }));
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            const alsoRemove = [];
+                            document.querySelectorAll('.shared-photo-cb:checked').forEach(cb => alsoRemove.push(cb.value));
+                            executeDeletePhoto(alsoRemove);
+                        }
+                    });
+                } else {
+                    // No shared products - simple delete confirmation
+                    Swal.fire({
+                        title: 'Padam Foto?',
+                        text: 'Foto produk ini akan dipadam.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonText: 'Batal',
+                        confirmButtonText: 'Ya, padamkan'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            executeDeletePhoto([]);
+                        }
+                    });
                 }
+            })
+            .catch(() => {
+                // Fallback to simple delete on error
+                Swal.fire({
+                    title: 'Padam Foto?',
+                    text: 'Foto produk ini akan dipadam.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonText: 'Batal',
+                    confirmButtonText: 'Ya, padamkan'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        executeDeletePhoto([]);
+                    }
+                });
             });
         });
+    }
+
+    function executeDeletePhoto(alsoRemoveFrom) {
+        let body = 'id_produk=' + encodeURIComponent(currentProductId) + '&delete_photo=1';
+        if (alsoRemoveFrom.length > 0) {
+            body += '&also_remove_from=' + encodeURIComponent(JSON.stringify(alsoRemoveFrom));
+        }
+
+        fetch('admin_edit_product_process.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({ title: 'Berjaya!', text: data.message, icon: 'success' })
+                .then(() => location.reload());
+            } else {
+                Swal.fire({ title: 'Ralat!', text: data.message, icon: 'error' });
+            }
+        })
+        .catch(() => Swal.fire({ title: 'Ralat!', text: 'Gagal menghubungi server.', icon: 'error' }));
     }
 
     // --- Form Submit via AJAX ---
     const editForm = document.getElementById('editProductForm');
     editForm.addEventListener('submit', function(event) {
         event.preventDefault();
+
+        // Validate category selection
+        if (!finalCatInput.value) {
+            Swal.fire('Ralat!', 'Sila pilih kategori untuk produk ini.', 'error');
+            mainCatSelect.focus();
+            return;
+        }
+
         const formData = new FormData(editForm);
         const submitBtn = editForm.querySelector('.btn-save');
         const originalHtml = submitBtn.innerHTML;

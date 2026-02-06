@@ -219,8 +219,17 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
    *Rajah 4.2: Senarai Produk*
 
 3. Gunakan kotak carian untuk mencari produk tertentu
-4. Gunakan penapis kategori untuk menapis mengikut kategori
-5. Klik **"Urus Kategori"** untuk mengurus senarai kategori
+4. **Penapis Kategori Hierarki:**
+   - Dropdown menunjukkan kategori utama dan subkategori dengan lekukan (indent)
+   - Subkategori ditandakan dengan ikon anak panah (→)
+   - Memilih kategori utama akan menapis semua produk dalam kategori tersebut DAN subkategorinya
+   - Memilih subkategori akan menapis produk dalam subkategori tersebut sahaja
+
+5. **Paparan Kategori dalam Jadual:**
+   - Produk dengan subkategori dipaparkan dalam format "Kategori Utama > Subkategori"
+   - Contoh: "Toner > Canon" menunjukkan produk dalam subkategori Canon di bawah Toner
+
+6. Klik **"Urus Kategori"** untuk mengurus senarai kategori
 
 #### 4.2.2 Tambah Produk Baru
 
@@ -233,16 +242,34 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
    |-------|------------|-------|
    | Nama Produk | Nama/penerangan produk | Ya |
    | ID Produk / SKU | Kod unik produk (cth: A4-PAPER-001) | Ya |
-   | Kategori | Kategori produk (pilih dari senarai) | Ya |
+   | Kategori Utama | Kategori utama produk (pilih dari senarai) | Ya |
+   | Subkategori | Subkategori produk (jika ada) | Bergantung |
    | Nama Pembekal | Nama pembekal untuk tujuan rekod | Tidak |
    | Harga Seunit (RM) | Harga seunit dalam Ringgit Malaysia | Tidak |
    | Kuantiti Stok Awal | Kuantiti stok permulaan | Ya |
+   | Foto Produk | Gambar produk (JPG, PNG, atau WEBP) | Tidak |
 
    ![Tambah Produk](screenshots/05_add_product.png)
    *Rajah 4.3: Borang Tambah Produk*
 
-3. Klik **"Simpan Produk"**
-4. Mesej berjaya akan dipaparkan
+3. **Pemilihan Kategori Bertingkat (Cascading):**
+   - Pilih **Kategori Utama** terlebih dahulu
+   - Jika kategori utama mempunyai subkategori, dropdown **Subkategori** akan muncul secara automatik
+   - Pilih subkategori yang sesuai (wajib jika ada subkategori)
+   - Jika kategori utama tiada subkategori, produk akan terus dikategorikan di bawah kategori utama tersebut
+
+4. **Muat Naik Foto Produk (Pilihan):**
+   - Klik kawasan muat naik foto atau drag & drop fail gambar
+   - Format yang disokong: JPG, PNG, WEBP
+   - Pratonton foto akan dipaparkan sebelum simpan
+
+5. **Gunakan Foto untuk Produk Lain:**
+   - Selepas memuat naik foto, pilihan "Gunakan foto ini untuk produk lain?" akan muncul
+   - Pilih produk-produk lain yang ingin menggunakan foto yang sama
+   - Berguna untuk produk serupa (contoh: pen berbeza warna dengan gambar sama)
+
+6. Klik **"Simpan Produk"**
+7. Mesej berjaya akan dipaparkan
 
 > **Nota:** ID Produk / SKU mestilah unik. Sistem akan memaparkan ralat jika ID sudah wujud.
 
@@ -256,8 +283,27 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
    ![Kemaskini Produk](screenshots/16_edit_product.png)
    *Rajah 4.4: Borang Kemaskini Produk*
 
-3. Kemaskini maklumat yang diperlukan
-4. Klik **"Kemaskini"**
+3. Kemaskini maklumat yang diperlukan:
+   - Nama Produk, Kategori, Pembekal, Harga, dan Stok boleh dikemaskini
+   - **Kategori Bertingkat:** Sama seperti borang tambah, pilih kategori utama dan subkategori akan muncul jika ada
+   - Kategori semasa produk akan dipra-pilih secara automatik
+
+4. **Pengurusan Foto Produk:**
+
+   **Muat Naik Foto Baru:**
+   - Klik kawasan muat naik atau seret fail gambar ke dalam
+   - Pratonton foto baru akan dipaparkan
+   - Pilihan "Gunakan foto ini untuk produk lain?" akan muncul
+
+   **Padam Foto Sedia Ada:**
+   - Klik butang **"Padam Foto"** (ikon tong sampah merah)
+   - **Ciri Pintar (Smart Delete):** Jika foto dikongsi dengan produk lain, sistem akan memaparkan senarai produk yang menggunakan foto sama
+   - Pilih produk-produk yang juga ingin dipadamkan fotonya, atau padamkan untuk produk semasa sahaja
+   - Foto fizikal hanya dipadam apabila tiada produk lain yang menggunakannya
+
+5. Klik **"Kemaskini"**
+
+> **Nota:** Menukar kategori produk tidak akan menjejaskan sejarah transaksi yang telah direkodkan.
 
 #### 4.2.4 Padam Produk
 
@@ -276,6 +322,10 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
 
 #### 4.2.5 Pengurusan Kategori
 
+Sistem menyokong **kategori bertingkat** dengan satu tahap kedalaman:
+- **Kategori Utama** - Kategori induk (contoh: Toner, Kertas, Alat Tulis)
+- **Subkategori** - Kategori anak di bawah kategori utama (contoh: Canon, HP, Epson di bawah Toner)
+
 **Langkah-langkah:**
 
 1. Dari halaman Senarai Produk, klik **"Urus Kategori"**
@@ -283,7 +333,35 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
    ![Pengurusan Kategori](screenshots/18_category_management.png)
    *Rajah 4.6: Halaman Pengurusan Kategori*
 
-2. Tambah, kemaskini, atau padam kategori mengikut keperluan
+**Paparan Hierarki:**
+- Kategori utama dipaparkan dengan **huruf tebal**
+- Subkategori dipaparkan dengan lekukan (indent) dan ikon anak panah (→)
+- Setiap kategori menunjukkan bilangan produk yang menggunakannya
+
+**Tambah Kategori Baru:**
+
+1. Isi nama kategori dalam medan **"Nama Kategori"**
+2. Untuk menambah **kategori utama**: Biarkan medan "Kategori Induk" kosong
+3. Untuk menambah **subkategori**: Pilih kategori induk dari dropdown "Kategori Induk"
+4. Klik **"Tambah"**
+
+**Kemaskini Kategori:**
+
+1. Klik ikon **pensel** pada kategori yang ingin dikemaskini
+2. Kemaskini nama atau kategori induk
+3. Klik **"Kemaskini"**
+
+> **Nota Penting:** Apabila nama kategori utama dikemaskini, nama kategori dalam rekod produk akan dikemaskini secara automatik.
+
+**Padam Kategori:**
+
+1. Klik ikon **tong sampah** pada kategori
+2. Pengesahan akan dipaparkan
+3. Klik **"Ya"** untuk memadam
+
+> **Amaran:**
+> - Kategori utama yang mempunyai **subkategori** tidak boleh dipadam sehingga semua subkategori dipadam terlebih dahulu
+> - Kategori (utama atau sub) yang mempunyai **produk** tidak boleh dipadam sehingga semua produk dialihkan ke kategori lain
 
 ---
 
@@ -296,7 +374,11 @@ Fungsi ini digunakan untuk **menambah stok masuk** sahaja (cth: penerimaan stok 
 **Langkah-langkah:**
 
 1. Klik **"Kemaskini Stok"** di menu sisi kiri
-2. Pilih **Kategori** untuk menapis senarai item (pilihan)
+2. **Penapis Kategori:**
+   - Pilih **Kategori** untuk menapis senarai item (pilihan)
+   - Dropdown menunjukkan **kategori utama** sahaja
+   - Memilih kategori utama akan menapis produk dalam kategori tersebut **DAN semua subkategorinya**
+   - Contoh: Memilih "Toner" akan memaparkan semua produk toner termasuk Canon, HP, Epson, dll.
 
    ![Kemaskini Stok](screenshots/06_stock_update.png)
    *Rajah 4.4: Borang Kemaskini Stok*
@@ -1038,6 +1120,43 @@ Klik butang "Daftar Akaun Baru" di halaman utama dan isi maklumat yang diperluka
 
 ---
 
+### S10: Bagaimana cara menambah subkategori baru?
+
+**Jawapan:**
+1. Pergi ke **Produk > Urus Kategori**
+2. Dalam borang tambah kategori, isi nama subkategori
+3. Pilih **Kategori Induk** dari dropdown (contoh: pilih "Toner" untuk menambah subkategori "Canon")
+4. Klik **"Tambah"**
+
+---
+
+### S11: Mengapa dropdown subkategori tidak muncul semasa tambah produk?
+
+**Jawapan:**
+Dropdown subkategori hanya muncul jika kategori utama yang dipilih mempunyai subkategori. Jika kategori utama tiada subkategori, produk akan terus dikategorikan di bawah kategori utama tersebut.
+
+---
+
+### S12: Bagaimana untuk menggunakan foto yang sama untuk beberapa produk?
+
+**Jawapan:**
+1. Semasa menambah atau mengemaskini produk, muat naik foto produk
+2. Selepas foto dimuat naik, dialog "Gunakan foto ini untuk produk lain?" akan muncul
+3. Pilih produk-produk lain yang ingin menggunakan foto sama
+4. Klik **"Simpan"** - foto akan dikongsi dengan semua produk yang dipilih
+
+---
+
+### S13: Apa yang berlaku jika saya memadam foto produk yang dikongsi?
+
+**Jawapan:**
+Sistem akan memaparkan senarai produk lain yang menggunakan foto sama. Anda boleh:
+- Memilih untuk **memadam foto dari produk semasa sahaja** - produk lain masih mempunyai foto
+- Memilih untuk **memadam foto dari beberapa/semua produk** yang berkongsi foto tersebut
+Fail foto fizikal hanya dipadam apabila tiada produk lain yang menggunakannya.
+
+---
+
 ## 7. HUBUNGI KAMI
 
 Jika anda menghadapi sebarang masalah atau memerlukan bantuan, sila hubungi:
@@ -1104,6 +1223,7 @@ Berikut adalah senarai penuh tangkapan skrin yang diperlukan untuk manual ini. S
 |-------|--------|---------|-----------|
 | 1.0 | Januari 2026 | [Nama Anda] | Versi awal |
 | 2.0 | Februari 2026 | Unit Teknologi Maklumat | Kemaskini menyeluruh mengikut sistem terkini - pembetulan medan borang, aliran kerja, dan penambahan ciri baharu (pendaftaran staf, pengurusan kategori, laporan analisis jabatan, profil gambar, statistik dashboard) |
+| 2.1 | Februari 2026 | Unit Teknologi Maklumat | Penambahan ciri subkategori dan foto produk: (1) Sokongan kategori bertingkat dengan kategori utama dan subkategori, (2) Dropdown kategori bertingkat (cascading) dalam borang produk, (3) Paparan hierarki "Kategori > Subkategori" dalam senarai produk, (4) Penapis kategori yang mengumpulkan subkategori, (5) Muat naik dan kongsi foto produk, (6) Padam foto pintar dengan pengesanan perkongsian foto |
 
 ---
 
