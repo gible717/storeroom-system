@@ -3,6 +3,19 @@
 ?>
             </main>
 
+            <!-- Toast Container -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055; pointer-events: none;">
+                <div id="globalToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 0; visibility: hidden; pointer-events: auto;">
+                    <div class="d-flex">
+                        <div class="toast-body d-flex align-items-center gap-2">
+                            <i class="bi toast-icon"></i>
+                            <span class="toast-message"></span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Back to Top Button -->
             <button type="button" class="btn-back-to-top" id="btnBackToTop" aria-label="Kembali ke atas">
                 <i class="bi bi-chevron-up"></i>
@@ -24,6 +37,100 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+/**
+ * Global Toast Notification Function
+ * @param {string} message - Message to display
+ * @param {string} type - 'success', 'error', 'warning', 'info' (default: 'success')
+ * @param {number} duration - Duration in ms (default: 3000)
+ */
+function showToast(message, type = 'success', duration = 3000) {
+    const toastEl = document.getElementById('globalToast');
+    if (!toastEl) return;
+
+    // Set icon based on type
+    const icons = {
+        success: 'bi-check-circle-fill',
+        error: 'bi-x-circle-fill',
+        warning: 'bi-exclamation-triangle-fill',
+        info: 'bi-info-circle-fill'
+    };
+
+    // Reset classes and set new type
+    toastEl.className = 'toast align-items-center border-0 toast-' + type;
+    toastEl.querySelector('.toast-icon').className = 'bi toast-icon ' + (icons[type] || icons.success);
+    toastEl.querySelector('.toast-message').textContent = message;
+
+    // Make visible and show toast
+    toastEl.style.opacity = '1';
+    toastEl.style.visibility = 'visible';
+    const toast = new bootstrap.Toast(toastEl, { delay: duration });
+    toast.show();
+
+    // Re-hide after toast hides
+    toastEl.addEventListener('hidden.bs.toast', function handler() {
+        toastEl.style.opacity = '0';
+        toastEl.style.visibility = 'hidden';
+        toastEl.removeEventListener('hidden.bs.toast', handler);
+    });
+}
+
+/**
+ * Sortable Table Function
+ * Call initSortableTable(tableId) to make a table sortable
+ * Table headers need data-sort="column-name" and data-type="text|number|date"
+ */
+function initSortableTable(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const headers = table.querySelectorAll('th[data-sort]');
+    const tbody = table.querySelector('tbody');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.setAttribute('aria-sort', 'none');
+
+        header.addEventListener('click', function() {
+            const column = this.dataset.sort;
+            const type = this.dataset.type || 'text';
+            const currentSort = this.getAttribute('aria-sort');
+            const newSort = currentSort === 'ascending' ? 'descending' : 'ascending';
+
+            // Reset all headers
+            headers.forEach(h => h.setAttribute('aria-sort', 'none'));
+            this.setAttribute('aria-sort', newSort);
+
+            // Get rows and sort
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const colIndex = Array.from(this.parentNode.children).indexOf(this);
+
+            rows.sort((a, b) => {
+                let aVal = a.children[colIndex]?.textContent.trim() || '';
+                let bVal = b.children[colIndex]?.textContent.trim() || '';
+
+                // Type-specific comparison
+                if (type === 'number') {
+                    aVal = parseFloat(aVal.replace(/[^0-9.-]/g, '')) || 0;
+                    bVal = parseFloat(bVal.replace(/[^0-9.-]/g, '')) || 0;
+                } else if (type === 'date') {
+                    aVal = new Date(aVal) || 0;
+                    bVal = new Date(bVal) || 0;
+                } else {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return newSort === 'ascending' ? -1 : 1;
+                if (aVal > bVal) return newSort === 'ascending' ? 1 : -1;
+                return 0;
+            });
+
+            // Reorder rows
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+}
+
 // Mobile Sidebar Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -64,15 +171,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const error = params.get('error');
 
     if (success) {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berjaya!',
-            text: success,
-            timer: 2500,
-            showConfirmButton: false
-        });
+        // Use Toast for success messages (non-blocking, quick feedback)
+        showToast(success, 'success', 3500);
     }
     else if (error) {
+        // Keep SweetAlert for errors (requires acknowledgment)
         Swal.fire({
             icon: 'error',
             title: 'Ralat!',
@@ -146,6 +249,44 @@ document.addEventListener('DOMContentLoaded', function() {
         width: 40px;
         height: 40px;
     }
+}
+
+/* Toast Notification Styles */
+#globalToast {
+    min-width: 280px;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+}
+#globalToast.show {
+    opacity: 1;
+    visibility: visible;
+}
+#globalToast.toast-success {
+    background-color: #198754;
+    color: #fff;
+}
+#globalToast.toast-error {
+    background-color: #dc3545;
+    color: #fff;
+}
+#globalToast.toast-warning {
+    background-color: #fd7e14;
+    color: #fff;
+}
+#globalToast.toast-info {
+    background-color: #0dcaf0;
+    color: #000;
+}
+#globalToast.toast-info .btn-close {
+    filter: none;
+}
+#globalToast .toast-icon {
+    font-size: 1.1rem;
+}
+#globalToast .toast-message {
+    font-weight: 500;
 }
 </style>
 </body>

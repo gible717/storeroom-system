@@ -54,23 +54,7 @@ unset($_SESSION['edit_mode']);
         <h1 class="h3 mb-0 text-gray-800 fw-bold">Pengurusan Kategori</h1>
     </div>
 
-    <!-- Error Alert -->
-    <?php if ($error): ?>
-    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <?php echo htmlspecialchars($error); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php endif; ?>
-
-    <!-- Success Alert -->
-    <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <?php echo htmlspecialchars($success); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php endif; ?>
+    <!-- Toast/SweetAlert handles success/error messages from URL params via admin_footer.php -->
 
     <div class="row">
         <!-- Category List -->
@@ -137,7 +121,15 @@ unset($_SESSION['edit_mode']);
                                     <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <tr><td colspan='2' class='text-center p-4'>Tiada kategori ditemui. Sila tambah kategori baru.</td></tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="empty-state empty-state-table">
+                                                <i class="bi bi-tags empty-state-icon"></i>
+                                                <h5 class="empty-state-title">Tiada Kategori</h5>
+                                                <p class="empty-state-text">Senarai kategori masih kosong. Tambah kategori pertama anda menggunakan borang di sebelah.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>

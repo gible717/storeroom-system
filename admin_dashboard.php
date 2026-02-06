@@ -249,6 +249,10 @@ require 'admin_header.php';
     background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
 }
 
+.admin-stat-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+}
+
 /* Apply glow animation classes to stat card numbers - keep white text */
 .admin-stat-card .pending-warning-active {
     animation: pending-warning-glow 2s ease-in-out infinite;
@@ -421,6 +425,15 @@ $tertunda = $tertunda_result ? $tertunda_result->fetch_assoc()['total'] : 0;
 $stokRendah_result = $conn->query("SELECT COUNT(*) as total FROM barang WHERE baki_semasa <= 10");
 $stokRendah = $stokRendah_result ? $stokRendah_result->fetch_assoc()['total'] : 0;
 
+// Determine card colors based on conditions
+// Permohonan Tertunda: Green if 0, Yellow/Orange if 1+
+$pendingCardClass = ($tertunda == 0) ? 'admin-stat-success' : 'admin-stat-warning';
+
+// Pantau Stok: Green if < 50% of items need restock, Red if >= 50%
+// Example: 20 total items, 9 or below need restock = green, 10+ = red
+$stockThreshold = $jumlahProduk > 0 ? ceil($jumlahProduk / 2) : 1;
+$stockCardClass = ($stokRendah < $stockThreshold) ? 'admin-stat-success' : 'admin-stat-danger';
+
 // Calculate requests this month
 $pesananBulanIni_result = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE MONTH(tarikh_mohon) = MONTH(CURRENT_DATE()) AND YEAR(tarikh_mohon) = YEAR(CURRENT_DATE())");
 $pesananBulanIni = $pesananBulanIni_result ? $pesananBulanIni_result->fetch_assoc()['total'] : 0;
@@ -501,22 +514,22 @@ $recent_requests = $conn->query($sql_requests);
         </a>
     </div>
     <div class="col-auto">
-        <div class="card admin-stat-card admin-stat-warning" data-bs-toggle="modal" data-bs-target="#pendingRequestModal">
+        <div class="card admin-stat-card <?php echo $pendingCardClass; ?>" data-bs-toggle="modal" data-bs-target="#pendingRequestModal">
             <div class="card-body position-relative">
                 <p class="stat-label fw-bold">Permohonan Tertunda</p>
                 <p class="stat-number" id="pendingRequestNumber" data-pending-count="<?php echo $tertunda; ?>"><?php echo $tertunda; ?></p>
                 <small class="hover-text">Klik untuk lihat</small>
-                <i class="bi bi-clock-history stat-icon"></i>
+                <i class="bi bi-<?php echo ($tertunda == 0) ? 'check-circle-fill' : 'clock-history'; ?> stat-icon"></i>
             </div>
         </div>
     </div>
     <div class="col-auto">
-        <div class="card admin-stat-card admin-stat-danger" data-bs-toggle="modal" data-bs-target="#stockWarningModal">
+        <div class="card admin-stat-card <?php echo $stockCardClass; ?>" data-bs-toggle="modal" data-bs-target="#stockWarningModal">
             <div class="card-body position-relative">
                 <p class="stat-label fw-bold">Pantau Stok</p>
-                <p class="stat-number" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>"><?php echo $stokRendah; ?></p>
+                <p class="stat-number" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>" data-total-items="<?php echo $jumlahProduk; ?>"><?php echo $stokRendah; ?></p>
                 <small class="hover-text">Klik untuk lihat</small>
-                <i class="bi bi-exclamation-triangle-fill stat-icon"></i>
+                <i class="bi bi-<?php echo ($stokRendah < $stockThreshold) ? 'check-circle-fill' : 'exclamation-triangle-fill'; ?> stat-icon"></i>
             </div>
         </div>
     </div>
@@ -652,9 +665,9 @@ $recent_requests = $conn->query($sql_requests);
 <div class="modal fade" id="stockWarningModal" tabindex="-1" aria-labelledby="stockWarningModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+            <div class="modal-header <?php echo ($stokRendah < $stockThreshold) ? 'bg-success' : 'bg-danger'; ?> text-white">
                 <h5 class="modal-title" id="stockWarningModalLabel">
-                    Pantau Stok - Stok Rendah & Habis
+                    Pantau Stok <?php echo ($stokRendah < $stockThreshold) ? '- Semua OK' : '- Stok Rendah & Habis'; ?>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -717,11 +730,11 @@ $recent_requests = $conn->query($sql_requests);
 <div class="modal fade" id="pendingRequestModal" tabindex="-1" aria-labelledby="pendingRequestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
+            <div class="modal-header <?php echo ($tertunda == 0) ? 'bg-success text-white' : 'bg-warning text-dark'; ?>">
                 <h5 class="modal-title" id="pendingRequestModalLabel">
-                    Permohonan Tertunda
+                    Permohonan Tertunda <?php echo ($tertunda == 0) ? '- Semua Selesai' : ''; ?>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close<?php echo ($tertunda == 0) ? ' btn-close-white' : ''; ?>" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <?php if ($pending_requests && $pending_requests->num_rows > 0): ?>
@@ -788,28 +801,30 @@ $recent_requests = $conn->query($sql_requests);
 document.addEventListener('DOMContentLoaded', function() {
     const sessionDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-    // Stock warning session tracker (red glow)
+    // Stock warning session tracker (red glow when >= 50% items need restock)
     const stockNumberEl = document.getElementById('stockWarningNumber');
     const stockCount = parseInt(stockNumberEl.getAttribute('data-stock-count'));
+    const totalItems = parseInt(stockNumberEl.getAttribute('data-total-items'));
+    const stockThreshold = totalItems > 0 ? Math.ceil(totalItems / 2) : 1;
+    const isStockCritical = stockCount >= stockThreshold; // >= 50% items need restock
     const stockSessionKey = 'stockWarningSession';
 
     function checkStockWarningStatus() {
         const now = Date.now();
         const lastCheck = localStorage.getItem(stockSessionKey);
 
-        if (stockCount === 0) {
-            // All stock is sufficient - show green
+        if (!isStockCritical) {
+            // Stock is safe (< 50% need restock) - show green card, white text
             stockNumberEl.classList.remove('stock-warning-active');
-            stockNumberEl.classList.add('stock-warning-safe');
+            stockNumberEl.style.color = 'white';
         } else {
-            // There are low/out-of-stock items
+            // Stock is critical (>= 50% need restock) - show red card with glow
             if (!lastCheck || (now - parseInt(lastCheck)) > sessionDuration) {
-                // Session expired or first visit - show glowing red warning
+                // Session expired or first visit - show glowing warning
                 stockNumberEl.classList.add('stock-warning-active');
-                stockNumberEl.classList.remove('stock-warning-safe');
             } else {
                 // Within 15-minute session - show white without glow
-                stockNumberEl.classList.remove('stock-warning-active', 'stock-warning-safe');
+                stockNumberEl.classList.remove('stock-warning-active');
                 stockNumberEl.style.color = 'white';
             }
         }
@@ -820,33 +835,31 @@ document.addEventListener('DOMContentLoaded', function() {
     stockModal.addEventListener('shown.bs.modal', function() {
         localStorage.setItem(stockSessionKey, Date.now().toString());
         stockNumberEl.classList.remove('stock-warning-active');
-        if (stockCount > 0) {
-            stockNumberEl.style.color = 'white';
-        }
+        stockNumberEl.style.color = 'white';
     });
 
-    // Pending requests session tracker (yellow glow)
+    // Pending requests session tracker (yellow glow when > 0)
     const pendingNumberEl = document.getElementById('pendingRequestNumber');
     const pendingCount = parseInt(pendingNumberEl.getAttribute('data-pending-count'));
+    const isPendingSafe = pendingCount === 0; // Green when 0 pending
     const pendingSessionKey = 'pendingRequestSession';
 
     function checkPendingRequestStatus() {
         const now = Date.now();
         const lastCheck = localStorage.getItem(pendingSessionKey);
 
-        if (pendingCount === 0) {
-            // All requests processed - show green
+        if (isPendingSafe) {
+            // No pending requests - show green card, white text
             pendingNumberEl.classList.remove('pending-warning-active');
-            pendingNumberEl.classList.add('pending-warning-safe');
+            pendingNumberEl.style.color = 'white';
         } else {
-            // There are pending requests
+            // There are pending requests - show yellow card with glow
             if (!lastCheck || (now - parseInt(lastCheck)) > sessionDuration) {
                 // Session expired or first visit - show glowing yellow warning
                 pendingNumberEl.classList.add('pending-warning-active');
-                pendingNumberEl.classList.remove('pending-warning-safe');
             } else {
                 // Within 15-minute session - show white without glow
-                pendingNumberEl.classList.remove('pending-warning-active', 'pending-warning-safe');
+                pendingNumberEl.classList.remove('pending-warning-active');
                 pendingNumberEl.style.color = 'white';
             }
         }
@@ -857,9 +870,7 @@ document.addEventListener('DOMContentLoaded', function() {
     pendingModal.addEventListener('shown.bs.modal', function() {
         localStorage.setItem(pendingSessionKey, Date.now().toString());
         pendingNumberEl.classList.remove('pending-warning-active');
-        if (pendingCount > 0) {
-            pendingNumberEl.style.color = 'white';
-        }
+        pendingNumberEl.style.color = 'white';
     });
 
     // Run checks on page load

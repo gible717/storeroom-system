@@ -177,6 +177,17 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
 | **Permohonan Tertunda** | Bilangan permohonan menunggu kelulusan (klik untuk lihat senarai tertunda) |
 | **Pantau Stok** | Bilangan produk dengan stok rendah atau habis (klik untuk lihat butiran) |
 
+**Sistem Warna Dinamik Kad:**
+
+Kad statistik berubah warna secara automatik berdasarkan keadaan semasa:
+
+| Kad | Warna Hijau (Selamat) | Warna Amaran |
+|-----|----------------------|--------------|
+| **Permohonan Tertunda** | Tiada permohonan tertunda (0) | Kuning/Oren - Ada 1 atau lebih permohonan menunggu tindakan |
+| **Pantau Stok** | Kurang 50% produk perlu restok | Merah - 50% atau lebih produk perlu restok segera |
+
+> **Nota:** Nombor pada kad akan berkelip (glow) untuk menarik perhatian apabila memerlukan tindakan segera. Selepas Pentadbir membuka modal berkaitan, animasi akan berhenti selama 15 minit.
+
 **Permohonan Terkini:**
 
 - Memaparkan 6 permohonan terbaru, diutamakan mengikut status (Baru dahulu)
@@ -229,7 +240,13 @@ Selepas log masuk, Pentadbir akan melihat Dashboard utama yang memaparkan:
    - Produk dengan subkategori dipaparkan dalam format "Kategori Utama > Subkategori"
    - Contoh: "Toner > Canon" menunjukkan produk dalam subkategori Canon di bawah Toner
 
-6. Klik **"Urus Kategori"** untuk mengurus senarai kategori
+6. **Susun Jadual (Sortable Columns):**
+   - Klik pada tajuk lajur untuk menyusun jadual mengikut lajur tersebut
+   - Lajur yang boleh disusun: Kod Item, Nama Produk, Kategori, Pembekal, Harga, Stok
+   - Klik sekali untuk susunan menaik (A-Z, 0-9), klik lagi untuk susunan menurun (Z-A, 9-0)
+   - Ikon anak panah akan menunjukkan arah susunan semasa
+
+7. Klik **"Urus Kategori"** untuk mengurus senarai kategori
 
 #### 4.2.2 Tambah Produk Baru
 
@@ -1224,6 +1241,7 @@ Berikut adalah senarai penuh tangkapan skrin yang diperlukan untuk manual ini. S
 | 1.0 | Januari 2026 | [Nama Anda] | Versi awal |
 | 2.0 | Februari 2026 | Unit Teknologi Maklumat | Kemaskini menyeluruh mengikut sistem terkini - pembetulan medan borang, aliran kerja, dan penambahan ciri baharu (pendaftaran staf, pengurusan kategori, laporan analisis jabatan, profil gambar, statistik dashboard) |
 | 2.1 | Februari 2026 | Unit Teknologi Maklumat | Penambahan ciri subkategori dan foto produk: (1) Sokongan kategori bertingkat dengan kategori utama dan subkategori, (2) Dropdown kategori bertingkat (cascading) dalam borang produk, (3) Paparan hierarki "Kategori > Subkategori" dalam senarai produk, (4) Penapis kategori yang mengumpulkan subkategori, (5) Muat naik dan kongsi foto produk, (6) Padam foto pintar dengan pengesanan perkongsian foto |
+| 2.2 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan UI/UX: (1) Sistem warna dinamik kad dashboard - hijau untuk selamat, amaran untuk perlu tindakan, (2) Notifikasi Toast untuk maklum balas pantas, (3) Lajur jadual boleh disusun (sortable) dalam senarai produk, (4) Paparan keadaan kosong (empty state) yang lebih mesra pengguna |
 
 ---
 

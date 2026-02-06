@@ -193,6 +193,130 @@ $header_user_initials = substr($initials, 0, 2);
             font-size: 0.875rem;
         }
 
+        /* Skeleton Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s ease-in-out infinite;
+            border-radius: 0.25rem;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .skeleton-text-sm {
+            height: 0.75rem;
+        }
+        .skeleton-text-lg {
+            height: 1.25rem;
+        }
+        .skeleton-title {
+            height: 1.5rem;
+            width: 60%;
+            margin-bottom: 0.75rem;
+        }
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .skeleton-avatar-lg {
+            width: 64px;
+            height: 64px;
+        }
+        .skeleton-button {
+            height: 38px;
+            width: 100px;
+            border-radius: 0.375rem;
+        }
+        .skeleton-card {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .skeleton-table-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .skeleton-table-cell {
+            flex: 1;
+            height: 1rem;
+            margin-right: 1rem;
+        }
+        .skeleton-table-cell:last-child {
+            margin-right: 0;
+        }
+        .skeleton-image {
+            width: 100%;
+            height: 150px;
+            border-radius: 0.375rem;
+        }
+
+        /* Empty State Component */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: #6c757d;
+        }
+        .empty-state-icon {
+            font-size: 3.5rem;
+            color: #adb5bd;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .empty-state-text {
+            font-size: 0.9375rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .empty-state-action {
+            margin-top: 1rem;
+        }
+        /* Variant: Inside table */
+        .empty-state-table {
+            padding: 2rem 1rem;
+        }
+        .empty-state-table .empty-state-icon {
+            font-size: 2.5rem;
+        }
+        .empty-state-table .empty-state-title {
+            font-size: 1rem;
+        }
+        .empty-state-table .empty-state-text {
+            font-size: 0.875rem;
+        }
+        /* Variant: Compact */
+        .empty-state-compact {
+            padding: 1.5rem 1rem;
+        }
+        .empty-state-compact .empty-state-icon {
+            font-size: 2rem;
+        }
+        .empty-state-compact .empty-state-title {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .empty-state-compact .empty-state-text {
+            font-size: 0.8125rem;
+            margin-bottom: 0.75rem;
+        }
+
         /* MyDS Breadcrumb Navigation */
         .breadcrumb-nav {
             padding: 0.75rem 0;

@@ -368,12 +368,12 @@ $total_rows = $result->num_rows;
                         <tr>
                             <th scope="col" style="width: 50px;">Bil.</th>
                             <th scope="col" style="width: 56px;">Foto</th>
-                            <th scope="col">Kod Item</th>
-                            <th scope="col">Nama Produk</th>
-                            <th scope="col">Kategori</th>
-                            <th scope="col">Pembekal</th>
-                            <th scope="col">Harga (RM)</th>
-                            <th scope="col">Stok</th>
+                            <th scope="col" data-sort="kod" data-type="text">Kod Item</th>
+                            <th scope="col" data-sort="nama" data-type="text">Nama Produk</th>
+                            <th scope="col" data-sort="kategori" data-type="text">Kategori</th>
+                            <th scope="col" data-sort="pembekal" data-type="text">Pembekal</th>
+                            <th scope="col" data-sort="harga" data-type="number">Harga (RM)</th>
+                            <th scope="col" data-sort="stok" data-type="number">Stok</th>
                             <th scope="col">Status</th>
                             <th scope="col" style="width: 110px;">Tindakan</th>
                         </tr>
@@ -453,7 +453,18 @@ $total_rows = $result->num_rows;
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="10" class="text-center py-4 text-muted">Tiada produk ditemui.</td></tr>
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state empty-state-table">
+                                        <i class="bi bi-box-seam empty-state-icon"></i>
+                                        <h5 class="empty-state-title">Tiada Produk</h5>
+                                        <p class="empty-state-text">Inventori anda masih kosong. Mulakan dengan menambah produk pertama anda.</p>
+                                        <a href="admin_add_product.php" class="btn btn-tambah-produk btn-sm">
+                                            <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -573,7 +584,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (visibleCount === 0) {
             const noResultRow = document.createElement('tr');
             noResultRow.className = 'no-results-row';
-            noResultRow.innerHTML = '<td colspan="10" class="text-center text-muted py-4"><i class="bi bi-search d-block fs-3 mb-2 opacity-50"></i>Tiada padanan ditemui.</td>';
+            noResultRow.innerHTML = `<td colspan="10">
+                <div class="empty-state empty-state-table">
+                    <i class="bi bi-search empty-state-icon"></i>
+                    <h5 class="empty-state-title">Tiada Padanan</h5>
+                    <p class="empty-state-text">Tiada produk yang sepadan dengan carian atau penapis anda.</p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('clearFiltersBtn').click()">
+                        <i class="bi bi-x-circle me-1"></i> Kosongkan Penapis
+                    </button>
+                </div>
+            </td>`;
             tableBody.appendChild(noResultRow);
         }
 
@@ -684,6 +704,13 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTable();
         updateClearButton();
     });
+
+    // Initialize sortable table - add table ID first
+    const productsTable = document.querySelector('.products-table');
+    if (productsTable) {
+        productsTable.id = 'productsTable';
+        initSortableTable('productsTable');
+    }
 });
 </script>
 
