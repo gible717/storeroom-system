@@ -3,7 +3,7 @@
 
 ---
 
-**Versi:** 2.0
+**Versi:** 2.3
 **Tarikh:** Februari 2026
 **Disediakan oleh:** Unit Teknologi Maklumat
 **Jabatan:** Majlis Perbandaran Kangar
@@ -188,6 +188,17 @@ Kad statistik berubah warna secara automatik berdasarkan keadaan semasa:
 
 > **Nota:** Nombor pada kad akan berkelip (glow) untuk menarik perhatian apabila memerlukan tindakan segera. Selepas Pentadbir membuka modal berkaitan, animasi akan berhenti selama 15 minit.
 
+**Carta Visualisasi:**
+
+Di bawah kad statistik utama, dua carta interaktif dipaparkan:
+
+| Carta | Penerangan |
+|-------|------------|
+| **Status Permohonan** (Carta Donut) | Pecahan visual permohonan mengikut status - Baru (kuning), Diluluskan (hijau), Ditolak (merah) |
+| **Trend Permohonan** (Carta Bar) | Bilangan permohonan mengikut bulan untuk 6 bulan terkini. Membantu mengenal pasti corak dan trend permintaan |
+
+> **Nota:** Carta dikemaskini secara automatik setiap kali halaman dimuat semula.
+
 **Permohonan Terkini:**
 
 - Memaparkan 6 permohonan terbaru, diutamakan mengikut status (Baru dahulu)
@@ -229,24 +240,38 @@ Kad statistik berubah warna secara automatik berdasarkan keadaan semasa:
    ![Senarai Produk](screenshots/04_product_list.png)
    *Rajah 4.2: Senarai Produk*
 
-3. Gunakan kotak carian untuk mencari produk tertentu
-4. **Penapis Kategori Hierarki:**
+3. **Kad Ringkasan Statistik** dipaparkan di bahagian atas halaman:
+
+   | Kad | Penerangan |
+   |-----|------------|
+   | **Jumlah Produk** (indigo) | Bilangan keseluruhan produk dalam sistem |
+   | **Nilai Inventori** (hijau) | Jumlah nilai keseluruhan stok dalam RM |
+   | **Stok Rendah** (kuning) | Bilangan produk dengan baki stok 1 hingga 10 unit |
+   | **Kehabisan Stok** (merah) | Bilangan produk dengan baki stok 0 |
+
+4. **Bar Kemajuan Stok:** Setiap produk memaparkan bar kemajuan nipis berwarna di bawah angka stok:
+   - **Hijau** — Stok melebihi 10 unit (paras selamat)
+   - **Kuning** — Stok antara 1 hingga 10 unit (perlu perhatian)
+   - **Merah** — Stok habis (0 unit)
+
+5. Gunakan kotak carian untuk mencari produk tertentu
+6. **Penapis Kategori Hierarki:**
    - Dropdown menunjukkan kategori utama dan subkategori dengan lekukan (indent)
    - Subkategori ditandakan dengan ikon anak panah (→)
    - Memilih kategori utama akan menapis semua produk dalam kategori tersebut DAN subkategorinya
    - Memilih subkategori akan menapis produk dalam subkategori tersebut sahaja
 
-5. **Paparan Kategori dalam Jadual:**
+7. **Paparan Kategori dalam Jadual:**
    - Produk dengan subkategori dipaparkan dalam format "Kategori Utama > Subkategori"
    - Contoh: "Toner > Canon" menunjukkan produk dalam subkategori Canon di bawah Toner
 
-6. **Susun Jadual (Sortable Columns):**
+8. **Susun Jadual (Sortable Columns):**
    - Klik pada tajuk lajur untuk menyusun jadual mengikut lajur tersebut
    - Lajur yang boleh disusun: Kod Item, Nama Produk, Kategori, Pembekal, Harga, Stok
    - Klik sekali untuk susunan menaik (A-Z, 0-9), klik lagi untuk susunan menurun (Z-A, 9-0)
    - Ikon anak panah akan menunjukkan arah susunan semasa
 
-7. Klik **"Urus Kategori"** untuk mengurus senarai kategori
+9. Klik **"Urus Kategori"** untuk mengurus senarai kategori
 
 #### 4.2.2 Tambah Produk Baru
 
@@ -1242,6 +1267,7 @@ Berikut adalah senarai penuh tangkapan skrin yang diperlukan untuk manual ini. S
 | 2.0 | Februari 2026 | Unit Teknologi Maklumat | Kemaskini menyeluruh mengikut sistem terkini - pembetulan medan borang, aliran kerja, dan penambahan ciri baharu (pendaftaran staf, pengurusan kategori, laporan analisis jabatan, profil gambar, statistik dashboard) |
 | 2.1 | Februari 2026 | Unit Teknologi Maklumat | Penambahan ciri subkategori dan foto produk: (1) Sokongan kategori bertingkat dengan kategori utama dan subkategori, (2) Dropdown kategori bertingkat (cascading) dalam borang produk, (3) Paparan hierarki "Kategori > Subkategori" dalam senarai produk, (4) Penapis kategori yang mengumpulkan subkategori, (5) Muat naik dan kongsi foto produk, (6) Padam foto pintar dengan pengesanan perkongsian foto |
 | 2.2 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan UI/UX: (1) Sistem warna dinamik kad dashboard - hijau untuk selamat, amaran untuk perlu tindakan, (2) Notifikasi Toast untuk maklum balas pantas, (3) Lajur jadual boleh disusun (sortable) dalam senarai produk, (4) Paparan keadaan kosong (empty state) yang lebih mesra pengguna |
+| 2.3 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan visualisasi data dan keselamatan: (1) Carta donut status permohonan dan carta bar trend bulanan di Dashboard Pentadbir, (2) Kad ringkasan statistik (jumlah produk, nilai inventori, stok rendah, kehabisan stok) di halaman produk, (3) Bar kemajuan stok berwarna dalam jadual produk, (4) Pengerasan keselamatan menyeluruh - pembolehubah persekitaran, perlindungan CSRF, sanitasi XSS, penyata tersedia (prepared statements), pengesahan MIME, pengehadan kadar |
 
 ---
 

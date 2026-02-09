@@ -493,6 +493,46 @@ $sql_requests = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status,
                     p.ID_permohonan DESC
                 LIMIT 6";
 $recent_requests = $conn->query($sql_requests);
+
+// Chart data: Request status breakdown
+$status_breakdown_sql = "SELECT status, COUNT(*) as jumlah FROM permohonan GROUP BY status";
+$status_breakdown = $conn->query($status_breakdown_sql);
+$chart_status_labels = [];
+$chart_status_data = [];
+$chart_status_colors = [];
+$chart_color_map = ['Baru' => '#ffc107', 'Diluluskan' => '#198754', 'Ditolak' => '#dc3545'];
+if ($status_breakdown) {
+    while ($srow = $status_breakdown->fetch_assoc()) {
+        $chart_status_labels[] = $srow['status'];
+        $chart_status_data[] = (int)$srow['jumlah'];
+        $chart_status_colors[] = $chart_color_map[$srow['status']] ?? '#6c757d';
+    }
+}
+
+// Chart data: Monthly request trend (last 6 months)
+$monthly_trend_sql = "SELECT
+    DATE_FORMAT(tarikh_mohon, '%Y-%m') AS bulan,
+    COUNT(*) as jumlah
+FROM permohonan
+WHERE tarikh_mohon >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
+GROUP BY DATE_FORMAT(tarikh_mohon, '%Y-%m')
+ORDER BY bulan ASC";
+$monthly_trend = $conn->query($monthly_trend_sql);
+$trend_data_map = [];
+if ($monthly_trend) {
+    while ($trow = $monthly_trend->fetch_assoc()) {
+        $trend_data_map[$trow['bulan']] = (int)$trow['jumlah'];
+    }
+}
+$chart_months = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'];
+$chart_trend_labels = [];
+$chart_trend_data = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date_key = date('Y-m', strtotime("-$i months"));
+    $month_idx = (int)date('n', strtotime("-$i months")) - 1;
+    $chart_trend_labels[] = $chart_months[$month_idx];
+    $chart_trend_data[] = $trend_data_map[$date_key] ?? 0;
+}
 ?>
 
 <div class="text-center mb-4">
@@ -530,6 +570,36 @@ $recent_requests = $conn->query($sql_requests);
                 <p class="stat-number" id="stockWarningNumber" data-stock-count="<?php echo $stokRendah; ?>" data-total-items="<?php echo $jumlahProduk; ?>"><?php echo $stokRendah; ?></p>
                 <small class="hover-text">Klik untuk lihat</small>
                 <i class="bi bi-<?php echo ($stokRendah < $stockThreshold) ? 'check-circle-fill' : 'exclamation-triangle-fill'; ?> stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-lg-10 col-xl-8 mx-auto">
+        <div class="row g-3">
+            <!-- Status Donut Chart -->
+            <div class="col-md-5">
+                <div class="card shadow-sm" style="border:none;border-radius:1rem;">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3" style="font-size:0.85rem;color:#6c757d;text-transform:uppercase;letter-spacing:0.5px;">Status Permohonan</h6>
+                        <div style="position:relative;height:200px;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Monthly Trend Bar Chart -->
+            <div class="col-md-7">
+                <div class="card shadow-sm" style="border:none;border-radius:1rem;">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3" style="font-size:0.85rem;color:#6c757d;text-transform:uppercase;letter-spacing:0.5px;">Trend Permohonan (6 Bulan)</h6>
+                        <div style="position:relative;height:200px;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -797,6 +867,7 @@ $recent_requests = $conn->query($sql_requests);
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const sessionDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -904,6 +975,82 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Initialize Charts
+if (typeof Chart !== 'undefined') {
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <?php echo json_encode($chart_status_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($chart_status_data); ?>,
+                    backgroundColor: <?php echo json_encode($chart_status_colors); ?>,
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyleWidth: 10,
+                            font: { size: 12, family: "'Inter', sans-serif" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const trendCtx = document.getElementById('trendChart');
+    if (trendCtx) {
+        new Chart(trendCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($chart_trend_labels); ?>,
+                datasets: [{
+                    label: 'Permohonan',
+                    data: <?php echo json_encode($chart_trend_data); ?>,
+                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 11, family: "'Inter', sans-serif" }
+                        },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: {
+                        ticks: {
+                            font: { size: 11, family: "'Inter', sans-serif" }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+}
 </script>
 
 <?php require 'admin_footer.php'; ?>

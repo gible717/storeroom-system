@@ -42,6 +42,15 @@ $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
 $total_rows = $result->num_rows;
+
+// Summary stats
+$stats_sql = "SELECT
+    SUM(CASE WHEN baki_semasa = 0 THEN 1 ELSE 0 END) as out_of_stock,
+    SUM(CASE WHEN baki_semasa > 0 AND baki_semasa <= 10 THEN 1 ELSE 0 END) as low_stock,
+    COALESCE(SUM(harga_seunit * baki_semasa), 0) as total_value
+FROM barang";
+$stats_result = $conn->query($stats_sql);
+$stats = $stats_result ? $stats_result->fetch_assoc() : ['out_of_stock' => 0, 'low_stock' => 0, 'total_value' => 0];
 ?>
 
 <style>
@@ -273,6 +282,43 @@ $total_rows = $result->num_rows;
     color: #6c757d;
 }
 
+/* --- Stock Progress Bar --- */
+.stock-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: #e9ecef;
+    margin-top: 4px;
+    width: 60px;
+}
+.stock-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+}
+
+/* --- Summary Stat Cards --- */
+.summary-stat-card {
+    border: none;
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.summary-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+.summary-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.summary-stat-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin: 0;
+}
+
 /* --- Card footer --- */
 .table-footer {
     background: #fff;
@@ -299,6 +345,53 @@ $total_rows = $result->num_rows;
             <a href="admin_add_product.php" class="btn btn-tambah-produk">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Produk
             </a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card summary-stat-card shadow-sm">
+                <div class="card-body py-3 px-3 text-center">
+                    <div class="summary-stat-value" style="color:#4f46e5;">
+                        <i class="bi bi-box-seam" style="font-size:1rem;opacity:0.5;"></i>
+                        <?php echo $total_rows; ?>
+                    </div>
+                    <p class="summary-stat-label">Jumlah Produk</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card summary-stat-card shadow-sm">
+                <div class="card-body py-3 px-3 text-center">
+                    <div class="summary-stat-value" style="color:#198754;">
+                        RM <?php echo number_format((float)$stats['total_value'], 0); ?>
+                    </div>
+                    <p class="summary-stat-label">Nilai Inventori</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card summary-stat-card shadow-sm">
+                <div class="card-body py-3 px-3 text-center">
+                    <div class="summary-stat-value" style="color:#ffc107;">
+                        <i class="bi bi-exclamation-triangle" style="font-size:1rem;opacity:0.5;"></i>
+                        <?php echo (int)$stats['low_stock']; ?>
+                    </div>
+                    <p class="summary-stat-label">Stok Rendah</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card summary-stat-card shadow-sm">
+                <div class="card-body py-3 px-3 text-center">
+                    <div class="summary-stat-value" style="color:#dc3545;">
+                        <i class="bi bi-x-circle" style="font-size:1rem;opacity:0.5;"></i>
+                        <?php echo (int)$stats['out_of_stock']; ?>
+                    </div>
+                    <p class="summary-stat-label">Kehabisan Stok</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -414,7 +507,15 @@ $total_rows = $result->num_rows;
                                     </td>
                                     <td><?php echo htmlspecialchars($row['nama_pembekal'] ?? '-'); ?></td>
                                     <td><?php echo number_format((float)$row['harga'], 2); ?></td>
-                                    <td><?php echo htmlspecialchars($row['stok_semasa'] ?? '0'); ?> unit</td>
+                                    <td>
+                                        <?php
+                                        $stok_val = (int)($row['stok_semasa'] ?? 0);
+                                        $bar_pct = min(($stok_val / 50) * 100, 100);
+                                        $bar_color = $stok_val > 10 ? '#198754' : ($stok_val > 0 ? '#ffc107' : '#dc3545');
+                                        ?>
+                                        <div><?php echo $stok_val; ?> unit</div>
+                                        <div class="stock-progress"><div class="stock-progress-bar" style="width:<?php echo $bar_pct; ?>%;background:<?php echo $bar_color; ?>;"></div></div>
+                                    </td>
                                     <td>
                                         <?php
                                         $stok = (int)$row['stok_semasa'];
