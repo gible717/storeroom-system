@@ -3,6 +3,10 @@
 
 session_start();
 require 'db.php';
+require_once 'csrf.php';
+
+// Validate CSRF token
+csrf_check('login.php');
 
 // Function to shorten Malaysian names
 function getShortenedName($full_name) {
@@ -42,6 +46,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Rate limiting - max 5 attempts per 15 minutes per IP
+$max_attempts = 5;
+$lockout_minutes = 15;
+$client_ip = $_SERVER['REMOTE_ADDR'];
+$rate_key = 'login_attempts_' . md5($client_ip);
+
+if (!isset($_SESSION[$rate_key])) {
+    $_SESSION[$rate_key] = ['count' => 0, 'first_attempt' => time()];
+}
+
+$attempts = &$_SESSION[$rate_key];
+// Reset if lockout period has passed
+if (time() - $attempts['first_attempt'] > $lockout_minutes * 60) {
+    $attempts = ['count' => 0, 'first_attempt' => time()];
+}
+
+if ($attempts['count'] >= $max_attempts) {
+    $remaining = ceil(($attempts['first_attempt'] + $lockout_minutes * 60 - time()) / 60);
+    header('Location: login.php?error=' . urlencode("Terlalu banyak percubaan log masuk. Sila cuba lagi dalam $remaining minit."));
+    exit;
+}
+
 // Get form data
 $ID_staf = trim($_POST['ID_staf'] ?? '');
 $kata_laluan_dimasukkan = $_POST['kata_laluan'] ?? $_POST['katalaluan'] ?? '';
@@ -65,6 +91,9 @@ if ($result && $result->num_rows === 1) {
     if (password_verify($kata_laluan_dimasukkan, $user['kata_laluan'])) {
 
         session_regenerate_id(true);
+
+        // Reset rate limiting on successful login
+        unset($_SESSION[$rate_key]);
 
         // Set session variables
         $_SESSION['ID_staf'] = $user['ID_staf'];
@@ -93,7 +122,9 @@ if ($result && $result->num_rows === 1) {
     }
 }
 
-// Login failed
+// Login failed - increment attempt counter
+$attempts['count']++;
+
 header('Location: login.php?error=' . urlencode('ID Staf atau Katalaluan salah.'));
 exit;
 ?>

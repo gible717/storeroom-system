@@ -3,6 +3,7 @@
 
 require_once 'staff_auth_check.php';
 require_once 'db.php';
+require_once 'csrf.php';
 
 // Fetch user profile for navbar
 $header_user_id = $_SESSION['ID_staf'];
@@ -90,6 +91,7 @@ $header_user_initials = substr($initials, 0, 2);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <?php echo csrf_meta(); ?>
 
     <style>
         /* MyDS Design System Variables */

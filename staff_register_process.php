@@ -1,12 +1,20 @@
 <?php
 // staff_register_process.php - Handle staff registration
 
+session_start();
 require 'db.php';
+require_once 'csrf.php';
 
 // Set JSON header for AJAX response
 header('Content-Type: application/json');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    echo json_encode(['success' => false, 'message' => 'Sesi anda telah tamat. Sila muat semula halaman.']);
+    exit;
+}
 
     // Get form data
     $id_staf = $_POST['id_staf'];

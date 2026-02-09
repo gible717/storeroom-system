@@ -10,7 +10,10 @@ $kategori_with_subs = [];
 if ($main_kategori_result) {
     while ($m = $main_kategori_result->fetch_assoc()) {
         $all_ids = [$m['ID_kategori']];
-        $sub_result = $conn->query("SELECT ID_kategori FROM KATEGORI WHERE parent_id = " . (int)$m['ID_kategori']);
+        $sub_stmt = $conn->prepare("SELECT ID_kategori FROM KATEGORI WHERE parent_id = ?");
+        $sub_stmt->bind_param("i", $m['ID_kategori']);
+        $sub_stmt->execute();
+        $sub_result = $sub_stmt->get_result();
         while ($s = $sub_result->fetch_assoc()) {
             $all_ids[] = $s['ID_kategori'];
         }
@@ -33,6 +36,7 @@ $products_result = $conn->query($products_sql);
             <div class="card shadow-sm border-0" style="border-radius: 1rem;">
                 <div class="card-body p-4 p-md-5">
                     <form action="admin_stock_manual_process.php" method="POST">
+                        <?php echo csrf_field(); ?>
                         <!-- Category Filter -->
                         <div class="mb-4">
                             <label for="kategori_filter" class="form-label fw-bold">Kategori</label>

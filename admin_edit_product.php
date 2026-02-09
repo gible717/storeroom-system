@@ -311,6 +311,7 @@ $has_image = (!empty($gambar) && file_exists($gambar));
                 <div class="card-body p-4">
 
                     <form id="editProductForm" action="admin_edit_product_process.php" method="POST">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="id_produk" value="<?php echo htmlspecialchars($product['ID_produk']); ?>">
 
                         <div class="section-heading">Maklumat Produk</div>
@@ -660,7 +661,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function executeDeletePhoto(alsoRemoveFrom) {
-        let body = 'id_produk=' + encodeURIComponent(currentProductId) + '&delete_photo=1';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        let body = 'id_produk=' + encodeURIComponent(currentProductId) + '&delete_photo=1&csrf_token=' + encodeURIComponent(csrfToken);
         if (alsoRemoveFrom.length > 0) {
             body += '&also_remove_from=' + encodeURIComponent(JSON.stringify(alsoRemoveFrom));
         }

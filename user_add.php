@@ -43,6 +43,7 @@ unset($_SESSION['form_data']);
 <div class="card shadow-sm border-0" style="border-radius: 1rem; max-width: 600px; margin: 0 auto;">
     <div class="card-body p-4 p-md-5">
         <form action="user_add_process.php" method="POST">
+            <?php echo csrf_field(); ?>
 
             <div class="mb-3">
                 <label for="id_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>

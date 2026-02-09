@@ -16,9 +16,23 @@ $userNameShort = getShortenedName($userName);
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // Get personal stats for this staff member
-$stats_baru = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE ID_pemohon = '$staffID' AND status = 'Baru'")->fetch_assoc()['total'] ?? 0;
-$stats_lulus = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE ID_pemohon = '$staffID' AND status = 'Diluluskan'")->fetch_assoc()['total'] ?? 0;
-$stats_tolak = $conn->query("SELECT COUNT(*) as total FROM permohonan WHERE ID_pemohon = '$staffID' AND status = 'Ditolak'")->fetch_assoc()['total'] ?? 0;
+$stmt_stats = $conn->prepare("SELECT COUNT(*) as total FROM permohonan WHERE ID_pemohon = ? AND status = ?");
+$status_baru = 'Baru';
+$stmt_stats->bind_param("ss", $staffID, $status_baru);
+$stmt_stats->execute();
+$stats_baru = $stmt_stats->get_result()->fetch_assoc()['total'] ?? 0;
+
+$status_lulus = 'Diluluskan';
+$stmt_stats->bind_param("ss", $staffID, $status_lulus);
+$stmt_stats->execute();
+$stats_lulus = $stmt_stats->get_result()->fetch_assoc()['total'] ?? 0;
+
+$status_tolak = 'Ditolak';
+$stmt_stats->bind_param("ss", $staffID, $status_tolak);
+$stmt_stats->execute();
+$stats_tolak = $stmt_stats->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_stats->close();
+
 $stats_jumlah = $stats_baru + $stats_lulus + $stats_tolak;
 
 // Get recent requests (last 5) with item names
@@ -28,11 +42,14 @@ $recent_sql = "SELECT p.ID_permohonan, p.tarikh_mohon, p.masa_mohon, p.status,
             FROM permohonan p
             LEFT JOIN permohonan_barang pb ON p.ID_permohonan = pb.ID_permohonan
             LEFT JOIN barang b ON pb.no_kod = b.no_kod
-            WHERE p.ID_pemohon = '$staffID'
+            WHERE p.ID_pemohon = ?
             GROUP BY p.ID_permohonan
             ORDER BY p.tarikh_mohon DESC, p.masa_mohon DESC
             LIMIT 5";
-$recent_result = $conn->query($recent_sql);
+$stmt_recent = $conn->prepare($recent_sql);
+$stmt_recent->bind_param("s", $staffID);
+$stmt_recent->execute();
+$recent_result = $stmt_recent->get_result();
 
 // Helper function for time display
 function smart_time_display($masa_mohon, $tarikh_mohon) {

@@ -76,6 +76,7 @@ if ($_SESSION['is_admin'] == 1) {
                     <?php endif; ?>
 
                     <form action="change_password_process.php" method="POST" id="passwordForm">
+                        <?php echo csrf_field(); ?>
                         <div class="mb-3">
                             <label for="new_password" class="form-label">Kata Laluan Baru <span class="text-danger" aria-hidden="true">*</span></label>
                             <div class="input-group">

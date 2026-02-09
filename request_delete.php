@@ -48,7 +48,7 @@ try {
 
 } catch (Exception $e) {
     $conn->rollback();
-    $_SESSION['error_msg'] = "Gagal memadam permohonan. Ralat: " . $e->getMessage();
+    $_SESSION['error_msg'] = safeError("Gagal memadam permohonan.", $e->getMessage());
 }
 
 header('Location: request_list.php');

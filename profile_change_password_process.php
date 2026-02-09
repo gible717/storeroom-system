@@ -3,6 +3,7 @@
 
 session_start();
 require_once 'db.php';
+require_once 'csrf.php';
 
 // Check login
 if (!isset($_SESSION['ID_staf'])) {
@@ -12,6 +13,10 @@ if (!isset($_SESSION['ID_staf'])) {
 
 $user_id = $_SESSION['ID_staf'];
 $is_admin = $_SESSION['is_admin'] ?? 0;
+
+// Validate CSRF token
+$redirect = ($is_admin == 1) ? 'admin_profile.php' : 'staff_profile.php';
+csrf_check($redirect);
 
 // Set redirect paths
 $profile_page = ($is_admin == 1) ? 'admin_profile.php' : 'staff_profile.php';

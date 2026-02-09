@@ -68,6 +68,7 @@ $items_result = $stmt_items->get_result();
                 <p class="text-muted">Anda sedang mengesahkan penerimaan untuk barang-barang yang telah diluluskan. Sila isikan "Kuantiti Diterima" berdasarkan barang yang anda ambil.</p>
 
                 <form action="kewps8_receipt_process.php" method="POST">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="id_permohonan" value="<?php echo $id_permohonan; ?>">
 
                     <div class="table-responsive">

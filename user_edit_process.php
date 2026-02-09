@@ -2,12 +2,16 @@
 // user_edit_process.php - Handle user edit form
 
 require 'admin_auth_check.php';
+require_once 'csrf.php';
 
 // Check POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: admin_users.php");
     exit;
 }
+
+// Validate CSRF token
+csrf_check('admin_users.php');
 
 // Get form data
 $id_staf = $_POST['id_staf'];

@@ -38,6 +38,7 @@ $jabatan_result = $conn->query("SELECT * FROM jabatan ORDER BY nama_jabatan ASC"
     <div class="card-body p-4">
 
         <form action="user_edit_process.php" method="POST">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="id_staf" value="<?php echo htmlspecialchars($user['ID_staf']); ?>">
 
             <div class="mb-3">

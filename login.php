@@ -2,6 +2,7 @@
 // login.php - User login page
 
 session_start();
+require_once 'csrf.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['ID_staf'])) {
@@ -152,6 +153,7 @@ if (isset($_SESSION['ID_staf'])) {
                 <?php endif; ?>
 
                 <form action="login_process.php" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="mb-3">
                         <label for="ID_staf" class="form-label">ID Staf <span class="text-danger" aria-hidden="true">*</span></label>
                         <input type="text" class="form-control" id="ID_staf" name="ID_staf" placeholder="Masukkan no. gaji" required aria-required="true" aria-describedby="ID_staf_help" maxlength="5">

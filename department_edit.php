@@ -41,6 +41,7 @@ $stmt_edit->close();
 <div class="card shadow-sm border-0" style="border-radius: 1rem; max-width: 600px; margin: 0 auto;">
     <div class="card-body p-4 p-md-5">
         <form action="department_process.php" method="POST">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="id_jabatan" value="<?php echo $edit_id; ?>">
 

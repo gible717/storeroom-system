@@ -104,6 +104,7 @@ function getInitials($name) {
 
         <!-- Profile Form -->
         <form action="profile_update_process.php" method="POST">
+            <?php echo csrf_field(); ?>
 
             <div class="profile-avatar-wrapper">
                 <div class="profile-avatar">
@@ -302,6 +303,7 @@ require 'admin_footer.php';
             const formData = new FormData();
             formData.append('profile_picture', blob, 'profile_upload');
             formData.append('file_type', outputType);
+            formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]')?.content || '');
 
             fetch('upload_profile_picture.php', {
                 method: 'POST',

@@ -1,7 +1,9 @@
 <?php
 // staff_register.php - Staff registration form
 
+session_start();
 require 'db.php';
+require_once 'csrf.php';
 
 // Fetch departments for dropdown
 $sql = "SELECT ID_jabatan, nama_jabatan FROM jabatan ORDER BY nama_jabatan ASC";
@@ -123,7 +125,8 @@ $jabatan_result = $conn->query($sql);
             <?php endif; ?>
 
             <form id="registerForm" action="staff_register_process.php" method="POST">
-                
+                <?php echo csrf_field(); ?>
+
                 <div class="mb-3">
                     <label for="id_staf" class="form-label">ID Staf <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="id_staf" name="id_staf" placeholder="Masukkan no. gaji" required>

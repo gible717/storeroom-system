@@ -25,6 +25,7 @@
 
 session_start();
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/csrf.php';
 
 header('Content-Type: application/json');
 
@@ -36,6 +37,12 @@ if (!isset($_SESSION['ID_staf'])) {
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     echo json_encode(['success' => false, 'message' => 'Kaedah penghantaran tidak sah.']);
+    exit;
+}
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    echo json_encode(['success' => false, 'message' => 'Sesi anda telah tamat. Sila muat semula halaman.']);
     exit;
 }
 
@@ -161,7 +168,7 @@ try {
     // Send an error JSON response
     echo json_encode([
         'success' => false, 
-        'message' => 'Gagal menghantar borang. Sila cuba lagi. Ralat: ' . $e->getMessage()
+        'message' => safeError('Gagal menghantar borang. Sila cuba lagi.', $e->getMessage())
     ]);
     exit;
 }

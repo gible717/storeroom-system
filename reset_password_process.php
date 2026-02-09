@@ -3,6 +3,7 @@
 
 session_start();
 require 'db.php';
+require_once 'csrf.php';
 
 // Check if user has completed step 1 verification
 if (!isset($_SESSION['reset_verified']) || $_SESSION['reset_verified'] !== true) {
@@ -14,6 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     header("Location: forgot_password.php");
     exit;
 }
+
+// Validate CSRF token
+csrf_check('forgot_password.php');
 
 $id_staf = $_SESSION['reset_id_staf'];
 $old_password_hash = $_SESSION['reset_old_password'];

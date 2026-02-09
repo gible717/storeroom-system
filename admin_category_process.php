@@ -3,7 +3,10 @@
 
 require_once 'db.php';
 require_once 'admin_auth_check.php';
-// admin_auth_check.php already verifies admin access, no need to check again
+require_once 'csrf.php';
+
+// Validate CSRF token
+csrf_check('admin_category.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
 
@@ -34,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                 $_SESSION['error_field'] = 'nama_kategori';
                 header("Location: admin_category.php?error=" . urlencode("Kategori '$nama_kategori' sudah wujud dalam sistem. Sila gunakan nama yang lain."));
             } else {
-                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
+                header("Location: admin_category.php?error=" . urlencode(safeError("Ralat pangkalan data.", $e->getMessage())));
             }
             exit;
         }
@@ -111,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                 $_SESSION['edit_mode'] = true;
                 header("Location: admin_category.php?error=" . urlencode("Kategori '$nama_kategori' sudah wujud dalam sistem. Sila gunakan nama yang lain."));
             } else {
-                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
+                header("Location: admin_category.php?error=" . urlencode(safeError("Ralat pangkalan data.", $e->getMessage())));
             }
             exit;
         }
@@ -144,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                     header("Location: admin_category.php?error=" . urlencode("Tidak boleh padam. Kategori ini sedang digunakan oleh produk."));
                 }
             } else {
-                header("Location: admin_category.php?error=" . urlencode("Ralat pangkalan data: " . $e->getMessage()));
+                header("Location: admin_category.php?error=" . urlencode(safeError("Ralat pangkalan data.", $e->getMessage())));
             }
             exit;
         }

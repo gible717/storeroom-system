@@ -72,6 +72,7 @@ $items_result = $stmt_items->get_result();
 </div>
 
 <form action="kewps8_approval_process.php" method="POST">
+    <?php echo csrf_field(); ?>
     <input type="hidden" name="id_permohonan" value="<?php echo $id_permohonan; ?>">
 
     <div class="row g-4">

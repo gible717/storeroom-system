@@ -1,10 +1,14 @@
 <?php
 // db.php - Database connection
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "storeroom_db";
+// Load environment configuration
+require_once __DIR__ . '/config.php';
+
+// Get database credentials from environment
+$servername = env('DB_HOST', 'localhost');
+$username = env('DB_USERNAME', 'root');
+$password = env('DB_PASSWORD', '');
+$dbname = env('DB_NAME', 'storeroom_db');
 
 // Enable error reporting for mysqli
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -12,7 +16,13 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // In production, don't expose connection details
+    if (isProduction()) {
+        error_log("Database connection failed: " . $conn->connect_error);
+        die("Database connection failed. Please contact the administrator.");
+    } else {
+        die("Connection failed: " . $conn->connect_error);
+    }
 }
 
 // Function to format dates in Malay

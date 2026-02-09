@@ -21,8 +21,10 @@ $prev_month_end = date('Y-m-t', strtotime("$prev_month-01"));
 
 // Build WHERE clause for category filter
 $kategori_condition = "";
+$bind_kategori = null;
 if ($selected_kategori !== '') {
-    $kategori_condition = "AND b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+    $kategori_condition = "AND b.kategori = ?";
+    $bind_kategori = $selected_kategori;
 }
 
 // Get all categories for dropdown
@@ -49,6 +51,9 @@ $kategori_condition
 ORDER BY b.no_kod ASC";
 
 $stmt = $conn->prepare($sql);
+if ($bind_kategori !== null) {
+    $stmt->bind_param("s", $bind_kategori);
+}
 $stmt->execute();
 $result = $stmt->get_result();
 

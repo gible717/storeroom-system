@@ -3,11 +3,15 @@
 
 require 'db.php';
 session_start();
+require_once 'csrf.php';
 
 // Check admin access
 if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
     die("Akses ditolak.");
 }
+
+// Validate CSRF token
+csrf_check('admin_users.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 

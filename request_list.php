@@ -27,8 +27,10 @@ $kategori_stmt->close();
 
 // Build WHERE clause for category filter
 $kategori_condition = "";
+$bind_kategori = null;
 if ($selected_kategori !== '') {
-    $kategori_condition = "AND b.kategori = '" . $conn->real_escape_string($selected_kategori) . "'";
+    $kategori_condition = "AND b.kategori = ?";
+    $bind_kategori = $selected_kategori;
 }
 
 // Get all requests for this staff
@@ -53,7 +55,11 @@ $sql = "SELECT
             p.ID_permohonan DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('s', $id_staf);
+if ($bind_kategori !== null) {
+    $stmt->bind_param('ss', $id_staf, $bind_kategori);
+} else {
+    $stmt->bind_param('s', $id_staf);
+}
 $stmt->execute();
 $requests_result = $stmt->get_result();
 $total_rows = $requests_result->num_rows;

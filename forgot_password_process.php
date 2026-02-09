@@ -3,11 +3,15 @@
 
 session_start();
 require 'db.php';
+require_once 'csrf.php';
 
 if ($_SERVER["REQUEST_METHOD"] != "POST") {
     header("Location: forgot_password.php");
     exit;
 }
+
+// Validate CSRF token
+csrf_check('forgot_password.php');
 
 $step = $_POST['step'] ?? '1';
 

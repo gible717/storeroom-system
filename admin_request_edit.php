@@ -68,6 +68,7 @@ while ($row = $result_all_barang->fetch_assoc()) {
 </div>
 
 <form action="admin_request_edit_process.php" method="POST" id="edit-form">
+    <?php echo csrf_field(); ?>
     <input type="hidden" name="id_permohonan" value="<?php echo $id_permohonan; ?>">
 
     <div class="row g-4">

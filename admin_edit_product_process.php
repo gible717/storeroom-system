@@ -4,6 +4,7 @@
 session_start();
 require_once 'admin_auth_check.php';
 require_once 'image_optimizer.php';
+require_once 'csrf.php';
 
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'Ralat tidak diketahui.'];
@@ -17,6 +18,13 @@ if ($isAdmin != 1) {
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     $response['message'] = 'Kaedah tidak sah.';
+    echo json_encode($response);
+    exit;
+}
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    $response['message'] = 'Sesi anda telah tamat. Sila muat semula halaman.';
     echo json_encode($response);
     exit;
 }
@@ -122,9 +130,20 @@ $photo_uploaded = false;
 if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPLOAD_ERR_OK) {
     $file = $_FILES['gambar_produk'];
     $allowed_types = ['image/jpeg', 'image/png', 'image/webp'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
 
-    if (!in_array($file['type'], $allowed_types)) {
+    // Server-side MIME validation (prevents spoofing)
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $real_mime = $finfo->file($file['tmp_name']);
+    if (!in_array($real_mime, $allowed_types)) {
         $response['message'] = 'Format foto tidak sah. Sila gunakan JPG, PNG, atau WEBP.';
+        echo json_encode($response);
+        exit;
+    }
+
+    $ext_check = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext_check, $allowed_extensions)) {
+        $response['message'] = 'Sambungan fail tidak sah.';
         echo json_encode($response);
         exit;
     }
@@ -210,7 +229,7 @@ try {
     $response['message'] = $msg;
     $response['redirectUrl'] = 'admin_products.php';
 } catch (mysqli_sql_exception $e) {
-    $response['message'] = 'Ralat kemaskini: ' . $e->getMessage();
+    $response['message'] = safeError('Ralat semasa mengemaskini produk.', $e->getMessage());
 }
 
 $stmt->close();

@@ -5,12 +5,19 @@ session_start();
 require 'db.php';
 require 'auth_check.php';
 require_once 'image_optimizer.php';
+require_once 'csrf.php';
 
 header('Content-Type: application/json');
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['status' => 'error', 'message' => 'Kaedah permintaan tidak sah.']);
+    exit;
+}
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    echo json_encode(['status' => 'error', 'message' => 'Sesi anda telah tamat. Sila muat semula halaman.']);
     exit;
 }
 
@@ -49,8 +56,19 @@ $gambar_path = null;
 if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPLOAD_ERR_OK) {
     $file = $_FILES['gambar_produk'];
     $allowed_types = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!in_array($file['type'], $allowed_types)) {
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+    // Server-side MIME validation (prevents spoofing)
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $real_mime = $finfo->file($file['tmp_name']);
+    if (!in_array($real_mime, $allowed_types)) {
         echo json_encode(['status' => 'error', 'message' => 'Format foto tidak sah. Sila gunakan JPG, PNG, atau WEBP.']);
+        exit;
+    }
+
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed_extensions)) {
+        echo json_encode(['status' => 'error', 'message' => 'Sambungan fail tidak sah.']);
         exit;
     }
 
@@ -59,7 +77,6 @@ if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPL
         mkdir($upload_dir, 0755, true);
     }
 
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $filename = $id_produk . '_' . time() . '.' . $ext;
     $destination = $upload_dir . $filename;
 
@@ -123,7 +140,7 @@ try {
     } else {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Ralat semasa menyimpan produk: ' . $e->getMessage()
+            'message' => safeError('Ralat semasa menyimpan produk.', $e->getMessage())
         ]);
     }
 }

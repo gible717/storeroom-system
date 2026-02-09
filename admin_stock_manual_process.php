@@ -26,13 +26,17 @@
  */
 
 require_once 'admin_auth_check.php';
+require_once 'csrf.php';
+
+// Validate CSRF token
+csrf_check('admin_stock_manual.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Get form data
-    $id_produk = $conn->real_escape_string($_POST['ID_produk']);
+    $id_produk = trim($_POST['ID_produk'] ?? '');
     $jumlah_masuk = (int)$_POST['jumlah_masuk'];
-    $no_dokumen = $conn->real_escape_string($_POST['no_dokumen']);
+    $no_dokumen = trim($_POST['no_dokumen'] ?? '');
     $id_staf = $userID;
 
     // Validate input
@@ -84,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     } catch (Exception $e) {
         $conn->rollback();
-        header("Location: admin_stock_manual.php?error=Gagal kemaskini stok: " . $e->getMessage());
+        header("Location: admin_stock_manual.php?error=" . urlencode(safeError("Gagal kemaskini stok.", $e->getMessage())));
         exit;
     }
 

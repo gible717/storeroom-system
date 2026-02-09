@@ -492,7 +492,8 @@ function confirmDelete(productId, productName) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = 'admin_delete_product.php?id=' + encodeURIComponent(productId);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            window.location.href = 'admin_delete_product.php?id=' + encodeURIComponent(productId) + '&token=' + encodeURIComponent(csrfToken);
         }
     });
 }

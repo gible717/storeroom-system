@@ -2,6 +2,10 @@
 // department_process.php - Handle department add/edit/delete
 
 require 'admin_auth_check.php';
+require_once 'csrf.php';
+
+// Validate CSRF token
+csrf_check('admin_department.php');
 
 // Add department
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'add') {

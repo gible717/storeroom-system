@@ -1,3 +1,7 @@
+<?php
+session_start();
+require_once 'csrf.php';
+?>
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -128,6 +132,7 @@
 
                     <!-- Verify Identity -->
                     <form id="verifyForm" action="forgot_password_process.php" method="POST">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="step" value="1">
 
                         <div class="mb-3">

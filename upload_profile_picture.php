@@ -11,12 +11,15 @@ ob_start();
 session_start();
 header('Content-Type: application/json');
 
+// Load config first so safeError() is available even if db.php fails
+require_once __DIR__ . '/config.php';
+
 // Include database
 try {
     require_once 'db.php';
 } catch (Exception $e) {
     ob_end_clean();
-    echo json_encode(['success' => false, 'error' => 'Database connection failed: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => safeError('Gagal menyambung ke pangkalan data.', $e->getMessage())]);
     exit();
 }
 
@@ -24,6 +27,14 @@ try {
 if (!isset($_SESSION['ID_staf'])) {
     ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Sila log masuk.']);
+    exit();
+}
+
+// Validate CSRF token
+require_once 'csrf.php';
+if (!csrf_validate()) {
+    ob_end_clean();
+    echo json_encode(['success' => false, 'error' => 'Sesi anda telah tamat. Sila muat semula halaman.']);
     exit();
 }
 
@@ -55,7 +66,16 @@ if (!is_dir($upload_dir)) {
     }
 }
 
-// Validate image
+// Validate image - server-side MIME check (prevents spoofing)
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$real_mime = $finfo->file($file['tmp_name']);
+$allowed_profile_types = ['image/jpeg', 'image/png', 'image/gif'];
+if (!in_array($real_mime, $allowed_profile_types)) {
+    ob_end_clean();
+    echo json_encode(['success' => false, 'error' => 'Fail bukan imej yang sah (JPG, PNG, GIF sahaja).']);
+    exit();
+}
+
 $image_info = @getimagesize($file['tmp_name']);
 if ($image_info === false) {
     ob_end_clean();
@@ -116,7 +136,7 @@ try {
     }
 } catch (Exception $e) {
     ob_end_clean();
-    echo json_encode(['success' => false, 'error' => 'Error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => safeError('Gagal memproses imej.', $e->getMessage())]);
     exit();
 }
 
@@ -128,7 +148,7 @@ try {
     $stmt_update->close();
 } catch (Exception $e) {
     ob_end_clean();
-    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => safeError('Ralat pangkalan data.', $e->getMessage())]);
     exit();
 }
 

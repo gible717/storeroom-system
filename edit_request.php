@@ -50,6 +50,7 @@ if (!$request) {
         <div class="card form-card">
             <div class="card-body p-5">
                 <form action="edit_request_process.php" method="POST">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="id_permohonan" value="<?php echo $request['ID_permohonan']; ?>">
                     <div class="row g-4">
                         <div class="col-12">

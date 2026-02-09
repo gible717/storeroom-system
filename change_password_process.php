@@ -5,12 +5,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once 'db.php';
+require_once 'csrf.php';
 
 // Check login
 if (!isset($_SESSION['ID_staf'])) {
     header("Location: login.php?error=Sila log masuk dahulu");
     exit;
 }
+
+// Validate CSRF token
+csrf_check('change_password.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: change_password.php');

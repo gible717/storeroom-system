@@ -617,8 +617,11 @@ document.addEventListener('DOMContentLoaded', function() {
         isSubmitting = true;
         hantarBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menghantar...';
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         fetch('kewps8_form_process.php', {
-            method: 'POST'
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'csrf_token=' + encodeURIComponent(csrfToken)
         })
         .then(response => response.json())
         .then(data => {

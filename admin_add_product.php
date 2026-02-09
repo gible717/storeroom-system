@@ -206,6 +206,7 @@ $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI
                 <div class="card-body p-4">
 
                     <form id="addProductForm">
+                        <?php echo csrf_field(); ?>
 
                         <div class="section-heading">Maklumat Produk</div>
 

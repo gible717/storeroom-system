@@ -2,12 +2,16 @@
 // kewps8_receipt_process.php - Handle receipt acknowledgment
 session_start();
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/csrf.php';
 
 // Check if user is logged in and is a staff member
 if (!isset($_SESSION['ID_staf']) || $_SESSION['is_admin'] == 1) {
     header('Location: login.php');
     exit;
 }
+
+// Validate CSRF token
+csrf_check('kewps8_receipt.php');
 
 // Check if the form was submitted via POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -54,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } catch (Exception $e) {
         // Something failed, roll back
         $conn->rollback();
-        $_SESSION['error_msg'] = "Gagal mengesahkan penerimaan. Ralat: " . $e->getMessage();
+        $_SESSION['error_msg'] = safeError("Gagal mengesahkan penerimaan.", $e->getMessage());
     }
 
     // Redirect back to the list

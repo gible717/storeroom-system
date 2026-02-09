@@ -41,12 +41,16 @@ error_reporting(E_ALL);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 require 'admin_auth_check.php';
+require_once 'csrf.php';
 
 // Check POST request
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     header('Location: manage_requests.php');
     exit;
 }
+
+// Validate CSRF token
+csrf_check('manage_requests.php');
 
 // Get form data
 $id_permohonan = $_POST['id_permohonan'] ?? null;
@@ -222,11 +226,11 @@ if ($action === 'approve') {
         // Check if request is AJAX
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => "Gagal memproses permohonan. Ralat: " . $e->getMessage()]);
+            echo json_encode(['success' => false, 'message' => safeError("Gagal memproses permohonan.", $e->getMessage())]);
             exit;
         }
 
-        $_SESSION['error_msg'] = "Gagal memproses permohonan. Ralat: " . $e->getMessage();
+        $_SESSION['error_msg'] = safeError("Gagal memproses permohonan.", $e->getMessage());
         header('Location: request_review.php?id=' . $id_permohonan);
         exit;
     }

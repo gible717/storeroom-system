@@ -52,6 +52,7 @@ $stmt_items->close();
 ?>
 
 <form action="request_review_process.php" method="POST">
+    <?php echo csrf_field(); ?>
     <input type="hidden" name="id_permohonan" value="<?php echo $id_permohonan; ?>">
     <input type="hidden" name="id_pemohon" value="<?php echo $request_header['ID_pemohon']; ?>">
 

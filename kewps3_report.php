@@ -11,7 +11,10 @@ $kategori_filter = $_GET['kategori'] ?? 'Semua';
 
 // Build query for items based on category filter
 if ($kategori_filter !== 'Semua') {
-    $barang_result = $conn->query("SELECT no_kod, perihal_stok, kategori FROM barang WHERE kategori = '" . $conn->real_escape_string($kategori_filter) . "' ORDER BY perihal_stok ASC");
+    $stmt_barang = $conn->prepare("SELECT no_kod, perihal_stok, kategori FROM barang WHERE kategori = ? ORDER BY perihal_stok ASC");
+    $stmt_barang->bind_param("s", $kategori_filter);
+    $stmt_barang->execute();
+    $barang_result = $stmt_barang->get_result();
 } else {
     $barang_result = $conn->query("SELECT no_kod, perihal_stok, kategori FROM barang ORDER BY perihal_stok ASC");
 }

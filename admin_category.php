@@ -83,11 +83,14 @@ unset($_SESSION['edit_mode']);
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <button type="button" class="btn btn-sm btn-outline-primary me-1"
-                                                    onclick="editCategory(<?php echo $main['ID_kategori']; ?>, '<?php echo addslashes($main['nama_kategori']); ?>', '')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit-category"
+                                                    data-id="<?php echo (int)$main['ID_kategori']; ?>"
+                                                    data-nama="<?php echo htmlspecialchars($main['nama_kategori'], ENT_QUOTES); ?>"
+                                                    data-parent="">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </button>
                                             <form action="admin_category_process.php" method="POST" class="d-inline delete-form">
+                                                <?php echo csrf_field(); ?>
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="ID_kategori" value="<?php echo $main['ID_kategori']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -104,11 +107,14 @@ unset($_SESSION['edit_mode']);
                                                 <?php echo htmlspecialchars($sub['nama_kategori']); ?>
                                             </td>
                                             <td class="text-end pe-4">
-                                                <button type="button" class="btn btn-sm btn-outline-primary me-1"
-                                                        onclick="editCategory(<?php echo $sub['ID_kategori']; ?>, '<?php echo addslashes($sub['nama_kategori']); ?>', '<?php echo $main['ID_kategori']; ?>')">
+                                                <button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit-category"
+                                                        data-id="<?php echo (int)$sub['ID_kategori']; ?>"
+                                                        data-nama="<?php echo htmlspecialchars($sub['nama_kategori'], ENT_QUOTES); ?>"
+                                                        data-parent="<?php echo (int)$main['ID_kategori']; ?>">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </button>
                                                 <form action="admin_category_process.php" method="POST" class="d-inline delete-form">
+                                                    <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="ID_kategori" value="<?php echo $sub['ID_kategori']; ?>">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -146,6 +152,7 @@ unset($_SESSION['edit_mode']);
                 </div>
                 <div class="card-body p-4">
                     <form action="admin_category_process.php" method="POST" id="categoryForm">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="action" id="form-action" value="<?php echo $edit_mode ? 'edit' : 'add'; ?>">
                         <input type="hidden" name="ID_kategori" id="form-id" value="<?php echo isset($form_data['ID_kategori']) ? htmlspecialchars($form_data['ID_kategori']) : ''; ?>">
                         <div class="mb-3">
@@ -206,20 +213,26 @@ document.querySelectorAll('.delete-form').forEach(form => {
     });
 });
 
-// Edit category function
-function editCategory(id, nama, parentId) {
-    document.getElementById('form-action').value = 'edit';
-    document.getElementById('form-id').value = id;
-    document.getElementById('nama_kategori').value = nama;
-    document.getElementById('parent_id').value = parentId || '';
-    document.getElementById('form-title').textContent = 'Edit Kategori';
-    document.getElementById('form-icon').className = 'bi bi-check-circle-fill';
-    document.getElementById('form-btn-text').textContent = 'Kemaskini';
-    document.getElementById('cancel-btn').classList.remove('d-none');
+// Edit category - bind via data attributes (prevents XSS)
+document.querySelectorAll('.btn-edit-category').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var id = this.getAttribute('data-id');
+        var nama = this.getAttribute('data-nama');
+        var parentId = this.getAttribute('data-parent');
 
-    // Scroll to form
-    document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
-}
+        document.getElementById('form-action').value = 'edit';
+        document.getElementById('form-id').value = id;
+        document.getElementById('nama_kategori').value = nama;
+        document.getElementById('parent_id').value = parentId || '';
+        document.getElementById('form-title').textContent = 'Edit Kategori';
+        document.getElementById('form-icon').className = 'bi bi-check-circle-fill';
+        document.getElementById('form-btn-text').textContent = 'Kemaskini';
+        document.getElementById('cancel-btn').classList.remove('d-none');
+
+        // Scroll to form
+        document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
+    });
+});
 
 // Reset form to add mode
 function resetForm() {

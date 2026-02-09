@@ -2,6 +2,7 @@
 // request_edit_process.php - Handle request edit (AJAX)
 
 require 'staff_auth_check.php';
+require_once 'csrf.php';
 
 header('Content-Type: application/json');
 $response = ['success' => false, 'message' => 'Ralat tidak diketahui.'];
@@ -9,6 +10,13 @@ $response = ['success' => false, 'message' => 'Ralat tidak diketahui.'];
 // Check POST request
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     $response['message'] = 'Kaedah penghantaran tidak sah.';
+    echo json_encode($response);
+    exit;
+}
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    $response['message'] = 'Sesi anda telah tamat. Sila muat semula halaman.';
     echo json_encode($response);
     exit;
 }
@@ -83,7 +91,7 @@ try {
 
 } catch (Exception $e) {
     $conn->rollback();
-    $response['message'] = "Gagal mengemaskini permohonan. Ralat: " . $e->getMessage();
+    $response['message'] = safeError("Gagal mengemaskini permohonan.", $e->getMessage());
 }
 
 echo json_encode($response);

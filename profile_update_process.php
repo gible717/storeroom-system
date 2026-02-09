@@ -9,9 +9,17 @@ if (!isset($_SESSION['ID_staf'])) {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/csrf.php';
 
 $user_id = $_SESSION['ID_staf'];
 $is_admin = $_SESSION['is_admin'];
+
+// Validate CSRF token
+if (!csrf_validate()) {
+    $redirect = ($is_admin == 1) ? 'admin_profile.php' : 'kewps8_profile.php';
+    header("Location: $redirect?error=" . urlencode("Sesi anda telah tamat. Sila cuba lagi."));
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data

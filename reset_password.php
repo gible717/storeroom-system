@@ -2,6 +2,7 @@
 // reset_password.php - Step 2: Set new password
 
 session_start();
+require_once 'csrf.php';
 
 // Check if user has completed step 1 verification
 if (!isset($_SESSION['reset_verified']) || $_SESSION['reset_verified'] !== true) {
@@ -157,6 +158,7 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
 
                     <!-- Step 2: Set New Password -->
                     <form id="resetPasswordForm" action="reset_password_process.php" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="mb-3">
                             <label for="kata_laluan_baru" class="form-label">Kata Laluan Baru <span class="text-danger" aria-hidden="true">*</span></label>
                             <div class="input-group">

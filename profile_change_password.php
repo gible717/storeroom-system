@@ -89,6 +89,7 @@ $profile_page = ($_SESSION['is_admin'] == 1) ? 'admin_profile.php' : 'staff_prof
         <?php endif; ?>
 
         <form action="profile_change_password_process.php" method="POST">
+            <?php echo csrf_field(); ?>
 
             <div class="mb-3">
                 <label for="current_password" class="form-label">Kata Laluan Semasa</label>
