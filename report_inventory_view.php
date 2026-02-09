@@ -98,6 +98,7 @@ $kategori_result = $conn->query($kategori_sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Inventori - <?php echo $month_name; ?></title>
+    <link rel="icon" type="image/png" href="assets/img/favicon-32.png">
     <style>
         @page {
             size: A4 portrait;

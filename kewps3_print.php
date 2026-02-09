@@ -74,6 +74,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KEW.PS-3_<?php echo htmlspecialchars($barang['perihal_stok']) . '_' . date('d-m-Y', strtotime($tarikh_mula)) . '_hingga_' . date('d-m-Y', strtotime($tarikh_akhir)); ?></title>
+    <link rel="icon" type="image/png" href="assets/img/favicon-32.png">
     <style>
         @page {
             size: A4 portrait;
