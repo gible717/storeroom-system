@@ -146,7 +146,7 @@ $id_staf = $_SESSION['reset_id_staf'] ?? 'Unknown';
                 <div class="reset-card" style="margin: 0;">
                     <div class="form-header">
                         <img src="/storeroom/assets/img/logo.png" alt="Logo Majlis Perbandaran Kangar" class="logo">
-                        <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+                        <h5 class="fw-bold mb-0">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h5>
                     </div>
 
                     <h4 class="text-center mb-4 fw-bold">Tetapkan Kata Laluan Baru</h4>

@@ -496,7 +496,7 @@ $header_user_initials = substr($initials, 0, 2);
         <div class="container-fluid">
             <a class="navbar-brand" href="staff_dashboard.php">
                 <img src="assets/img/logo.png" alt="Logo" style="height: 40px;">
-                <span class="ms-2">Sistem Pengurusan Bilik Stor dan Inventori</span>
+                <span class="ms-2">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</span>
             </a>
 
             <div class="d-flex align-items-center ms-auto">

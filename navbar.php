@@ -57,7 +57,7 @@ $userInitials = substr($initials, 0, 2);
 <header class="top-navbar">
     <a class="navbar-brand-custom" href="staff_dashboard.php">
         <img src="assets/img/logo.png" alt="Logo">
-        <span class="d-none d-md-inline">Sistem Pengurusan Bilik Stor dan Inventori</span>
+        <span class="d-none d-md-inline">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</span>
         <span class="d-inline d-md-none">Sistem Stor MPK</span>
     </a>
     <div class="user-info d-flex align-items-center">

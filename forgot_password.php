@@ -121,7 +121,7 @@ require_once 'csrf.php';
                 <div class="reset-card" style="margin: 0;">
                     <div class="form-header">
                         <img src="/storeroom/assets/img/logo.png" alt="Logo Majlis Perbandaran Kangar" class="logo">
-                        <h5 class="fw-bold mb-0">Sistem Pengurusan Bilik Stor dan Inventori</h5>
+                        <h5 class="fw-bold mb-0">InventStor - Sistem Pengurusan Bilik Stor dan Inventori</h5>
                     </div>
                     <p class="text-center text-muted mb-4">Masukkan ID Staf anda untuk menetapkan semula kata laluan</p>
 
