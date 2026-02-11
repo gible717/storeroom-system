@@ -1,33 +1,74 @@
 # Summary of Changes - System Improvements
-**Last Updated**: 6 January 2026
-**Version**: 2.1
+**Last Updated**: 10 February 2026
+**Version**: 2.3
 
 ---
 
-## 🆕 Latest Updates (6 January 2026)
+## 🆕 Latest Updates (February 2026)
 
-### 1. Bidirectional Remarks System
+### 1. MPK Favicon & Branding (c8a2840)
+- Added auto-cropped MPK logo favicon (32x32) to all 13 standalone pages
+- Added Apple touch icon (180x180) support
+- Files: `admin_header.php`, `staff_header.php`, `index.php`, `login.php`, and 9 more
+
+### 2. Data Visualization (427a4e2)
+- Interactive Chart.js dashboard charts (stock distribution, request trends)
+- Enhanced product statistics with visual stock level indicators
+- Department breakdown visualizations
+
+### 3. Comprehensive Security Hardening (81927cd)
+- CSRF token protection on all forms (40+ files)
+- Content Security Policy (CSP) headers
+- XSS output sanitization with `htmlspecialchars()`
+- Secure session configuration (httpOnly, sameSite)
+- Input validation and sanitization on all endpoints
+
+### 4. UI/UX Improvements (28c760e)
+- Dynamic admin dashboard with animated stat cards
+- Toast notifications (SweetAlert2) for all actions
+- Sortable tables with column header click sorting
+- Quick action modals for pending requests and stock warnings
+- Fixed profile picture crop modal backdrop issues
+
+### 5. Subcategory System & Smart Photo Delete (2e3291f)
+- Hierarchical category → subcategory product organization
+- Smart shared photo deletion (only removes file when no other product references it)
+
+### 6. Product Photo Feature (2e68e9f)
+- Product photo upload, preview, and delete on admin pages
+- "Apply photo to other products" with select all support
+- Product photos visible on browse/request pages
+- Functional view button popup with photo, details, stock status
+
+### 7. MPK Letterhead (c0764e6)
+- Formal MPK letterhead added to inventory report printouts
+
+### 8. Duplicate Entry Handling (7d9ce86, 7ece6f9)
+- Improved duplicate entry error handling with field validation
+- Admin request edit capability
+- Print fixes
+
+📄 **See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md) for detailed documentation**
+
+---
+
+## 📊 Previous Updates (6 January 2026 - Version 2.1)
+
+### Bidirectional Remarks System
 - **request_list.php**: Modal now shows both staff and admin remarks
 - **staff_dashboard.php**: Quick view updated to show both remarks
 - **manage_requests.php**: Admin can view both staff and admin remarks
-- **Purpose**: Transparent two-way communication between staff and admin
 
-### 2. Smart Jawatan Autocomplete
+### Smart Jawatan Autocomplete
 - **kewps8_print.php**: Added COALESCE logic for jawatan display
-- **request_review.php**: Added COALESCE logic for jawatan display
 - **kewps8_form.php**: Implemented smart autocomplete with datalist
 - **get_jawatan_suggestions.php** (NEW): AJAX endpoint for suggestions
-- **kewps8_cart_ajax.php**: Returns jawatan in cart get action
-- **Purpose**: Learn from user behavior and auto-suggest jawatan values
 
-### 3. Smart Telegram Notifications
+### Smart Telegram Notifications
 - **telegram_helper.php**: Only show jawatan and catatan if not empty
-- **Purpose**: Cleaner notifications without empty fields
 
-### 4. Bug Fixes
+### Bug Fixes
 - **admin_dashboard.php**: Fixed missing "Diluluskan" status badge
-
-📄 **See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md) for detailed documentation**
 
 ---
 
@@ -239,4 +280,6 @@ Enhance transparency in the approval process by allowing admins to provide feedb
 
 ---
 
+**Last Updated:** 10 February 2026
+**Version:** 2.3
 **End of Summary**

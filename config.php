@@ -131,4 +131,7 @@ function safeError($userMessage, $technicalDetail = '') {
 
 // Auto-load .env on include
 loadEnv();
+
+// Load global error handler
+require_once __DIR__ . '/error_handler.php';
 ?>

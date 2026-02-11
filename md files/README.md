@@ -28,18 +28,22 @@ Web-based inventory management system designed for government storeroom operatio
   - 👁️ **View staff's original remarks** when reviewing
   - 💬 **Add admin remarks** for transparency
 - 📊 Comprehensive dashboard with real-time statistics
+  - 📈 **Interactive charts** (Chart.js) - stock distribution, request trends
   - 🎯 **Quick action modals** for pending requests and stock warnings
   - ⚡ **Smart glow indicators** with 5-minute timers for new requests
   - 📱 **Mobile-responsive stat cards** with hover effects
 - 📦 Complete inventory management (CRUD operations)
+  - 📷 **Product photos** with shared photo support
+  - 📂 **Subcategory system** for hierarchical product organization
 - 🔄 Manual stock adjustments (restock, corrections)
 - 👥 User and department management
 - 📈 Advanced reporting and analytics
-  - Department-focused analytics
-  - Inventory reports with stock movements
+  - Department-focused analytics with charts
+  - Inventory reports with stock movements and MPK letterhead
   - KEW.PS-3 stock card reports
 - 🔔 **Smart Telegram notifications** - Auto-hides empty optional fields
 - 📋 Complete audit trail via transaction logs
+- 🔃 **Sortable tables** - Click column headers to sort
 
 ---
 
@@ -78,10 +82,14 @@ storeroom/
 ├── telegram_helper.php     # Telegram notification functions
 ├── assets/                 # Static assets
 │   ├── css/               # Stylesheets
-│   └── img/               # Images and logos
+│   └── img/               # Images, logos, and favicons
+│       ├── favicon-32.png  # Browser tab favicon
+│       └── favicon-180.png # Apple touch icon
 ├── uploads/               # User-uploaded files
-│   └── profile_pictures/  # Staff profile pictures
-└── DATABASE_SCHEMA_ANALYSIS.md  # Complete database documentation
+│   ├── profile_pictures/  # Staff profile pictures
+│   └── product_images/    # Product photos
+├── md files/              # Documentation (26 markdown files)
+└── 404.php, 500.php       # Error pages
 ```
 
 ---
@@ -102,28 +110,53 @@ The system uses **7 core tables**:
 
 ---
 
-## 🎉 What's New (Version 2.1 - January 2026)
+## 🎉 What's New (Version 2.3 - February 2026)
 
 ### ✨ Latest Features
 
-1. **🔄 Bidirectional Remarks System**
-   - Staff and admin can now view each other's notes/remarks
-   - Transparent two-way communication
-   - Visual distinction with color-coded alerts
+1. **🔒 Comprehensive Security Hardening**
+   - CSRF token protection on all forms
+   - Content Security Policy (CSP) headers
+   - XSS output sanitization with `htmlspecialchars()`
+   - Secure session configuration (httpOnly, sameSite)
+   - Input validation and sanitization on all endpoints
 
-2. **🤖 Smart Jawatan Autocomplete**
-   - Auto-suggests position based on user profile
-   - Learns from previous requests
-   - COALESCE fallback logic for data integrity
+2. **📊 Data Visualization & Dashboard Charts**
+   - Interactive Chart.js charts on admin dashboard
+   - Product statistics with stock level distribution
+   - Request trend analysis and department breakdown
+   - Visual stock status indicators
 
-3. **📱 Smarter Telegram Notifications**
-   - Auto-hides empty optional fields
-   - Cleaner, more professional messages
-   - Reduces notification clutter
+3. **📂 Subcategory System**
+   - Hierarchical category → subcategory product organization
+   - Smart photo delete (shared photo safety)
+   - Enhanced product browsing with subcategory filters
 
-4. **🐛 Bug Fixes**
-   - Fixed missing "Diluluskan" status badge on admin dashboard
-   - Improved jawatan field consistency across pages
+4. **📷 Product Photo Management**
+   - Upload, preview, and delete product photos
+   - "Apply photo to other products" shared photo feature
+   - Product photos visible on browse/request pages
+   - Smart shared photo deletion (only removes file when no other product references it)
+
+5. **🎨 UI/UX Improvements**
+   - Dynamic admin dashboard with animated stat cards
+   - Toast notifications (SweetAlert2) for all actions
+   - Sortable tables with column header click sorting
+   - Mobile-responsive stat cards with hover effects
+   - Quick action modals for pending requests and stock warnings
+
+6. **🖼️ MPK Favicon & Branding**
+   - Custom MPK logo favicon across all pages
+   - Auto-cropped from source logo for optimal browser tab display
+   - Apple touch icon (180x180) support
+   - Formal MPK letterhead on inventory reports
+
+7. **🔧 Previous Improvements (v2.1)**
+   - Bidirectional remarks system (staff ↔ admin)
+   - Smart jawatan autocomplete with history
+   - Smarter Telegram notifications (auto-hide empty fields)
+   - Duplicate entry handling with field validation
+   - Admin request edit capability
 
 📄 **Detailed documentation:** See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md)
 
@@ -253,13 +286,16 @@ Stock Updated → Transaction Logged
 ## 🔒 Security Features
 
 - ✅ Password hashing using PHP `password_hash()` (bcrypt)
-- ✅ Session-based authentication
+- ✅ Session-based authentication with secure configuration (httpOnly, sameSite)
 - ✅ Role-based access control (Admin vs Staff)
-- ✅ SQL injection prevention (prepared statements)
-- ✅ CSRF protection via POST-only forms
-- ✅ Input validation and sanitization
+- ✅ SQL injection prevention (prepared statements on all queries)
+- ✅ CSRF token protection on all forms
+- ✅ Content Security Policy (CSP) headers
+- ✅ XSS prevention via `htmlspecialchars()` output encoding
+- ✅ Input validation and sanitization on all endpoints
 - ✅ Self-approval prevention (admin cannot approve own requests)
 - ✅ Row-level locking for stock updates (prevents race conditions)
+- ✅ Secure file upload validation (image type, size limits)
 
 ---
 
@@ -372,19 +408,24 @@ Majlis Perbandaran Kangar, Perlis
 **Purpose:**
 Final Year Project / Internship System
 
-**Academic Year:** 2024/2025
+**Academic Year:** 2024/2025 (Semester 2)
 
 ---
 
 ## 🔄 Version History
 
-### Current Version
+### Current Version (2.3 - February 2026)
 - ✅ Complete request workflow (create → approve → track)
 - ✅ Real-time stock management
-- ✅ Department-focused analytics
+- ✅ Department-focused analytics with interactive charts
 - ✅ Telegram integration
 - ✅ Complete audit trail
 - ✅ Mobile responsive design
+- ✅ Comprehensive security hardening (CSRF, CSP, XSS)
+- ✅ Product photo management with shared photos
+- ✅ Subcategory system
+- ✅ MPK favicon and branded reports
+- ✅ Toast notifications and sortable tables
 
 ---
 
@@ -393,14 +434,16 @@ Final Year Project / Internship System
 Potential improvements if requested:
 - Email notifications (in addition to Telegram)
 - Bulk approval operations
-- Excel/PDF export for reports
 - Dark mode theme
 - Advanced search and filtering
 - QR code for products
 - Barcode scanning integration
+- API layer for mobile app integration
 
 ---
 
-**Last Updated:** December 2025
+**Last Updated:** February 2026
+
+**System Version:** 2.3
 
 **System Status:** ✅ Production Ready

@@ -78,7 +78,9 @@ if (isset($_POST['delete_photo'])) {
 
         // Only delete file if no product uses it anymore
         if ($remaining == 0) {
-            unlink($photo_path);
+            if (!@unlink($photo_path)) {
+                error_log("[STOREROOM] Failed to delete product photo: $photo_path");
+            }
         }
     }
 
@@ -169,7 +171,9 @@ if (isset($_FILES['gambar_produk']) && $_FILES['gambar_produk']['error'] === UPL
         $check->close();
 
         if ($others == 0 && file_exists($old_row['gambar_produk'])) {
-            unlink($old_row['gambar_produk']);
+            if (!@unlink($old_row['gambar_produk'])) {
+                error_log("[STOREROOM] Failed to delete old product photo: " . $old_row['gambar_produk']);
+            }
         }
     }
 

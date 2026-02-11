@@ -354,7 +354,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['out_of_stock' => 0, 'l
             <div class="card summary-stat-card shadow-sm">
                 <div class="card-body py-3 px-3 text-center">
                     <div class="summary-stat-value" style="color:#4f46e5;">
-                        <i class="bi bi-box-seam" style="font-size:1rem;opacity:0.5;"></i>
+                        <i class style="font-size:1rem;opacity:0.5;"></i>
                         <?php echo $total_rows; ?>
                     </div>
                     <p class="summary-stat-label">Jumlah Produk</p>
@@ -375,7 +375,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['out_of_stock' => 0, 'l
             <div class="card summary-stat-card shadow-sm">
                 <div class="card-body py-3 px-3 text-center">
                     <div class="summary-stat-value" style="color:#ffc107;">
-                        <i class="bi bi-exclamation-triangle" style="font-size:1rem;opacity:0.5;"></i>
+                        <i class= style="font-size:1rem;opacity:0.5;"></i>
                         <?php echo (int)$stats['low_stock']; ?>
                     </div>
                     <p class="summary-stat-label">Stok Rendah</p>
@@ -386,7 +386,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['out_of_stock' => 0, 'l
             <div class="card summary-stat-card shadow-sm">
                 <div class="card-body py-3 px-3 text-center">
                     <div class="summary-stat-value" style="color:#dc3545;">
-                        <i class="bi bi-x-circle" style="font-size:1rem;opacity:0.5;"></i>
+                        <i class= style="font-size:1rem;opacity:0.5;"></i>
                         <?php echo (int)$stats['out_of_stock']; ?>
                     </div>
                     <p class="summary-stat-label">Kehabisan Stok</p>

@@ -34,10 +34,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Enable error reporting
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Error reporting handled by global error_handler.php
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 require 'admin_auth_check.php';

@@ -2,9 +2,9 @@
 ## Sistem Pengurusan Bilik Stor dan Inventori (Storeroom Management System)
 
 **Organization:** Majlis Perbandaran Kangar, Perlis
-**System Status:** Production Ready - Cleaned & Optimized
-**Last Updated:** 7 January 2026
-**Total PHP Lines:** ~14,460
+**System Status:** Production Ready - Version 2.3
+**Last Updated:** 10 February 2026
+**Total PHP Lines:** ~14,460+
 
 ---
 
@@ -19,6 +19,11 @@ This is a **government inventory management system** designed for the municipal 
 - 100% Malay localization in UI
 - Fully responsive Bootstrap 5 design
 - Complete audit trail via transaksi_stok table
+- Comprehensive security: CSRF tokens, CSP headers, XSS prevention
+- Interactive data visualization with Chart.js
+- Product photo management with shared photo support
+- Subcategory system for hierarchical product organization
+- MPK branding: custom favicon on all pages, letterhead on reports
 
 ---
 
@@ -153,6 +158,8 @@ storeroom/
 │   │   ├── img/                  (Logo, backgrounds, icons)
 │   │   │   ├── logo.png
 │   │   │   ├── admin-logo.png
+│   │   │   ├── favicon-32.png    (Browser tab favicon)
+│   │   │   ├── favicon-180.png   (Apple touch icon)
 │   │   │   ├── background*.jpg   (3 slideshow backgrounds)
 │   │   │   └── login-bg.jpg
 │   │   └── css/                  (Cropper library)
@@ -163,16 +170,18 @@ storeroom/
 │
 ├── Uploads
 │   ├── uploads/
-│   │   └── profile_pictures/     (User profile images)
+│   │   ├── profile_pictures/     (User profile images)
+│   │   └── product_images/       (Product photos)
 │   └── [Dynamic folders created on demand]
 │
-├── Documentation
+├── Documentation (md files/)
 │   ├── README.md                 (Main documentation)
 │   ├── DATABASE_SCHEMA_ANALYSIS.md (Complete DB schema)
 │   ├── SYSTEM_ERD.md             (Entity relationships)
 │   ├── SYSTEM_DFD.md             (Data flow diagrams)
 │   ├── TESTING_CHECKLIST.md      (QA checklist)
-│   └── COMMIT_INSTRUCTIONS.md    (Git workflow)
+│   ├── RECENT_IMPROVEMENTS.md    (v2.1-2.3 changes)
+│   └── ... (26 total .md files)
 │
 ├── Configuration
 │   ├── .htaccess                 (Apache rewrite rules)
@@ -393,11 +402,15 @@ storeroom/
    - Payment/ordering information
 
 #### Dashboard Features
-- Real-time statistics with animated indicators
+- Real-time statistics with animated stat cards
+- Interactive Chart.js charts (stock distribution, request trends)
 - Glowing animations for alerts (pending requests, low stock)
+- Quick action modals for pending requests and stock warnings
+- Toast notifications (SweetAlert2) for all actions
 - Color-coded status badges
+- Sortable tables with column header sorting
 - Responsive mobile-friendly design
-- Quick navigation to common tasks
+- MPK favicon in browser tab
 
 ---
 
@@ -1060,15 +1073,17 @@ if (session_status() === PHP_SESSION_NONE) {
 - Configuration files for sensitive data
 - Helper files for specific features
 
-### Security Measures
-1. **SQL Injection:** Prepared statements exclusively
-2. **XSS Prevention:** `htmlspecialchars()` on output, HTML purification
-3. **CSRF Prevention:** POST-only forms, session validation
-4. **Authentication:** Session-based with bcrypt passwords
-5. **Authorization:** Role-based access checks
-6. **Rate Limiting:** Can be added at web server level
-7. **Input Validation:** Server-side validation on critical operations
-8. **File Upload:** Image validation, safe directory permissions
+### Security Measures (Hardened - February 2026)
+1. **SQL Injection:** Prepared statements exclusively on ALL queries
+2. **XSS Prevention:** `htmlspecialchars()` on all output, HTML purification
+3. **CSRF Prevention:** Token-based protection on all forms + POST-only validation
+4. **Content Security Policy:** CSP headers to prevent unauthorized script execution
+5. **Authentication:** Session-based with bcrypt passwords, secure cookie flags
+6. **Authorization:** Role-based access checks (Admin vs Staff)
+7. **Session Security:** httpOnly cookies, sameSite attribute, session regeneration
+8. **Input Validation:** Server-side validation on all endpoints
+9. **File Upload:** Image type validation, safe directory permissions
+10. **Self-Approval Prevention:** Admin cannot approve own requests
 
 ### Performance Considerations
 - Database: Indexes on foreign keys (recommend)
@@ -1224,31 +1239,35 @@ Key areas to verify:
 
 ## 17. RECENT IMPROVEMENTS
 
-### Database Optimization (30 December 2025)
-**Major database cleanup and standardization:**
-- ✅ Removed unused `produk` table (duplicate of `barang`)
-- ✅ Removed unused columns:
-  - `barang.lokasi_simpanan` (0 PHP uses)
-  - `barang.gambar_produk` (0 PHP uses)
-  - `staf.is_superadmin` (0 PHP uses)
-  - `staf.peranan` (replaced by `is_admin`)
-- ✅ Standardized role management on `is_admin` column only
+### Version 2.3 (February 2026)
+**Major feature and security update:**
+- ✅ **Comprehensive Security Hardening** - CSRF tokens, CSP headers, XSS prevention, secure sessions (40+ files)
+- ✅ **Data Visualization** - Interactive Chart.js dashboard charts, product statistics
+- ✅ **Subcategory System** - Hierarchical category → subcategory organization
+- ✅ **Product Photo Management** - Upload, preview, delete, share across products
+- ✅ **UI/UX Improvements** - Toast notifications, sortable tables, dynamic dashboard
+- ✅ **MPK Favicon** - Custom favicon on all 13 standalone pages
+- ✅ **MPK Letterhead** - Formal header on inventory report printouts
+- ✅ **Duplicate Entry Handling** - Improved validation with field-level errors
+- ✅ **Admin Request Edit** - Admins can now edit requests
+
+### Version 2.1 (January 2026)
+- ✅ Bidirectional remarks system (staff ↔ admin)
+- ✅ Smart jawatan autocomplete with history
+- ✅ Smarter Telegram notifications (auto-hide empty fields)
+- ✅ Bug fixes (missing status badge)
+
+### Database Optimization (December 2025)
+- ✅ Removed unused `produk` table and columns
+- ✅ Standardized role management on `is_admin` column
 - ✅ Implemented 8 database-level FK constraints
-- ✅ Cleaned up duplicate FK constraints
 - ✅ Verified data integrity (0 orphaned records)
-- ✅ Updated all documentation (ERD, DFD, Schema Analysis)
 
-**Impact:** Professional database structure optimized for clarity and maintainability
-
-### Previous Features Implemented
+### Earlier Features
 - Comprehensive code comments and documentation
 - Department analytics redesign in reports
-- Search bar styling improvements
-- Telegram timezone sync
-- Clear Filters UI enhancement
+- Telegram timezone sync, Clear Filters UI
 - Real-time search with pagination
-- Password validation UX improvements
-- Keyboard accessibility enhancements
 - Mobile responsiveness optimization
 - Malay localization completion
 
@@ -1306,7 +1325,7 @@ Potential improvements:
 
 ## 20. KNOWLEDGE BASE SUMMARY
 
-**Total System Size:** ~14,460 PHP lines
+**Total System Size:** ~14,460+ PHP lines
 **Core Files:** 90+ PHP files
 **Database Tables:** 7 (cleaned and optimized)
 **Database Constraints:** 8 FK constraints
@@ -1315,9 +1334,10 @@ Potential improvements:
 **Framework:** Bootstrap 5.3.2
 **Database:** MySQLi with prepared statements
 **External Integration:** Telegram Bot API
-**Security:** Bcrypt passwords, prepared statements, session-based auth, database-level integrity
+**Security:** CSRF tokens, CSP headers, XSS prevention, bcrypt passwords, prepared statements, secure sessions
+**Visualization:** Chart.js interactive dashboard charts
 **Key Feature:** Request approval workflow with automatic stock management and complete audit trail
-**Status:** Production-Ready, Cleaned & Optimized (30 Dec 2025)
+**Status:** Production-Ready, Version 2.3 (February 2026)
 
 ---
 
@@ -1328,3 +1348,6 @@ This is a well-structured, production-ready government inventory management syst
 The system has been thoroughly documented with database schema analysis, data flow diagrams, and testing checklists already in place. Future developers should focus on understanding the request approval workflow, transaction patterns, and the denormalization strategy used for audit trails.
 
 **Ready for:** Production deployment, feature enhancements, maintenance, and handoff to other development teams.
+
+**Last Updated:** 10 February 2026
+**Version:** 2.3

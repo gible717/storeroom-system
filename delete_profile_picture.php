@@ -27,7 +27,9 @@ if ($old_pic && !empty($old_pic['gambar_profil'])) {
 
     // Delete file from server
     if (file_exists($file_to_delete)) {
-        unlink($file_to_delete);
+        if (!@unlink($file_to_delete)) {
+            error_log("[STOREROOM] Failed to delete profile picture: $file_to_delete");
+        }
     }
 
     // Clear path in database

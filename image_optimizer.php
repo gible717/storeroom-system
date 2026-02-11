@@ -73,7 +73,7 @@ function optimizeProductImage($source_path, $max_width = 800, $quality = 85) {
     if ($success) {
         // Delete original file if it's different from WebP output
         if ($webp_path !== $source_path && file_exists($source_path)) {
-            unlink($source_path);
+            @unlink($source_path);
         }
         return $webp_path;
     }

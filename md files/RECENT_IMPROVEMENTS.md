@@ -1,17 +1,175 @@
 # Recent System Improvements
 
-**Date**: 6 January 2026
-**Version**: 2.1
+**Date**: 10 February 2026
+**Version**: 2.3
 **Status**: ✅ Completed
 
 ---
 
 ## 📋 Table of Contents
 
+### Version 2.3 (February 2026)
+5. [Comprehensive Security Hardening](#5-comprehensive-security-hardening)
+6. [Data Visualization & Dashboard Charts](#6-data-visualization--dashboard-charts)
+7. [Subcategory System](#7-subcategory-system)
+8. [Product Photo Management](#8-product-photo-management)
+9. [UI/UX Improvements](#9-uiux-improvements)
+10. [MPK Favicon & Branding](#10-mpk-favicon--branding)
+
+### Version 2.1 (January 2026)
 1. [Bidirectional Remarks System](#1-bidirectional-remarks-system)
 2. [Smart Jawatan Autocomplete](#2-smart-jawatan-autocomplete)
 3. [Smart Telegram Notifications](#3-smart-telegram-notifications)
 4. [Bug Fixes](#4-bug-fixes)
+
+---
+
+# Version 2.3 Improvements (February 2026)
+
+---
+
+## 5. Comprehensive Security Hardening
+
+### Overview
+Major security upgrade across the entire application, implementing industry best practices for web application security.
+
+### Changes Implemented
+
+#### CSRF Token Protection
+- All forms now include CSRF tokens to prevent cross-site request forgery
+- Token generation and validation on every POST request
+- Session-based token storage with automatic regeneration
+
+#### Content Security Policy (CSP) Headers
+- CSP headers added to prevent unauthorized script execution
+- Restricts resource loading to trusted sources only
+- Mitigates XSS and data injection attacks
+
+#### XSS Prevention
+- All user-facing output encoded with `htmlspecialchars()`
+- Input sanitization on all form submissions
+- Safe rendering of user-generated content
+
+#### Secure Session Configuration
+- `httpOnly` flag on session cookies (prevents JavaScript access)
+- `sameSite` attribute set to prevent CSRF via cookies
+- Session regeneration on login to prevent fixation attacks
+
+#### Input Validation
+- Server-side validation on all endpoints
+- Type checking and length validation
+- Prepared statements on all database queries (already existed, verified)
+
+### Impact
+- **Files Modified**: 40+ PHP files across entire application
+- **Commit**: `81927cd`
+
+---
+
+## 6. Data Visualization & Dashboard Charts
+
+### Overview
+Added interactive Chart.js charts to the admin dashboard and product statistics pages for better data insights.
+
+### Features Added
+- **Stock Level Distribution Chart** - Pie/doughnut chart showing product stock status breakdown (sufficient/low/out of stock)
+- **Request Trend Chart** - Line/bar chart showing request volume over time
+- **Department Breakdown** - Visual breakdown of requests by department
+- **Product Statistics** - Enhanced product listing with visual stock indicators
+
+### Technical Details
+- Uses Chart.js library (already included in project)
+- Real-time data from database queries
+- Responsive charts that adapt to screen size
+- Color-coded indicators matching existing UI patterns
+
+### Impact
+- **Commit**: `427a4e2`
+
+---
+
+## 7. Subcategory System
+
+### Overview
+Added hierarchical product organization with subcategories under existing categories, and smart photo deletion logic.
+
+### Features Added
+- **Category → Subcategory hierarchy** for better product organization
+- **Subcategory filters** on product browsing pages
+- **Smart photo delete** - When deleting a product, only removes the photo file if no other product references the same image
+
+### Impact
+- **Commit**: `2e3291f`
+
+---
+
+## 8. Product Photo Management
+
+### Overview
+Full product photo system allowing admins to upload, preview, and manage product images.
+
+### Features Added
+- **Photo upload** on add/edit product pages with preview
+- **Photo delete** with confirmation
+- **"Apply photo to other products"** dialog - share one photo across multiple products
+- **Select all** support in photo sharing dialog
+- **Green name indicator** for items that already have photos
+- **Product photos on browse page** (`kewps8_browse.php`) - staff can see product images when making requests
+- **Functional view button popup** in admin product listing showing photo, details, and stock status
+- **Shared photo safety** - file only deleted from disk when no other product references it
+
+### Impact
+- **Commit**: `2e68e9f`
+- **New directory**: `uploads/product_images/`
+
+---
+
+## 9. UI/UX Improvements
+
+### Overview
+Significant user interface and experience enhancements across the application.
+
+### Features Added
+- **Dynamic admin dashboard** with animated stat cards and gradient backgrounds
+- **Toast notifications** (SweetAlert2) replacing standard alerts for all actions
+- **Sortable tables** - click column headers to sort ascending/descending
+- **Mobile-responsive stat cards** with hover lift effects
+- **Quick action modals** for pending requests and stock warnings on dashboard
+- **Smart glow indicators** with 5-minute timers for new requests
+- **Improved profile picture UI** - fixed crop modal backdrop issues, cleaner upload interface
+
+### Impact
+- **Commit**: `28c760e`
+
+---
+
+## 10. MPK Favicon & Branding
+
+### Overview
+Added custom MPK (Majlis Perbandaran Kangar) branding across the application.
+
+### Features Added
+- **Custom favicon** (32x32) auto-cropped from MPK logo, displayed in all browser tabs
+- **Apple touch icon** (180x180) for iOS bookmark support
+- **Favicon added to all 13 standalone pages** (login, register, error pages, print pages, etc.)
+- **Formal MPK letterhead** on inventory report printouts
+
+### Files Modified
+- `admin_header.php`, `staff_header.php` (covers all admin/staff pages)
+- `index.php`, `login.php`, `forgot_password.php`, `reset_password.php`, `staff_register.php`
+- `404.php`, `500.php`
+- `kewps3_print.php`, `kewps8_print.php`, `print_request.php`, `report_inventory_view.php`
+
+### New Assets
+- `assets/img/favicon-32.png` - Browser tab favicon
+- `assets/img/favicon-180.png` - Apple touch icon
+
+### Impact
+- **Commit**: `c8a2840` (favicon), `c0764e6` (letterhead)
+
+---
+
+# Version 2.1 Improvements (January 2026)
 
 ---
 
@@ -274,22 +432,16 @@ if ($status === 'Diluluskan') {
 
 ## 📊 Summary Statistics
 
-### Files Created
-1. `get_jawatan_suggestions.php` - AJAX endpoint for jawatan suggestions
-2. `RECENT_IMPROVEMENTS.md` - This documentation file
+### Version 2.3 Changes
+- **Security Hardening**: 40+ files modified with CSRF, CSP, XSS protection
+- **Data Visualization**: Dashboard charts and product statistics added
+- **Subcategory System**: Hierarchical product categorization
+- **Product Photos**: Full photo management system with shared photo support
+- **UI/UX**: Toast notifications, sortable tables, dynamic dashboard
+- **Favicon**: 13 pages updated with MPK branding
+- **Letterhead**: Formal MPK header on inventory reports
 
-### Files Modified
-1. `kewps8_print.php` - COALESCE logic for jawatan
-2. `request_review.php` - COALESCE logic for jawatan
-3. `kewps8_form.php` - Smart autocomplete UI and JS
-4. `kewps8_cart_ajax.php` - Return jawatan in get action
-5. `request_list.php` - Bidirectional remarks display
-6. `staff_dashboard.php` - Bidirectional remarks display
-7. `manage_requests.php` - Bidirectional remarks display
-8. `telegram_helper.php` - Smart field visibility
-9. `admin_dashboard.php` - Status badge fix
-
-### Total Changes
+### Version 2.1 Changes
 - **Files Created**: 2
 - **Files Modified**: 9
 - **Lines Added**: ~200
@@ -340,22 +492,17 @@ if ($status === 'Diluluskan') {
 
 ## 📝 Future Enhancements (Optional)
 
-### Jawatan System
-- [ ] Global jawatan dropdown list (standardization)
-- [ ] Department-specific jawatan suggestions
-- [ ] Admin can manage jawatan master list
-
-### Remarks System
-- [ ] Timestamp for when remarks were added
-- [ ] Edit history tracking
-- [ ] Email notification when admin adds remarks
-- [ ] Character limit with counter
-
-### Telegram
-- [ ] Deep links to specific requests
+### Potential Improvements
+- [ ] Email notifications (alternative to Telegram)
+- [ ] Bulk approval for multiple requests
+- [ ] Dark mode theme
+- [ ] QR code product tracking
+- [ ] Barcode scanning integration
+- [ ] API layer for mobile app
 - [ ] Quick approve/reject buttons in Telegram
-- [ ] Admin can reply via Telegram bot
 
 ---
 
+**Last Updated:** 10 February 2026
+**Version:** 2.3
 **End of Document**

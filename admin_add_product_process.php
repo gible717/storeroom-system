@@ -128,7 +128,7 @@ try {
 } catch (mysqli_sql_exception $e) {
     // Clean up uploaded file on failure
     if ($gambar_path && file_exists($gambar_path)) {
-        unlink($gambar_path);
+        @unlink($gambar_path);
     }
 
     if ($e->getCode() === 1062) {

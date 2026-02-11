@@ -13,7 +13,10 @@ $dbname = env('DB_NAME', 'storeroom_db');
 // Enable error reporting for mysqli
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Create connection with timeout
+$conn = new mysqli();
+$conn->options(MYSQLI_OPT_CONNECT_TIMEOUT, 5); // 5 second connection timeout
+$conn->real_connect($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     // In production, don't expose connection details
