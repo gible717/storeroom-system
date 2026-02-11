@@ -113,5 +113,49 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
+<!-- Session Timeout Warning -->
+<script>
+(function() {
+    const SESSION_TIMEOUT = 30 * 60; // 30 minutes in seconds
+    const WARNING_BEFORE = 5 * 60;   // Warn 5 minutes before expiry
+    let warningShown = false;
+    let lastActivity = Date.now();
+
+    // Reset timer on user interaction
+    ['click', 'keypress', 'scroll', 'mousemove'].forEach(evt => {
+        document.addEventListener(evt, function() {
+            lastActivity = Date.now();
+            warningShown = false;
+        }, { passive: true });
+    });
+
+    setInterval(function() {
+        const idleSeconds = (Date.now() - lastActivity) / 1000;
+        const remaining = SESSION_TIMEOUT - idleSeconds;
+
+        if (remaining <= WARNING_BEFORE && remaining > 0 && !warningShown) {
+            warningShown = true;
+            const mins = Math.ceil(remaining / 60);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sesi Hampir Tamat',
+                    html: 'Sesi anda akan tamat dalam <strong>' + mins + ' minit</strong> kerana tidak aktif.<br>Klik di mana-mana untuk kekal log masuk.',
+                    confirmButtonText: 'Kekal Log Masuk',
+                    timer: remaining * 1000,
+                    timerProgressBar: true
+                }).then(() => {
+                    lastActivity = Date.now();
+                    warningShown = false;
+                });
+            }
+        }
+
+        if (remaining <= 0) {
+            window.location.href = 'login.php?error=' + encodeURIComponent('Sesi anda telah tamat tempoh kerana tidak aktif. Sila log masuk semula.');
+        }
+    }, 30000); // Check every 30 seconds
+})();
+</script>
 </body>
 </html>

@@ -100,6 +100,7 @@ if ($result && $result->num_rows === 1) {
         $_SESSION['nama'] = $user['nama'];
         $_SESSION['is_admin'] = $user['is_admin'];
         $_SESSION['is_first_login'] = $user['is_first_login'];
+        $_SESSION['last_activity'] = time();
 
         // Force password change on first login
         if ($user['is_first_login'] == 1) {

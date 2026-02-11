@@ -457,6 +457,8 @@ Fungsi ini digunakan untuk **menambah stok masuk** sahaja (cth: penerimaan stok 
    | Merah | Ditolak |
 
 5. Pentadbir juga boleh klik **"Buat Permohonan"** untuk membuat permohonan bagi pihak sendiri
+   - Proses permohonan adalah sama seperti staf (lihat **Seksyen 5.2**)
+   - Penapis kategori menunjukkan **kategori utama** sahaja dan termasuk semua subkategori secara automatik
 
 #### 4.4.2 Semak dan Lulus Permohonan
 
@@ -888,50 +890,76 @@ Selepas log masuk, Staf akan melihat Dashboard dengan komponen berikut:
 
 ### 5.2 Buat Permohonan Baru (KEW.PS-8)
 
-**Langkah-langkah:**
+Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk memilih barang, dan halaman **Borang KEW.PS-8** untuk menyemak dan menghantar permohonan.
+
+> **Nota:** Pentadbir juga boleh membuat permohonan menggunakan aliran yang sama ini (lihat Seksyen 4.4.1).
+
+#### Langkah 1: Pilih Item (Halaman Katalog)
 
 1. Klik kad **"Permohonan Baru"** di Dashboard
 
-2. Borang KEW.PS-8 akan dipaparkan
+2. Halaman **Pilih Item** akan dipaparkan dalam bentuk katalog produk bergrid
 
-   ![Borang KEW.PS-8](screenshots/11_kewps8_form.png)
-   *Rajah 5.2: Borang Permohonan KEW.PS-8*
+   ![Halaman Pilih Item](screenshots/11_kewps8_form.png)
+   *Rajah 5.2: Halaman Pilih Item (Katalog Produk)*
 
-3. Maklumat borang:
+3. **Penapis Kategori (Butang Pil):**
+   - Klik butang pil kategori di bahagian atas untuk menapis produk
+   - Penapis menunjukkan **kategori utama** sahaja
+   - Memilih kategori utama akan menapis produk dalam kategori tersebut **DAN semua subkategorinya**
+   - Contoh: Memilih "Toner" akan memaparkan semua produk toner termasuk Canon, HP, Epson, dll.
+   - Klik **"Semua"** untuk memaparkan semua produk
 
-   | Medan | Penerangan | Wajib |
-   |-------|------------|-------|
-   | Nama Pemohon | Auto-isi dari profil anda (tidak boleh diubah) | - |
-   | Jabatan / Unit | Auto-isi dari profil anda (tidak boleh diubah) | - |
-   | Jawatan | Jawatan anda (dengan cadangan automatik) | Tidak |
-   | Tapisan mengikut Kategori | Tapis senarai item mengikut kategori | Tidak |
-   | Perihal Stok | Pilih item dari senarai dropdown | Ya |
-   | Kuantiti Dimohon | Kuantiti yang ingin dimohon | Ya |
-   | Catatan | Catatan tambahan untuk permohonan | Tidak |
+4. **Carian Produk:**
+   - Gunakan kotak carian di bahagian atas kanan untuk mencari produk mengikut nama atau kod
 
-4. Tambah item yang diperlukan:
-   - Pilih kategori untuk menapis senarai (pilihan)
-   - Pilih item dari dropdown **"Perihal Stok"**
-   - Masukkan **kuantiti** yang diperlukan
-   - Klik butang **"Tambah Item"** di bahagian atas
-
-5. Ulang langkah 4 untuk menambah lebih banyak item
+5. **Tambah Item ke Senarai:**
+   - Setiap produk dipaparkan dalam bentuk kad dengan gambar produk (jika ada)
+   - Laraskan **kuantiti** menggunakan butang **-** dan **+** pada setiap kad
+   - Klik butang **"Tambah"** untuk menambah item ke senarai pilihan anda
+   - Kad produk yang telah ditambah akan ditandakan dengan garis sempadan berwarna
 
 > **Nota:** Kuantiti tidak boleh melebihi stok semasa yang tersedia. Item yang kehabisan stok tidak boleh ditambah.
 
-6. Klik butang **"Sahkan"** apabila selesai
+6. **Bar Senarai (Sticky Bar):**
+   - Bar di bahagian bawah skrin menunjukkan bilangan item yang dipilih
+   - Klik **"Kosongkan"** untuk membuang semua item
+   - Klik **"Teruskan ke Borang"** apabila selesai memilih item
 
-7. Modal pengesahan akan memaparkan senarai item anda:
-   - Semak senarai item
-   - Kemaskini kuantiti jika perlu
-   - Padam item jika perlu (klik ikon tong sampah)
+7. Klik ikon **troli** di bahagian atas kanan untuk melihat pratonton senarai item anda
 
-   ![Senarai Item](screenshots/12_item_list.png)
-   *Rajah 5.3: Modal Pengesahan Permohonan*
+#### Langkah 2: Borang KEW.PS-8
 
-8. Klik **"Hantar"** untuk menghantar permohonan
+8. Selepas klik **"Teruskan ke Borang"**, halaman borang KEW.PS-8 akan dipaparkan
 
-9. Mesej berjaya akan dipaparkan
+9. Maklumat borang:
+
+   | Medan | Penerangan | Boleh Ubah |
+   |-------|------------|------------|
+   | Nama Pemohon | Auto-isi dari profil anda | Tidak |
+   | Jabatan / Unit | Auto-isi dari profil anda | Tidak |
+   | Jawatan | Jawatan anda (dengan cadangan automatik) | Ya |
+   | Senarai Item Dipilih | Item yang dipilih dari halaman katalog | Ya (kuantiti/padam) |
+   | Catatan | Catatan tambahan untuk permohonan | Ya |
+
+10. **Semak Senarai Item:**
+    - Kemaskini kuantiti setiap item jika perlu
+    - Padam item yang tidak diperlukan (klik ikon tong sampah)
+    - Klik **"Tambah Lagi Item"** untuk kembali ke halaman katalog dan menambah item lain
+
+11. Klik butang **"Sahkan"** apabila selesai
+
+12. Modal pengesahan akan memaparkan senarai item anda:
+    - Semak senarai item buat kali terakhir
+    - Kemaskini kuantiti jika perlu
+    - Padam item jika perlu (klik ikon tong sampah)
+
+    ![Senarai Item](screenshots/12_item_list.png)
+    *Rajah 5.3: Modal Pengesahan Permohonan*
+
+13. Klik **"Hantar"** untuk menghantar permohonan
+
+14. Mesej berjaya akan dipaparkan
 
 ---
 

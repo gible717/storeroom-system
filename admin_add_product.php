@@ -275,7 +275,7 @@ $kategori_result = $conn->query("SELECT ID_kategori, nama_kategori FROM KATEGORI
                         <div class="d-flex justify-content-end gap-2 pt-3 border-top">
                             <a href="admin_products.php" class="btn btn-cancel">Batal</a>
                             <button type="submit" class="btn btn-save">
-                                <i class="bi bi-plus-lg me-1"></i>Simpan Produk
+                                Simpan Produk
                             </button>
                         </div>
                     </form>

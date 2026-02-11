@@ -182,7 +182,7 @@ $accent_rgb = $is_admin ? '79, 70, 229' : '13, 110, 253';
     <div class="col-lg-8">
         <!-- Header Section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="<?php echo $back_link; ?>" class="text-dark" title="Kembali">
+            <a href="kewps8_browse.php" class="text-dark" title="Kembali ke Pilih Item">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
             <h3 class="mb-0 fw-bold"><?php echo $pageTitle; ?></h3>

@@ -25,6 +25,23 @@ if (!isset($_SESSION['ID_staf'])) {
     exit;
 }
 
+// Session timeout - 30 minutes of inactivity
+$session_timeout = 30 * 60; // 30 minutes in seconds
+
+if (isset($_SESSION['last_activity'])) {
+    $inactive_time = time() - $_SESSION['last_activity'];
+    if ($inactive_time > $session_timeout) {
+        // Session expired - destroy and redirect
+        session_unset();
+        session_destroy();
+        header("Location: login.php?error=" . urlencode("Sesi anda telah tamat tempoh kerana tidak aktif. Sila log masuk semula."));
+        exit;
+    }
+}
+
+// Update last activity timestamp
+$_SESSION['last_activity'] = time();
+
 // Load session variables
 $userID = $_SESSION['ID_staf'];
 $userName = $_SESSION['nama'];

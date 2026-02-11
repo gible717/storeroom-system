@@ -384,7 +384,7 @@ $has_image = (!empty($gambar) && file_exists($gambar));
                         <div class="d-flex justify-content-end gap-2 pt-3 border-top">
                             <a href="admin_products.php" class="btn btn-cancel">Batal</a>
                             <button type="submit" class="btn btn-save">
-                                <i class="bi bi-check-lg me-1"></i>Kemaskini Produk
+                                Kemaskini Produk
                             </button>
                         </div>
                     </form>
