@@ -17,7 +17,7 @@ if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1) {
     require 'staff_header.php';
 }
 
-// Get categories for filter
+// Get categories for filter (main categories)
 $kategori_sql = "SELECT DISTINCT kategori FROM barang WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC";
 $kategori_result = $conn->query($kategori_sql);
 $categories = [];
@@ -27,10 +27,31 @@ if ($kategori_result) {
     }
 }
 
-// Get all products
+// Get all unique subcategory names (for independent brand/sub filter row)
+$all_subcategories = [];
+$allsub_sql = "SELECT DISTINCT k.nama_kategori AS sub_name
+    FROM KATEGORI k
+    WHERE k.parent_id IS NOT NULL
+    ORDER BY k.nama_kategori ASC";
+$allsub_result = $conn->query($allsub_sql);
+if ($allsub_result) {
+    while ($row = $allsub_result->fetch_assoc()) {
+        $all_subcategories[] = $row['sub_name'];
+    }
+}
+
+// Get all products with subcategory info
 $products = [];
-$result = $conn->query("SELECT no_kod, perihal_stok, kategori, baki_semasa AS stok_semasa, gambar_produk FROM barang ORDER BY perihal_stok ASC");
+$result = $conn->query("
+    SELECT b.no_kod, b.perihal_stok, b.kategori, b.baki_semasa AS stok_semasa, b.gambar_produk,
+           k.nama_kategori AS sub_nama, k.parent_id
+    FROM barang b
+    LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
+    ORDER BY b.perihal_stok ASC
+");
 while ($row = $result->fetch_assoc()) {
+    // If parent_id is set, product is in a subcategory
+    $row['subkategori'] = (!empty($row['parent_id'])) ? $row['sub_nama'] : '';
     $products[] = $row;
 }
 
@@ -208,6 +229,22 @@ $accent_rgb   = $is_admin ? '79, 70, 229' : '13, 110, 253';
     color: #fff;
 }
 
+/* Subcategory filter pills - different color (teal/warm) + slightly smaller */
+.sub-pill {
+    font-size: 0.75rem !important;
+    padding: 0.3rem 0.85rem !important;
+}
+.sub-pill:hover {
+    border-color: #0d9488 !important;
+    color: #0d9488 !important;
+    background: #f0fdfa !important;
+}
+.sub-pill.active {
+    border-color: #0d9488 !important;
+    background: #0d9488 !important;
+    color: #fff !important;
+}
+
 /* Search bar */
 .search-browse {
     max-width: 350px;
@@ -334,6 +371,21 @@ $accent_rgb   = $is_admin ? '79, 70, 229' : '13, 110, 253';
                         placeholder="Cari nama atau kod produk...">
                 </div>
             </div>
+
+            <?php if (!empty($all_subcategories)): ?>
+            <!-- Subcategory/Brand Filter Pills (always visible, independent filter) -->
+            <div class="mt-3 pt-3 border-top" id="subcategoryRow">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <small class="text-muted me-1"><i class="bi bi-tag me-1"></i>Subkategori:</small>
+                    <button class="filter-pill sub-pill active" data-sub="">Semua</button>
+                    <?php foreach ($all_subcategories as $sub): ?>
+                        <button class="filter-pill sub-pill" data-sub="<?php echo htmlspecialchars($sub); ?>">
+                            <?php echo htmlspecialchars($sub); ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -373,6 +425,7 @@ $accent_rgb   = $is_admin ? '79, 70, 229' : '13, 110, 253';
              data-name="<?php echo htmlspecialchars(strtolower($item['perihal_stok'])); ?>"
              data-kod="<?php echo htmlspecialchars(strtolower($item['no_kod'])); ?>"
              data-kategori="<?php echo htmlspecialchars($item['kategori'] ?? ''); ?>"
+             data-subkategori="<?php echo htmlspecialchars($item['subkategori'] ?? ''); ?>"
              data-stock="<?php echo $stok; ?>">
 
             <div class="card product-card h-100 shadow-sm"
@@ -395,7 +448,10 @@ $accent_rgb   = $is_admin ? '79, 70, 229' : '13, 110, 253';
                     <!-- Category Badge -->
                     <?php if (!empty($item['kategori'])): ?>
                         <span class="badge bg-light text-dark border mb-2" style="width: fit-content; font-size: 0.7rem;">
-                            <?php echo htmlspecialchars($item['kategori']); ?>
+                            <?php echo htmlspecialchars($item['kategori']);
+                            if (!empty($item['subkategori'])) {
+                                echo ' <i class="bi bi-chevron-right" style="font-size:0.55rem;"></i> ' . htmlspecialchars($item['subkategori']);
+                            } ?>
                         </span>
                     <?php endif; ?>
 
@@ -498,7 +554,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const productGrid = document.getElementById('productGrid');
     const productItems = document.querySelectorAll('.product-item');
     const searchInput = document.getElementById('searchInput');
-    const categoryFilters = document.querySelectorAll('.filter-pill');
+    const categoryFilters = document.querySelectorAll('#categoryFilters .filter-pill');
+    const subPills = document.querySelectorAll('.sub-pill');
     const sortSelect = document.getElementById('sortSelect');
     const productCount = document.getElementById('productCount');
     const noResults = document.getElementById('noResults');
@@ -513,15 +570,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const cartModalBody = document.getElementById('cartModalBody');
 
     let activeKategori = '';
+    let activeSubkategori = '';
 
     // ==========================================
-    // 1. CATEGORY FILTER
+    // 1. CATEGORY FILTER (Main categories)
     // ==========================================
     categoryFilters.forEach(pill => {
         pill.addEventListener('click', function() {
             categoryFilters.forEach(p => p.classList.remove('active'));
             this.classList.add('active');
             activeKategori = this.dataset.kategori;
+            filterProducts();
+        });
+    });
+
+    // ==========================================
+    // 1b. SUBCATEGORY FILTER (Independent - brands)
+    // ==========================================
+    subPills.forEach(pill => {
+        pill.addEventListener('click', function() {
+            subPills.forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            activeSubkategori = this.dataset.sub;
             filterProducts();
         });
     });
@@ -553,6 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = item.dataset.name || '';
             const kod = item.dataset.kod || '';
             const kategori = item.dataset.kategori || '';
+            const subkategori = item.dataset.subkategori || '';
             const nameEl = item.querySelector('.product-name');
 
             const matchesSearch = searchText === '' ||
@@ -562,7 +633,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesKategori = activeKategori === '' ||
                 kategori === activeKategori;
 
-            if (matchesSearch && matchesKategori) {
+            const matchesSubkategori = activeSubkategori === '' ||
+                subkategori === activeSubkategori;
+
+            if (matchesSearch && matchesKategori && matchesSubkategori) {
                 item.style.display = '';
                 visibleCount++;
                 highlightText(nameEl, searchText);

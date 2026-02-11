@@ -13,6 +13,7 @@ Web-based inventory management system designed for government storeroom operatio
 
 ### For Staff (Staf)
 - 📝 Create inventory requests (KEW.PS-8 form)
+  - 🛒 **Product catalog browse** with dual-row filter (category + subcategory/brand)
   - 🤖 **Smart jawatan autocomplete** - Auto-suggests position based on profile and history
   - 💾 **Auto-save to session** - Form remembers your input if you navigate away
 - 👀 View and track own requests
@@ -130,7 +131,9 @@ The system uses **7 core tables**:
 3. **📂 Subcategory System**
    - Hierarchical category → subcategory product organization
    - Smart photo delete (shared photo safety)
-   - Enhanced product browsing with subcategory filters
+   - **Independent two-row filter** on browse page: main categories (Row 1) + subcategories/brands (Row 2)
+   - Filter by brand (e.g., "HP") across all categories without selecting a main category first
+   - Product cards display "Main > Sub" badge format (e.g., "Toner > HP")
 
 4. **📷 Product Photo Management**
    - Upload, preview, and delete product photos

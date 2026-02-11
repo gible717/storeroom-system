@@ -458,7 +458,8 @@ Fungsi ini digunakan untuk **menambah stok masuk** sahaja (cth: penerimaan stok 
 
 5. Pentadbir juga boleh klik **"Buat Permohonan"** untuk membuat permohonan bagi pihak sendiri
    - Proses permohonan adalah sama seperti staf (lihat **Seksyen 5.2**)
-   - Penapis kategori menunjukkan **kategori utama** sahaja dan termasuk semua subkategori secara automatik
+   - Halaman katalog menyediakan **dua baris penapis bebas**: kategori utama dan subkategori/jenama
+   - Penapis subkategori boleh digunakan secara terus tanpa perlu memilih kategori utama terlebih dahulu
 
 #### 4.4.2 Semak dan Lulus Permohonan
 
@@ -903,17 +904,22 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
    ![Halaman Pilih Item](screenshots/11_kewps8_form.png)
    *Rajah 5.2: Halaman Pilih Item (Katalog Produk)*
 
-3. **Penapis Kategori (Butang Pil):**
-   - Klik butang pil kategori di bahagian atas untuk menapis produk
-   - Penapis menunjukkan **kategori utama** sahaja
-   - Memilih kategori utama akan menapis produk dalam kategori tersebut **DAN semua subkategorinya**
-   - Contoh: Memilih "Toner" akan memaparkan semua produk toner termasuk Canon, HP, Epson, dll.
+3. **Penapis Kategori (Baris 1 - Butang Pil):**
+   - Baris pertama menunjukkan **kategori utama** (cth: Alat Tulis, Toner, Printer)
+   - Klik butang pil kategori untuk menapis produk mengikut kategori utama
    - Klik **"Semua"** untuk memaparkan semua produk
 
-4. **Carian Produk:**
+4. **Penapis Subkategori (Baris 2 - Butang Pil Berwarna Teal):**
+   - Baris kedua menunjukkan **subkategori/jenama** (cth: HP, Canon, Epson)
+   - Penapis ini **bebas** daripada penapis kategori utama
+   - Contoh: Klik **"HP"** sahaja untuk melihat **semua produk HP** merentasi semua kategori (toner HP, printer HP, dll.)
+   - Kedua-dua penapis boleh digabungkan: Pilih "Toner" + "HP" = hanya toner HP sahaja
+   - Setiap kad produk memaparkan label kategori dalam format **"Toner > HP"** jika produk mempunyai subkategori
+
+5. **Carian Produk:**
    - Gunakan kotak carian di bahagian atas kanan untuk mencari produk mengikut nama atau kod
 
-5. **Tambah Item ke Senarai:**
+6. **Tambah Item ke Senarai:**
    - Setiap produk dipaparkan dalam bentuk kad dengan gambar produk (jika ada)
    - Laraskan **kuantiti** menggunakan butang **-** dan **+** pada setiap kad
    - Klik butang **"Tambah"** untuk menambah item ke senarai pilihan anda
@@ -921,18 +927,18 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
 
 > **Nota:** Kuantiti tidak boleh melebihi stok semasa yang tersedia. Item yang kehabisan stok tidak boleh ditambah.
 
-6. **Bar Senarai (Sticky Bar):**
+7. **Bar Senarai (Sticky Bar):**
    - Bar di bahagian bawah skrin menunjukkan bilangan item yang dipilih
    - Klik **"Kosongkan"** untuk membuang semua item
    - Klik **"Teruskan ke Borang"** apabila selesai memilih item
 
-7. Klik ikon **troli** di bahagian atas kanan untuk melihat pratonton senarai item anda
+8. Klik ikon **troli** di bahagian atas kanan untuk melihat pratonton senarai item anda
 
 #### Langkah 2: Borang KEW.PS-8
 
-8. Selepas klik **"Teruskan ke Borang"**, halaman borang KEW.PS-8 akan dipaparkan
+9. Selepas klik **"Teruskan ke Borang"**, halaman borang KEW.PS-8 akan dipaparkan
 
-9. Maklumat borang:
+10. Maklumat borang:
 
    | Medan | Penerangan | Boleh Ubah |
    |-------|------------|------------|
@@ -942,14 +948,14 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
    | Senarai Item Dipilih | Item yang dipilih dari halaman katalog | Ya (kuantiti/padam) |
    | Catatan | Catatan tambahan untuk permohonan | Ya |
 
-10. **Semak Senarai Item:**
+11. **Semak Senarai Item:**
     - Kemaskini kuantiti setiap item jika perlu
     - Padam item yang tidak diperlukan (klik ikon tong sampah)
     - Klik **"Tambah Lagi Item"** untuk kembali ke halaman katalog dan menambah item lain
 
-11. Klik butang **"Sahkan"** apabila selesai
+12. Klik butang **"Sahkan"** apabila selesai
 
-12. Modal pengesahan akan memaparkan senarai item anda:
+13. Modal pengesahan akan memaparkan senarai item anda:
     - Semak senarai item buat kali terakhir
     - Kemaskini kuantiti jika perlu
     - Padam item jika perlu (klik ikon tong sampah)
@@ -957,9 +963,9 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
     ![Senarai Item](screenshots/12_item_list.png)
     *Rajah 5.3: Modal Pengesahan Permohonan*
 
-13. Klik **"Hantar"** untuk menghantar permohonan
+14. Klik **"Hantar"** untuk menghantar permohonan
 
-14. Mesej berjaya akan dipaparkan
+15. Mesej berjaya akan dipaparkan
 
 ---
 
