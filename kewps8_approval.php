@@ -35,9 +35,12 @@ if ($permohonan['ID_pemohon'] == $_SESSION['ID_staf']) {
 }
 
 // Fetch request items data
-$stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran, b.baki_semasa
+$stmt_items = $conn->prepare("SELECT pb.*, b.perihal_stok, b.unit_pengukuran, b.baki_semasa,
+                                b.kategori,
+                                CASE WHEN k.parent_id IS NOT NULL THEN k.nama_kategori ELSE NULL END AS subkategori
                             FROM permohonan_barang pb
                             LEFT JOIN barang b ON pb.no_kod = b.no_kod
+                            LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
@@ -97,6 +100,14 @@ $items_result = $stmt_items->get_result();
                                         <td>
                                             <?php echo htmlspecialchars($item['perihal_stok']); ?>
                                             <small class="d-block text-muted">(<?php echo htmlspecialchars($item['unit_pengukuran']); ?>)</small>
+                                            <?php if (!empty($item['kategori'])): ?>
+                                                <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">
+                                                    <?php echo htmlspecialchars($item['kategori']);
+                                                    if (!empty($item['subkategori'])) {
+                                                        echo ' <i class="bi bi-chevron-right" style="font-size:0.5rem;"></i> ' . htmlspecialchars($item['subkategori']);
+                                                    } ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </td>
                                         <td class="text-center fs-5">
                                             <span class="badge bg-secondary"><?php echo $item['kuantiti_mohon']; ?></span>

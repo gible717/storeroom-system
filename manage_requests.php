@@ -398,9 +398,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         `;
 
                         data.items.forEach(item => {
+                            let kategoriHtml = '';
+                            if (item.kategori) {
+                                kategoriHtml = `<br><span class="badge bg-light text-dark border" style="font-size:0.65rem;">${item.kategori}`;
+                                if (item.subkategori) {
+                                    kategoriHtml += ` <i class="bi bi-chevron-right" style="font-size:0.5rem;"></i> ${item.subkategori}`;
+                                }
+                                kategoriHtml += `</span>`;
+                            }
                             html += `
                                 <tr>
-                                    <td>${item.perihal_stok}</td>
+                                    <td>${item.perihal_stok}${kategoriHtml}</td>
                                     <td class="text-center">${item.kuantiti_mohon}</td>
                                 </tr>
                             `;

@@ -29,9 +29,12 @@ if (!$request_header) {
 
 // Get items for this request
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok,
+                                b.kategori,
+                                CASE WHEN k.parent_id IS NOT NULL THEN k.nama_kategori ELSE NULL END AS subkategori
                             FROM permohonan_barang pb
                             JOIN barang b ON pb.no_kod = b.no_kod
+                            LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();
@@ -86,6 +89,14 @@ while ($row = $result_all_barang->fetch_assoc()) {
                                     <tr class="item-row" id="row-<?php echo $item['no_kod']; ?>">
                                         <td>
                                             <?php echo htmlspecialchars($item['perihal_stok']); ?>
+                                            <?php if (!empty($item['kategori'])): ?>
+                                                <br><span class="badge bg-light text-dark border" style="font-size: 0.65rem;">
+                                                    <?php echo htmlspecialchars($item['kategori']);
+                                                    if (!empty($item['subkategori'])) {
+                                                        echo ' <i class="bi bi-chevron-right" style="font-size:0.5rem;"></i> ' . htmlspecialchars($item['subkategori']);
+                                                    } ?>
+                                                </span>
+                                            <?php endif; ?>
                                             <input type="hidden" name="items[<?php echo $item['no_kod']; ?>][no_kod]" value="<?php echo $item['no_kod']; ?>">
                                             <input type="hidden" name="items[<?php echo $item['no_kod']; ?>][perihal_stok]" value="<?php echo htmlspecialchars($item['perihal_stok']); ?>">
                                         </td>

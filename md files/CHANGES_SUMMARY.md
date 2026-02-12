@@ -32,6 +32,7 @@
 
 ### 5. Subcategory System & Smart Photo Delete (2e3291f)
 - Hierarchical category → subcategory product organization
+- "Main > Sub" category badges on request review, approval, receipt, and edit pages
 - Smart shared photo deletion (only removes file when no other product references it)
 
 ### 6. Product Photo Feature (2e68e9f)

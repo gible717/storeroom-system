@@ -96,6 +96,7 @@ Added hierarchical product organization with subcategories under existing catego
 ### Features Added
 - **Category → Subcategory hierarchy** for better product organization
 - **Subcategory filters** on product browsing pages
+- **"Main > Sub" category badges** on request management pages (review, approval, receipt, edit, quick-view modals)
 - **Smart photo delete** - When deleting a product, only removes the photo file if no other product references the same image
 
 ### Impact

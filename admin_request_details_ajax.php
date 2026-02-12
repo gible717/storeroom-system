@@ -29,9 +29,12 @@ if (!$request_header) {
 
 // Get items for this request
 $items_in_request = [];
-$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok
+$stmt_items = $conn->prepare("SELECT pb.no_kod, pb.kuantiti_mohon, b.perihal_stok,
+                                b.kategori,
+                                CASE WHEN k.parent_id IS NOT NULL THEN k.nama_kategori ELSE NULL END AS subkategori
                             FROM permohonan_barang pb
                             JOIN barang b ON pb.no_kod = b.no_kod
+                            LEFT JOIN KATEGORI k ON b.ID_kategori = k.ID_kategori
                             WHERE pb.ID_permohonan = ?");
 $stmt_items->bind_param("i", $id_permohonan);
 $stmt_items->execute();

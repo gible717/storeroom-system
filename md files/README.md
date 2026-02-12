@@ -134,6 +134,7 @@ The system uses **7 core tables**:
    - **Independent two-row filter** on browse page: main categories (Row 1) + subcategories/brands (Row 2)
    - Filter by brand (e.g., "HP") across all categories without selecting a main category first
    - Product cards display "Main > Sub" badge format (e.g., "Toner > HP")
+   - **Category badges on request pages** - review, approval, receipt, edit, and quick-view modals show "Main > Sub" format
 
 4. **📷 Product Photo Management**
    - Upload, preview, and delete product photos

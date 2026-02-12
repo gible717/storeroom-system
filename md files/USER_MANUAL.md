@@ -480,6 +480,7 @@ Fungsi ini digunakan untuk **menambah stok masuk** sahaja (cth: penerimaan stok 
 
 4. Semak senarai item yang dimohon:
    - **Perihal Stok** - Nama item
+   - **Kategori / Subkategori** - Lencana "Kategori > Subkategori" dipaparkan di bawah nama item (cth: "Toner > HP")
    - **Baki Semasa** - Stok semasa dalam sistem
    - **Kuantiti Mohon** - Kuantiti yang diminta oleh pemohon
    - **Kuantiti Lulus** - Kuantiti yang diluluskan (boleh diubah oleh pentadbir)

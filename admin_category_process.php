@@ -82,8 +82,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
             $stmt->execute();
             $stmt->close();
 
-            // If this is a main category (parent_id IS NULL), cascade update barang.kategori
+            // Cascade update barang.kategori to keep denormalized field in sync
             if ($parent_id === null) {
+                // Main category renamed: update all products under this main + its subcategories
                 $sub_stmt = $conn->prepare("SELECT ID_kategori FROM KATEGORI WHERE parent_id = ?");
                 $sub_stmt->bind_param("i", $ID_kategori);
                 $sub_stmt->execute();
@@ -102,6 +103,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                 $update_stmt->bind_param("s" . $types, ...$params);
                 $update_stmt->execute();
                 $update_stmt->close();
+            } else {
+                // Converted to subcategory: update products to use parent's main category name
+                $parent_stmt = $conn->prepare("SELECT nama_kategori FROM KATEGORI WHERE ID_kategori = ?");
+                $parent_stmt->bind_param("i", $parent_id);
+                $parent_stmt->execute();
+                $parent_name = $parent_stmt->get_result()->fetch_assoc()['nama_kategori'] ?? '';
+                $parent_stmt->close();
+
+                if ($parent_name !== '') {
+                    $update_stmt = $conn->prepare("UPDATE barang SET kategori = ? WHERE ID_kategori = ?");
+                    $update_stmt->bind_param("si", $parent_name, $ID_kategori);
+                    $update_stmt->execute();
+                    $update_stmt->close();
+                }
             }
 
             header("Location: admin_category.php?success=Kategori berjaya dikemaskini!");
