@@ -3,7 +3,7 @@
 
 ---
 
-**Versi:** 2.3
+**Versi:** 2.4
 **Tarikh:** Februari 2026
 **Disediakan oleh:** Unit Teknologi Maklumat
 **Jabatan:** Majlis Perbandaran Kangar
@@ -393,7 +393,9 @@ Sistem menyokong **kategori bertingkat** dengan satu tahap kedalaman:
 2. Kemaskini nama atau kategori induk
 3. Klik **"Kemaskini"**
 
-> **Nota Penting:** Apabila nama kategori utama dikemaskini, nama kategori dalam rekod produk akan dikemaskini secara automatik.
+> **Nota Penting:**
+> - Apabila nama kategori utama dikemaskini, nama kategori dalam rekod produk akan dikemaskini secara automatik.
+> - Apabila kategori utama ditukar menjadi subkategori (dengan menetapkan Kategori Induk), semua produk di bawahnya akan dikemaskini secara automatik untuk menggunakan nama kategori induk yang baru.
 
 **Padam Kategori:**
 
@@ -456,7 +458,12 @@ Fungsi ini digunakan untuk **menambah stok masuk** sahaja (cth: penerimaan stok 
    | Hijau | Diluluskan |
    | Merah | Ditolak |
 
-5. Pentadbir juga boleh klik **"Buat Permohonan"** untuk membuat permohonan bagi pihak sendiri
+5. **Pratonton Pantas (Quick View):**
+   - Klik pada mana-mana permohonan untuk melihat butiran ringkas dalam modal pop-up
+   - Modal memaparkan senarai item dengan lencana **"Kategori > Subkategori"** di bawah setiap nama item
+   - Contoh: "Toner > HP" memudahkan pengenalpastian item tanpa perlu membuka halaman penuh
+
+6. Pentadbir juga boleh klik **"Buat Permohonan"** untuk membuat permohonan bagi pihak sendiri
    - Proses permohonan adalah sama seperti staf (lihat **Seksyen 5.2**)
    - Halaman katalog menyediakan **dua baris penapis bebas**: kategori utama dan subkategori/jenama
    - Penapis subkategori boleh digunakan secara terus tanpa perlu memilih kategori utama terlebih dahulu
@@ -980,7 +987,10 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
    ![Senarai Permohonan Staf](screenshots/13_my_requests.png)
    *Rajah 5.4: Senarai Permohonan Saya*
 
-3. Klik pada **ID Permohonan** untuk melihat butiran penuh (termasuk catatan admin jika ada)
+3. Klik pada **ID Permohonan** untuk melihat butiran ringkas dalam modal pop-up:
+   - Senarai item yang dimohon beserta kuantiti
+   - Lencana **"Kategori > Subkategori"** dipaparkan di bawah setiap nama item untuk memudahkan pengenalpastian
+   - Catatan admin (jika ada) untuk permohonan yang telah diproses
 
 4. Status permohonan:
 
@@ -1003,6 +1013,7 @@ Proses permohonan terbahagi kepada **dua halaman**: halaman **Pilih Item** untuk
    *Rajah 5.5: Halaman Edit Permohonan*
 
 3. Kemaskini maklumat atau item
+   - Senarai item memaparkan lencana **"Kategori > Subkategori"** di bawah nama item untuk rujukan
 4. Klik **"Kemaskini"**
 
 #### 5.3.2 Padam Permohonan
@@ -1303,6 +1314,7 @@ Berikut adalah senarai penuh tangkapan skrin yang diperlukan untuk manual ini. S
 | 2.1 | Februari 2026 | Unit Teknologi Maklumat | Penambahan ciri subkategori dan foto produk: (1) Sokongan kategori bertingkat dengan kategori utama dan subkategori, (2) Dropdown kategori bertingkat (cascading) dalam borang produk, (3) Paparan hierarki "Kategori > Subkategori" dalam senarai produk, (4) Penapis kategori yang mengumpulkan subkategori, (5) Muat naik dan kongsi foto produk, (6) Padam foto pintar dengan pengesanan perkongsian foto |
 | 2.2 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan UI/UX: (1) Sistem warna dinamik kad dashboard - hijau untuk selamat, amaran untuk perlu tindakan, (2) Notifikasi Toast untuk maklum balas pantas, (3) Lajur jadual boleh disusun (sortable) dalam senarai produk, (4) Paparan keadaan kosong (empty state) yang lebih mesra pengguna |
 | 2.3 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan visualisasi data dan keselamatan: (1) Carta donut status permohonan dan carta bar trend bulanan di Dashboard Pentadbir, (2) Kad ringkasan statistik (jumlah produk, nilai inventori, stok rendah, kehabisan stok) di halaman produk, (3) Bar kemajuan stok berwarna dalam jadual produk, (4) Pengerasan keselamatan menyeluruh - pembolehubah persekitaran, perlindungan CSRF, sanitasi XSS, penyata tersedia (prepared statements), pengesahan MIME, pengehadan kadar |
+| 2.4 | Februari 2026 | Unit Teknologi Maklumat | Penambahbaikan kategori dan penapis: (1) Lencana "Kategori > Subkategori" pada halaman semakan, kelulusan, resit, edit permohonan dan modal pratonton pantas, (2) Penapis subkategori/jenama bebas (baris kedua) pada halaman katalog permohonan, (3) Pembetulan kaskad automatik rekod produk apabila kategori utama ditukar menjadi subkategori |
 
 ---
 
