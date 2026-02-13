@@ -360,6 +360,7 @@ $accent_rgb   = $is_admin ? '79, 70, 229' : '13, 110, 253';
                             <?php echo htmlspecialchars($kategori); ?>
                         </button>
                     <?php endforeach; ?>
+                    <small class="text-muted ms-1" style="font-size: 0.68rem; opacity: 0.7;"><i class="bi bi-info-circle me-1"></i>Boleh pilih lebih dari satu</small>
                 </div>
 
                 <!-- Search -->
@@ -569,29 +570,69 @@ document.addEventListener('DOMContentLoaded', function() {
     const cartPreviewBtn = document.getElementById('cartPreviewBtn');
     const cartModalBody = document.getElementById('cartModalBody');
 
-    let activeKategori = '';
-    let activeSubkategori = '';
+    let activeKategories = new Set();
+    let activeSubkategories = new Set();
 
     // ==========================================
-    // 1. CATEGORY FILTER (Main categories)
+    // 1. CATEGORY FILTER (Main categories - multi-select)
     // ==========================================
     categoryFilters.forEach(pill => {
         pill.addEventListener('click', function() {
-            categoryFilters.forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
-            activeKategori = this.dataset.kategori;
+            const kategori = this.dataset.kategori;
+            const semuaBtn = document.querySelector('#categoryFilters .filter-pill[data-kategori=""]');
+
+            if (kategori === '') {
+                // "Semua" clicked - clear all
+                activeKategories.clear();
+                categoryFilters.forEach(p => p.classList.remove('active'));
+                semuaBtn.classList.add('active');
+            } else {
+                // Toggle this category
+                if (activeKategories.has(kategori)) {
+                    activeKategories.delete(kategori);
+                } else {
+                    activeKategories.add(kategori);
+                }
+                semuaBtn.classList.remove('active');
+                this.classList.toggle('active');
+
+                // If nothing selected, revert to "Semua"
+                if (activeKategories.size === 0) {
+                    semuaBtn.classList.add('active');
+                }
+            }
             filterProducts();
         });
     });
 
     // ==========================================
-    // 1b. SUBCATEGORY FILTER (Independent - brands)
+    // 1b. SUBCATEGORY FILTER (Independent - multi-select)
     // ==========================================
     subPills.forEach(pill => {
         pill.addEventListener('click', function() {
-            subPills.forEach(p => p.classList.remove('active'));
-            this.classList.add('active');
-            activeSubkategori = this.dataset.sub;
+            const sub = this.dataset.sub;
+            const semuaSubBtn = document.querySelector('.sub-pill[data-sub=""]');
+
+            if (sub === '') {
+                // "Semua" clicked - clear all
+                activeSubkategories.clear();
+                subPills.forEach(p => p.classList.remove('active'));
+                semuaSubBtn.classList.add('active');
+            } else {
+                // Toggle this subcategory
+                if (activeSubkategories.has(sub)) {
+                    activeSubkategories.delete(sub);
+                } else {
+                    activeSubkategories.add(sub);
+                }
+                semuaSubBtn.classList.remove('active');
+                this.classList.toggle('active');
+
+                // If nothing selected, revert to "Semua"
+                if (activeSubkategories.size === 0) {
+                    semuaSubBtn.classList.add('active');
+                }
+            }
             filterProducts();
         });
     });
@@ -630,11 +671,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 name.includes(searchText) ||
                 kod.includes(searchText);
 
-            const matchesKategori = activeKategori === '' ||
-                kategori === activeKategori;
+            const matchesKategori = activeKategories.size === 0 ||
+                activeKategories.has(kategori);
 
-            const matchesSubkategori = activeSubkategori === '' ||
-                subkategori === activeSubkategori;
+            const matchesSubkategori = activeSubkategories.size === 0 ||
+                activeSubkategories.has(subkategori);
 
             if (matchesSearch && matchesKategori && matchesSubkategori) {
                 item.style.display = '';
