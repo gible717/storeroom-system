@@ -35,7 +35,7 @@ INSERT INTO staf (ID_staf, nama, kata_laluan, is_admin, emel, jawatan, ID_jabata
 -- Password: User123
 
 INSERT INTO staf (ID_staf, nama, kata_laluan, is_admin, emel, jawatan, ID_jabatan, is_first_login) VALUES
-('S0001', 'Staf Contoh', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 0, 'staff@example.com', 'Pembantu Tadbir', @dept_it, 1);
+('S001', 'Staf Contoh', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 0, 'staff@example.com', 'Pembantu Tadbir', @dept_it, 1);
 
 -- ============================================
 -- 4. DEFAULT CATEGORIES
@@ -51,7 +51,7 @@ INSERT INTO KATEGORI (nama_kategori, parent_id) VALUES
 -- ============================================
 -- Default login:
 --   Admin: A001 / User123
---   Staff: S0001 / User123
+--   Staff: S001 / User123
 --
 -- IMPORTANT: Change passwords after first login!
 -- ============================================
