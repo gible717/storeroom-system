@@ -6,8 +6,10 @@ telegram_config.php
 # Test and Debug Files
 get_chat_id.php
 test_telegram.php
+test_telegram_reminder.php
 test_monthly_reminder.php
 debug_telegram.php
+debug_request_*.php
 
 # Progress Reports
 PROGRESS_REPORT_*.md

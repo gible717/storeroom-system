@@ -39,15 +39,17 @@ Ini akan muat turun semua fail ke `C:\xampp\htdocs\storeroom\`.
 
 ### 3.2 Import Database
 1. Buka browser, pergi ke **http://localhost/phpmyadmin**
-2. Klik **New** (panel kiri) untuk buat database baru
-3. Nama database: `storeroom_db`
-4. Collation: `utf8mb4_general_ci`
-5. Klik **Create**
-6. Klik database `storeroom_db` yang baru dibuat
-7. Klik tab **Import** → **Choose File**
-8. Pilih fail SQL dump (jika ada) → Klik **Go**
+2. Klik tab **SQL** di bahagian atas
+3. Import fail schema (struktur jadual):
+   - Klik tab **Import** → **Choose File**
+   - Pilih `C:\xampp\htdocs\storeroom\database\schema.sql`
+   - Klik **Go**
+4. Import fail seed data (akaun default):
+   - Klik tab **Import** → **Choose File**
+   - Pilih `C:\xampp\htdocs\storeroom\database\seed_data.sql`
+   - Klik **Go**
 
-> Jika tiada fail SQL dump, hubungi pembangun untuk mendapatkan salinan database.
+> **Nota:** `schema.sql` akan cipta database dan semua 7 jadual. `seed_data.sql` akan cipta akaun admin dan staf default.
 
 ---
 
