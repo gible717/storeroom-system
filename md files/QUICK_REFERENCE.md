@@ -318,7 +318,7 @@ TELEGRAM_ADMIN_CHAT_IDS = [123456, 789012]
 - **Chart.js** for analytics & dashboard charts
 - **SweetAlert2** for toast notifications
 - **Telegram Bot API** integration
-- **26 documentation files** (.md)
+- **13 documentation files** (.md)
 - **Security**: CSRF tokens, CSP headers, XSS prevention
 
 ---
@@ -342,18 +342,6 @@ When starting a new conversation with this briefing:
 
 ---
 
-## USEFUL LINKS IN FULL BRIEFING
-
-For detailed information, refer to [SYSTEM_BRIEFING.md](SYSTEM_BRIEFING.md):
-- Complete database schema
-- Full file structure
-- Detailed workflow diagrams
-- Security implementation details
-- UI/UX patterns
-- Recent improvements
-- Future enhancement opportunities
-
----
 
 **Last Updated:** February 2026
 **Version:** 2.3

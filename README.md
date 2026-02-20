@@ -82,7 +82,7 @@ storeroom/
 ├── uploads/
 │   ├── profile_pictures/    # Staff profile photos
 │   └── product_images/      # Product photos
-└── md files/                # Internal documentation (26 files)
+└── md files/                # Internal documentation (13 files)
 ```
 
 ---

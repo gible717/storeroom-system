@@ -89,7 +89,7 @@ storeroom/
 ├── uploads/               # User-uploaded files
 │   ├── profile_pictures/  # Staff profile pictures
 │   └── product_images/    # Product photos
-├── md files/              # Documentation (26 markdown files)
+├── md files/              # Documentation (13 markdown files)
 └── 404.php, 500.php       # Error pages
 ```
 
@@ -161,8 +161,6 @@ The system uses **7 core tables**:
    - Smarter Telegram notifications (auto-hide empty fields)
    - Duplicate entry handling with field validation
    - Admin request edit capability
-
-📄 **Detailed documentation:** See [RECENT_IMPROVEMENTS.md](RECENT_IMPROVEMENTS.md)
 
 ---
 
